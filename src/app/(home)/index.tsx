@@ -1,179 +1,174 @@
-import Feather from '@expo/vector-icons/Feather';
-import { useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { Card, Chip, cn } from 'heroui-native';
-import type { FC } from 'react';
-import { Image, Pressable, View } from 'react-native';
-import Animated, {
-  Easing,
-  FadeIn,
-  FadeInDown,
-  useAnimatedStyle,
-  withTiming,
-} from 'react-native-reanimated';
-import { withUniwind } from 'uniwind';
-import { AppText } from '../../components/app-text';
-import { ScreenScrollView } from '../../components/screen-scroll-view';
-import { useAppTheme } from '../../contexts/app-theme-context';
+import { StatusBar } from "expo-status-bar";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { View } from "react-native";
+import { ThemeToggle } from "../../components/theme-toggle";
+import { useAppTheme } from "../../contexts/app-theme-context";
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-const AnimatedImage = Animated.createAnimatedComponent(Image);
-const AnimatedView = Animated.createAnimatedComponent(View);
-
-const StyledFeather = withUniwind(Feather);
-
-type HomeCardProps = {
-  title: string;
-  imageLight: string;
-  imageDark: string;
-  count: number;
-  footer: string;
-  path: string;
+type TouchPoint = {
+  id: string;
+  x: number;
+  y: number;
 };
 
-const cards: HomeCardProps[] = [
-  {
-    title: 'Components',
-    imageLight:
-      'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/home-components-light.png',
-    imageDark:
-      'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/home-components-dark.png',
-    count: 22,
-    footer: 'Explore all components',
-    path: 'components',
-  },
-  {
-    title: 'Themes',
-    imageLight:
-      'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/home-themes-light.png',
-    imageDark:
-      'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/home-themes-dark.png',
-    count: 4,
-    footer: 'Try different themes',
-    path: 'themes',
-  },
-  {
-    title: 'Showcases',
-    imageLight:
-      'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/home-showcases-light.png',
-    imageDark:
-      'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/home-showcases-dark-1.png',
-    count: 5,
-    footer: 'View components in action',
-    path: 'showcases',
-  },
-];
-
-const HomeCard: FC<HomeCardProps & { index: number }> = ({
-  title,
-  imageLight,
-  imageDark,
-  count,
-  footer,
-  path,
-  index,
-}) => {
-  const router = useRouter();
-
-  const { isDark } = useAppTheme();
-
-  const rLightImageStyle = useAnimatedStyle(() => {
-    return {
-      opacity: isDark ? 0 : withTiming(0.4),
-    };
-  });
-
-  const rDarkImageStyle = useAnimatedStyle(() => {
-    return {
-      opacity: isDark ? withTiming(0.4) : 0,
-    };
-  });
-
-  return (
-    <AnimatedPressable
-      entering={FadeInDown.duration(300)
-        .delay(index * 100)
-        .easing(Easing.out(Easing.ease))}
-      onPress={() => router.push(path)}
-    >
-      <Card
-        className={cn(
-          'p-0 border border-zinc-200',
-          isDark && 'border-zinc-900'
-        )}
-      >
-        <AnimatedView
-          entering={FadeIn}
-          className="absolute inset-0 w-full h-full"
-        >
-          <AnimatedImage
-            source={{ uri: imageLight }}
-            className="absolute inset-0 w-full h-full"
-            resizeMode="cover"
-            style={rLightImageStyle}
-          />
-          <AnimatedImage
-            source={{ uri: imageDark }}
-            className="absolute inset-0 w-full h-full"
-            resizeMode="cover"
-            style={rDarkImageStyle}
-          />
-        </AnimatedView>
-        <View className="gap-4">
-          <Card.Header className="p-3">
-            <Chip size="sm" className="bg-background/25">
-              <Chip.Label className="text-foreground/85">
-                {`${count} total`}
-              </Chip.Label>
-            </Chip>
-          </Card.Header>
-          <Card.Body className="h-16" />
-          <Card.Footer className="px-3 pb-3 flex-row items-end gap-4">
-            <View className="flex-1">
-              <Card.Title className="text-2xl text-foreground/85">
-                {title}
-              </Card.Title>
-              <Card.Description className="text-foreground/65 pl-0.5">
-                {footer}
-              </Card.Description>
-            </View>
-            <View className="size-9 rounded-full bg-background/25 items-center justify-center">
-              <StyledFeather
-                name="arrow-up-right"
-                size={20}
-                className="text-foreground"
-              />
-            </View>
-          </Card.Footer>
-        </View>
-      </Card>
-    </AnimatedPressable>
-  );
-};
+const BASE_CIRCLE_SIZE = 50;
+const CIRCLE_SIZE = BASE_CIRCLE_SIZE * 1.5;
+const WINNER_CIRCLE_SIZE = BASE_CIRCLE_SIZE * 2;
+const HIGHLIGHT_DELAY_MS = 5000;
+const BASE_CIRCLE_COLOR = "#F64D00";
+const HIGHLIGHT_CIRCLE_COLOR = "#E4E4E4";
 
 export default function App() {
   const { isDark } = useAppTheme();
+  const [touches, setTouches] = useState<TouchPoint[]>([]);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const [toggleRect, setToggleRect] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const toggleRef = useRef<View>(null);
+  const stableCountRef = useRef<number>(0);
+
+  const isTouchOnToggle = useCallback(
+    (touch: TouchPoint) => {
+      if (!toggleRect) {
+        return false;
+      }
+      return (
+        touch.x >= toggleRect.x &&
+        touch.x <= toggleRect.x + toggleRect.width &&
+        touch.y >= toggleRect.y &&
+        touch.y <= toggleRect.y + toggleRect.height
+      );
+    },
+    [toggleRect]
+  );
+
+  const updateTouches = useCallback(
+    (nextTouches: TouchPoint[]) => {
+      const filteredTouches = nextTouches.filter(
+        (touch) => !isTouchOnToggle(touch)
+      );
+      setTouches(filteredTouches);
+
+      const currentCount = filteredTouches.length;
+      if (currentCount !== stableCountRef.current) {
+        stableCountRef.current = currentCount;
+        setHighlightId(null);
+        if (highlightTimer.current) {
+          clearTimeout(highlightTimer.current);
+          highlightTimer.current = null;
+        }
+        if (currentCount > 0) {
+          const randomIndex = Math.floor(
+            Math.random() * filteredTouches.length
+          );
+          const scheduledId = filteredTouches[randomIndex]?.id ?? null;
+          highlightTimer.current = setTimeout(() => {
+            if (stableCountRef.current === currentCount) {
+              setHighlightId(scheduledId);
+            }
+          }, HIGHLIGHT_DELAY_MS);
+        }
+        return;
+      }
+
+      if (highlightId) {
+        const hasHighlight = filteredTouches.some(
+          (touch) => touch.id === highlightId
+        );
+        if (!hasHighlight) {
+          setHighlightId(null);
+        }
+      }
+    },
+    [highlightId, isTouchOnToggle]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (highlightTimer.current) {
+        clearTimeout(highlightTimer.current);
+      }
+    };
+  }, []);
 
   return (
-    <ScreenScrollView>
-      <View className="items-center justify-center my-4">
-        <AppText className="text-muted text-base">v1.0.0-beta.9</AppText>
+    <View
+      className="flex-1"
+      onTouchStart={(event) => {
+        const nextTouches = event.nativeEvent.touches.map((touch) => ({
+          id: touch.identifier,
+          x: touch.pageX,
+          y: touch.pageY,
+        }));
+        updateTouches(nextTouches);
+      }}
+      onTouchMove={(event) => {
+        const nextTouches = event.nativeEvent.touches.map((touch) => ({
+          id: touch.identifier,
+          x: touch.pageX,
+          y: touch.pageY,
+        }));
+        updateTouches(nextTouches);
+      }}
+      onTouchEnd={(event) => {
+        const nextTouches = event.nativeEvent.touches.map((touch) => ({
+          id: touch.identifier,
+          x: touch.pageX,
+          y: touch.pageY,
+        }));
+        updateTouches(nextTouches);
+      }}
+      onTouchCancel={(event) => {
+        const nextTouches = event.nativeEvent.touches.map((touch) => ({
+          id: touch.identifier,
+          x: touch.pageX,
+          y: touch.pageY,
+        }));
+        updateTouches(nextTouches);
+      }}
+      style={{ backgroundColor: isDark ? "#0B0B0B" : "#E4E4E4" }}
+    >
+      <View
+        ref={toggleRef}
+        className="absolute top-16 right-6 z-10 rounded-full"
+        onLayout={() => {
+          toggleRef.current?.measureInWindow((x, y, width, height) => {
+            setToggleRect({ x, y, width, height });
+          });
+        }}
+      >
+        <ThemeToggle />
       </View>
-      <View className="gap-6">
-        {cards.map((card, index) => (
-          <HomeCard
-            key={card.title}
-            title={card.title}
-            imageLight={card.imageLight}
-            imageDark={card.imageDark}
-            count={card.count}
-            footer={card.footer}
-            path={card.path}
-            index={index}
+
+      {touches.map((touch) => {
+        const isHighlighted = touch.id === highlightId;
+        const circleColor = isHighlighted
+          ? HIGHLIGHT_CIRCLE_COLOR
+          : BASE_CIRCLE_COLOR;
+        const circleSize = isHighlighted ? WINNER_CIRCLE_SIZE : CIRCLE_SIZE;
+        return (
+          <View
+            key={touch.id}
+            style={{
+              position: "absolute",
+              left: touch.x - circleSize / 2,
+              top: touch.y - circleSize / 2,
+              width: circleSize,
+              height: circleSize,
+              borderRadius: circleSize / 2,
+              borderWidth: 0,
+              borderColor: circleColor,
+              backgroundColor: circleColor,
+            }}
           />
-        ))}
-      </View>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
-    </ScreenScrollView>
+        );
+      })}
+
+      <StatusBar style={isDark ? "light" : "dark"} />
+    </View>
   );
 }

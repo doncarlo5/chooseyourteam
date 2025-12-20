@@ -1,8 +1,8 @@
-import React from 'react';
-import { Pressable, View } from 'react-native';
-import Svg, { Circle, Path } from 'react-native-svg';
-import { useUniwind } from 'uniwind';
-import { useAppTheme } from '../contexts/app-theme-context';
+import React from "react";
+import { Pressable, View } from "react-native";
+import Svg, { Circle, Path } from "react-native-svg";
+import { useUniwind } from "uniwind";
+import { useAppTheme } from "../contexts/app-theme-context";
 
 type ThemeOption = {
   id: string;
@@ -72,9 +72,9 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({
               r={radius + 4}
               fill="none"
               stroke={
-                currentTheme === 'dark' || currentTheme.endsWith('-dark')
-                  ? '#ffffff'
-                  : '#000000'
+                currentTheme === "dark" || currentTheme.endsWith("-dark")
+                  ? "#E4E4E4"
+                  : "#0B0B0B"
               }
               strokeWidth={3}
               opacity={0.8}
@@ -88,47 +88,47 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({
 
 const availableThemes: ThemeOption[] = [
   {
-    id: 'default',
-    name: 'Default',
-    lightVariant: 'light',
-    darkVariant: 'dark',
+    id: "default",
+    name: "Default",
+    lightVariant: "light",
+    darkVariant: "dark",
     colors: {
-      primary: '#006FEE',
-      secondary: '#17C964',
-      tertiary: '#F5A524',
+      primary: "#006FEE",
+      secondary: "#17C964",
+      tertiary: "#F5A524",
     },
   },
   {
-    id: 'lavender',
-    name: 'Lavender',
-    lightVariant: 'lavender-light',
-    darkVariant: 'lavender-dark',
+    id: "lavender",
+    name: "Lavender",
+    lightVariant: "lavender-light",
+    darkVariant: "lavender-dark",
     colors: {
-      primary: 'hsl(270 50% 75%)',
-      secondary: 'hsl(160 40% 70%)',
-      tertiary: 'hsl(45 55% 75%)',
+      primary: "hsl(270 50% 75%)",
+      secondary: "hsl(160 40% 70%)",
+      tertiary: "hsl(45 55% 75%)",
     },
   },
   {
-    id: 'mint',
-    name: 'Mint',
-    lightVariant: 'mint-light',
-    darkVariant: 'mint-dark',
+    id: "mint",
+    name: "Mint",
+    lightVariant: "mint-light",
+    darkVariant: "mint-dark",
     colors: {
-      primary: 'hsl(165 45% 70%)',
-      secondary: 'hsl(145 50% 68%)',
-      tertiary: 'hsl(55 60% 75%)',
+      primary: "hsl(165 45% 70%)",
+      secondary: "hsl(145 50% 68%)",
+      tertiary: "hsl(55 60% 75%)",
     },
   },
   {
-    id: 'sky',
-    name: 'Sky',
-    lightVariant: 'sky-light',
-    darkVariant: 'sky-dark',
+    id: "sky",
+    name: "Sky",
+    lightVariant: "sky-light",
+    darkVariant: "sky-dark",
     colors: {
-      primary: 'hsl(200 50% 72%)',
-      secondary: 'hsl(175 45% 70%)',
-      tertiary: 'hsl(48 58% 75%)',
+      primary: "hsl(200 50% 72%)",
+      secondary: "hsl(175 45% 70%)",
+      tertiary: "hsl(48 58% 75%)",
     },
   },
 ];
@@ -137,11 +137,11 @@ export const ThemeSelectorBar: React.FC = () => {
   const { currentTheme, setTheme, isLight } = useAppTheme();
 
   const getCurrentThemeId = () => {
-    if (currentTheme === 'light' || currentTheme === 'dark') return 'default';
-    if (currentTheme.startsWith('lavender')) return 'lavender';
-    if (currentTheme.startsWith('mint')) return 'mint';
-    if (currentTheme.startsWith('sky')) return 'sky';
-    return 'default';
+    if (currentTheme === "light" || currentTheme === "dark") return "default";
+    if (currentTheme.startsWith("lavender")) return "lavender";
+    if (currentTheme.startsWith("mint")) return "mint";
+    if (currentTheme.startsWith("sky")) return "sky";
+    return "default";
   };
 
   const handleThemeSelect = (theme: ThemeOption) => {
