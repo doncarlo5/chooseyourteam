@@ -1,6 +1,6 @@
 {
   "name": "heroui-native-example",
-  "version": "v0.0.1",
+  "version": "0.0.1",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start -c",

@@ -2,7 +2,7 @@
   "expo": {
     "name": "HeroUI Native Example",
     "slug": "chooseyourteam",
-    "version": "v0.0.1",
+    "version": "0.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "chooseyourteam",
