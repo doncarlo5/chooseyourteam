@@ -109,7 +109,7 @@ export default function SelectedPlayersLayer({
         size="md"
         className={cn(
           "absolute top-16 left-6 z-10 rounded-full",
-          isDark ? "bg-[#E4E4E4]" : "bg-[#0B0B0B]"
+          isDark ? "bg-[#E4E4E4]/50" : "bg-[#0B0B0B]/50"
         )}
         onPress={onBack}
         onLayout={() => {
