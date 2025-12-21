@@ -4,7 +4,9 @@ import { StatusBar } from "expo-status-bar";
 import { Card, PressableFeedback, cn, useThemeColor } from "heroui-native";
 import { useEffect, useRef, useState } from "react";
 import { View } from "react-native";
-import Animated, { Easing, FadeInDown, interpolate } from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, { Easing, FadeInDown } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import { ThemeToggle } from "../../components/theme-toggle";
 import { useAppTheme } from "../../contexts/app-theme-context";
 import type { PlayerCardProps } from "../../helpers/types/home-screen";
@@ -14,7 +16,6 @@ import SelectedPlayersLayer from "./selected-players-layer";
 const BASE_CIRCLE_SIZE = 100;
 const REVEAL_CIRCLE_SIZE = BASE_CIRCLE_SIZE * 1.5;
 const HIGHLIGHT_DELAY_MS = 4000;
-const MAX_FINGERS = 10;
 const TEAM_COLORS = ["#F64D00", "#1F3A5F", "#2FBF71", "#F2C14E", "#00A3E0"];
 const GROUP_OPTIONS = [2, 3, 4, 5];
 
@@ -133,11 +134,12 @@ export default function App() {
     }
 
     const steps = [
-      { offset: 1600, style: Haptics.ImpactFeedbackStyle.Light },
-      { offset: 1300, style: Haptics.ImpactFeedbackStyle.Light },
+      { offset: 2200, style: Haptics.ImpactFeedbackStyle.Light },
+      { offset: 1900, style: Haptics.ImpactFeedbackStyle.Light },
+      { offset: 1600, style: Haptics.ImpactFeedbackStyle.Medium },
+      { offset: 1300, style: Haptics.ImpactFeedbackStyle.Medium },
       { offset: 1000, style: Haptics.ImpactFeedbackStyle.Medium },
-      { offset: 800, style: Haptics.ImpactFeedbackStyle.Medium },
-      { offset: 600, style: Haptics.ImpactFeedbackStyle.Medium },
+      { offset: 700, style: Haptics.ImpactFeedbackStyle.Heavy },
       { offset: 400, style: Haptics.ImpactFeedbackStyle.Heavy },
       { offset: 200, style: Haptics.ImpactFeedbackStyle.Heavy },
     ];
@@ -165,7 +167,7 @@ export default function App() {
         !isTouchInsideRect(touch, toggleRect) &&
         !isTouchInsideRect(touch, backRect)
     );
-    const visibleTouches = filteredTouches.slice(0, MAX_FINGERS);
+    const visibleTouches = filteredTouches;
     setTouches(visibleTouches);
     latestTouchesRef.current = visibleTouches;
 
@@ -189,7 +191,7 @@ export default function App() {
       (touch) => !prevTouchIdsRef.current.has(touch.id)
     );
     if (isTouchStart && hasNewTouch) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     prevTouchIdsRef.current = currentIds;
     if (nextTouches.length === 0) {
@@ -231,120 +233,122 @@ export default function App() {
     };
   }, []);
 
+  const touchGesture = Gesture.Manual()
+    .onTouchesDown((event) => {
+      const nextTouches = event.allTouches.map((touch) => ({
+        id: String(touch.id),
+        x: touch.absoluteX,
+        y: touch.absoluteY,
+      }));
+      scheduleOnRN(updateTouches, nextTouches, true);
+    })
+    .onTouchesMove((event) => {
+      const nextTouches = event.allTouches.map((touch) => ({
+        id: String(touch.id),
+        x: touch.absoluteX,
+        y: touch.absoluteY,
+      }));
+      scheduleOnRN(updateTouches, nextTouches, false);
+    })
+    .onTouchesUp((event) => {
+      const nextTouches = event.allTouches.map((touch) => ({
+        id: String(touch.id),
+        x: touch.absoluteX,
+        y: touch.absoluteY,
+      }));
+      scheduleOnRN(updateTouches, nextTouches, false);
+    })
+    .onTouchesCancelled((event) => {
+      const nextTouches = event.allTouches.map((touch) => ({
+        id: String(touch.id),
+        x: touch.absoluteX,
+        y: touch.absoluteY,
+      }));
+      scheduleOnRN(updateTouches, nextTouches, false);
+    });
+
   return (
-    <View
-      onTouchStart={(event) => {
-        const nextTouches = event.nativeEvent.touches.map((touch) => ({
-          id: touch.identifier,
-          x: touch.pageX,
-          y: touch.pageY,
-        }));
-        updateTouches(nextTouches, true);
-      }}
-      onTouchMove={(event) => {
-        const nextTouches = event.nativeEvent.touches.map((touch) => ({
-          id: touch.identifier,
-          x: touch.pageX,
-          y: touch.pageY,
-        }));
-        updateTouches(nextTouches, false);
-      }}
-      onTouchEnd={(event) => {
-        const nextTouches = event.nativeEvent.touches.map((touch) => ({
-          id: touch.identifier,
-          x: touch.pageX,
-          y: touch.pageY,
-        }));
-        updateTouches(nextTouches, false);
-      }}
-      onTouchCancel={(event) => {
-        const nextTouches = event.nativeEvent.touches.map((touch) => ({
-          id: touch.identifier,
-          x: touch.pageX,
-          y: touch.pageY,
-        }));
-        updateTouches(nextTouches, false);
-      }}
-      className={cn("flex-1", isDark ? "bg-[#0B0B0B]" : "bg-[#E4E4E4]")}
-    >
-      {!selectedGroups && (
-        <View
-          ref={toggleRef}
-          className="absolute top-16 right-6 z-10 flex-row items-center gap-2 rounded-full"
-          onLayout={() => {
-            toggleRef.current?.measureInWindow((x, y, width, height) => {
-              setToggleRect({ x, y, width, height });
-            });
+    <GestureDetector gesture={touchGesture}>
+      <View className={cn("flex-1", isDark ? "bg-[#0B0B0B]" : "bg-[#E4E4E4]")}>
+        {!selectedGroups && (
+          <View
+            ref={toggleRef}
+            className="absolute top-16 right-6 z-10 flex-row items-center gap-2 rounded-full"
+            onLayout={() => {
+              toggleRef.current?.measureInWindow((x, y, width, height) => {
+                setToggleRect({ x, y, width, height });
+              });
+            }}
+          >
+            <ThemeToggle />
+          </View>
+        )}
+
+        <SelectedPlayersLayer
+          selectedGroups={selectedGroups}
+          isDark={isDark}
+          touches={touches}
+          revealedTouches={revealedTouches}
+          frozenTouches={frozenTouches}
+          isRevealed={isRevealed}
+          teamAssignments={teamAssignments}
+          teamNumbers={teamNumbers}
+          baseSize={BASE_CIRCLE_SIZE}
+          revealSize={REVEAL_CIRCLE_SIZE}
+          backRef={backRef}
+          onBack={() => {
+            setSelectedGroups(null);
+            setTouches([]);
+            resetReveal();
+            stableCountRef.current = 0;
+            touchSignatureRef.current = "";
+            if (highlightTimer.current) {
+              clearTimeout(highlightTimer.current);
+              highlightTimer.current = null;
+            }
           }}
-        >
-          <ThemeToggle />
-        </View>
-      )}
+          onBackLayout={(rect) => {
+            setBackRect(rect);
+          }}
+        />
 
-      <SelectedPlayersLayer
-        selectedGroups={selectedGroups}
-        isDark={isDark}
-        touches={touches}
-        revealedTouches={revealedTouches}
-        frozenTouches={frozenTouches}
-        isRevealed={isRevealed}
-        teamAssignments={teamAssignments}
-        teamNumbers={teamNumbers}
-        baseSize={BASE_CIRCLE_SIZE}
-        revealSize={REVEAL_CIRCLE_SIZE}
-        backRef={backRef}
-        onBack={() => {
-          setSelectedGroups(null);
-          setTouches([]);
-          resetReveal();
-          stableCountRef.current = 0;
-          touchSignatureRef.current = "";
-          if (highlightTimer.current) {
-            clearTimeout(highlightTimer.current);
-            highlightTimer.current = null;
-          }
-        }}
-        onBackLayout={(rect) => {
-          setBackRect(rect);
-        }}
-      />
-
-      {!selectedGroups && (
-        <View className="flex-1 justify-center px-8 gap-4">
-          <View className="w-full">
-            <AppText className="text-xl font-semibold text-foreground mb-2">
-              How many groups?
-            </AppText>
-            <View className="flex-row flex-wrap -mx-2">
-              {GROUP_OPTIONS.map((count, index) => {
-                return (
-                  <PlayerCard
-                    key={count}
-                    count={count}
-                    index={index}
-                    isDark={isDark}
-                    isDisabled={false}
-                    onPress={() => {
-                      setTouches([]);
-                      resetReveal();
-                      stableCountRef.current = 0;
-                      touchSignatureRef.current = "";
-                      if (highlightTimer.current) {
-                        clearTimeout(highlightTimer.current);
-                        highlightTimer.current = null;
-                      }
-                      setSelectedGroups(count);
-                    }}
-                  />
-                );
-              })}
+        {!selectedGroups && (
+          <View className="flex-1 justify-center px-8 gap-4">
+            <View className="w-full">
+              <AppText className="text-xl font-semibold text-foreground mb-2">
+                How many groups?
+              </AppText>
+              <View className="flex-row flex-wrap -mx-2">
+                {GROUP_OPTIONS.map((count, index) => {
+                  return (
+                    <PlayerCard
+                      key={count}
+                      count={count}
+                      index={index}
+                      isDark={isDark}
+                      isDisabled={false}
+                      onPress={() => {
+                        setTouches([]);
+                        resetReveal();
+                        stableCountRef.current = 0;
+                        touchSignatureRef.current = "";
+                        if (highlightTimer.current) {
+                          clearTimeout(highlightTimer.current);
+                          highlightTimer.current = null;
+                        }
+                        setSelectedGroups(count);
+                      }}
+                    />
+                  );
+                })}
+              </View>
             </View>
           </View>
-        </View>
-      )}
+        )}
 
-      <StatusBar style={isDark ? "light" : "dark"} />
-    </View>
+        <StatusBar style={isDark ? "light" : "dark"} />
+      </View>
+    </GestureDetector>
   );
 }
 
