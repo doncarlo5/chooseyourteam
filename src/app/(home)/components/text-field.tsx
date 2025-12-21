@@ -1,14 +1,14 @@
 /* eslint-disable react-native/no-inline-styles */
-import { Ionicons } from '@expo/vector-icons';
-import { Button, TextField } from 'heroui-native';
-import { useState } from 'react';
-import { Pressable, useWindowDimensions, View } from 'react-native';
-import { useReanimatedKeyboardAnimation } from 'react-native-keyboard-controller';
-import Animated, { useAnimatedStyle } from 'react-native-reanimated';
-import { withUniwind } from 'uniwind';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
-import { useAppTheme } from '../../../contexts/app-theme-context';
+import { Ionicons } from "@expo/vector-icons";
+import { Button, TextField } from "heroui-native";
+import { useState } from "react";
+import { Pressable, useWindowDimensions, View } from "react-native";
+import { useReanimatedKeyboardAnimation } from "react-native-keyboard-controller";
+import Animated, { useAnimatedStyle } from "react-native-reanimated";
+import { withUniwind } from "uniwind";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
+import { useAppTheme } from "../../../contexts/app-theme-context";
 
 const StyledIonicons = withUniwind(Ionicons);
 
@@ -74,7 +74,7 @@ const TextFieldWithIconsContent = () => {
                 onPress={() => setIsPasswordVisible(!isPasswordVisible)}
               >
                 <StyledIonicons
-                  name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
+                  name={isPasswordVisible ? "eye-off-outline" : "eye-outline"}
                   size={16}
                   className="text-muted"
                 />
@@ -140,7 +140,7 @@ const MultilineTextFieldContent = () => {
 
 const TextFieldWithValidationContent = () => {
   const [isTestFieldInvalid, setIsTestFieldInvalid] = useState(false);
-  const [testFieldValue, setTestFieldValue] = useState('');
+  const [testFieldValue, setTestFieldValue] = useState("");
 
   return (
     <View className="flex-1 justify-center px-5">
@@ -167,7 +167,7 @@ const TextFieldWithValidationContent = () => {
             size="sm"
             className="self-start"
           >
-            {isTestFieldInvalid ? 'Clear Error' : 'Simulate Error'}
+            {isTestFieldInvalid ? "Clear Error" : "Simulate Error"}
           </Button>
         </View>
       </KeyboardAvoidingContainer>
@@ -189,7 +189,7 @@ const TextFieldWithCustomStylesContent = () => {
             maxLength={16}
             className="border-[0.5px] rounded-none"
             style={{
-              borderColor: isDark ? '#fafafa' : '#09090b',
+              borderColor: isDark ? "#fafafa" : "#09090b",
             }}
             animation="disabled"
           />
@@ -204,33 +204,33 @@ const TextFieldWithCustomStylesContent = () => {
 
 const TEXT_FIELD_VARIANTS: UsageVariant[] = [
   {
-    value: 'basic-text-field',
-    label: 'Basic TextField',
+    value: "basic-text-field",
+    label: "Basic TextField",
     content: <BasicTextFieldContent />,
   },
   {
-    value: 'text-field-with-icons',
-    label: 'TextField with icons',
+    value: "text-field-with-icons",
+    label: "TextField with icons",
     content: <TextFieldWithIconsContent />,
   },
   {
-    value: 'disabled-text-field',
-    label: 'Disabled TextField',
+    value: "disabled-text-field",
+    label: "Disabled TextField",
     content: <DisabledTextFieldContent />,
   },
   {
-    value: 'multiline-text-field',
-    label: 'Multiline TextField',
+    value: "multiline-text-field",
+    label: "Multiline TextField",
     content: <MultilineTextFieldContent />,
   },
   {
-    value: 'text-field-with-validation',
-    label: 'TextField with validation',
+    value: "text-field-with-validation",
+    label: "TextField with validation",
     content: <TextFieldWithValidationContent />,
   },
   {
-    value: 'text-field-with-custom-styles',
-    label: 'TextField with custom styles',
+    value: "text-field-with-custom-styles",
+    label: "TextField with custom styles",
     content: <TextFieldWithCustomStylesContent />,
   },
 ];

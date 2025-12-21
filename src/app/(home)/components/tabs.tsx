@@ -1,4 +1,4 @@
-import { useHeaderHeight } from '@react-navigation/elements';
+import { useHeaderHeight } from "@react-navigation/elements";
 import {
   Button,
   cn,
@@ -6,17 +6,17 @@ import {
   RadioGroup,
   Tabs,
   TextField,
-} from 'heroui-native';
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+} from "heroui-native";
+import { useState } from "react";
+import { StyleSheet, View } from "react-native";
 import Animated, {
   FadeIn,
   FadeOut,
   LinearTransition,
-} from 'react-native-reanimated';
-import { withUniwind } from 'uniwind';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
+} from "react-native-reanimated";
+import { withUniwind } from "uniwind";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
 
 const StyleAnimatedView = withUniwind(Animated.View);
 
@@ -42,7 +42,7 @@ interface FormErrors {
 }
 
 interface TabsContentProps {
-  variant: 'pill' | 'line';
+  variant: "pill" | "line";
 }
 
 interface TabTriggerProps {
@@ -56,7 +56,7 @@ const TabTrigger = ({ value, label }: TabTriggerProps) => {
       {({ isSelected }) => (
         <Tabs.Label
           className={cn(
-            isSelected ? 'text-accent font-medium' : 'text-foreground'
+            isSelected ? "text-accent font-medium" : "text-foreground",
           )}
         >
           {label}
@@ -67,36 +67,36 @@ const TabTrigger = ({ value, label }: TabTriggerProps) => {
 };
 
 const TabsContent = ({ variant }: TabsContentProps) => {
-  const [activeTab, setActiveTab] = useState('general');
+  const [activeTab, setActiveTab] = useState("general");
 
-  const [homepage] = useState('heroui.com');
+  const [homepage] = useState("heroui.com");
   const [showSidebar, setShowSidebar] = useState(true);
   const [showStatusBar, setShowStatusBar] = useState(false);
 
-  const [theme, setTheme] = useState('auto');
-  const [fontSize, setFontSize] = useState('medium');
+  const [theme, setTheme] = useState("auto");
+  const [fontSize, setFontSize] = useState("medium");
 
   const [accountActivity, setAccountActivity] = useState(true);
   const [mentions, setMentions] = useState(true);
   const [directMessages, setDirectMessages] = useState(false);
   const [marketingEmail, setMarketingEmail] = useState(false);
 
-  const [name, setName] = useState('');
-  const [username, setUsername] = useState('');
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
 
   const validateProfile = (): boolean => {
     const newErrors: FormErrors = {};
 
     if (!name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = "Name is required";
     }
 
     if (!username.trim()) {
-      newErrors.username = 'Username is required';
+      newErrors.username = "Username is required";
     } else if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
       newErrors.username =
-        'Username must be 3-20 characters (letters, numbers, underscore only)';
+        "Username must be 3-20 characters (letters, numbers, underscore only)";
     }
 
     setErrors(newErrors);
@@ -105,7 +105,7 @@ const TabsContent = ({ variant }: TabsContentProps) => {
 
   const handleUpdateProfile = () => {
     if (validateProfile()) {
-      console.log('Profile updated:', { name, username });
+      console.log("Profile updated:", { name, username });
     }
   };
 
@@ -114,11 +114,11 @@ const TabsContent = ({ variant }: TabsContentProps) => {
       variant={variant}
       value={activeTab}
       onValueChange={setActiveTab}
-      className={cn('gap-1.5', variant === 'line' && 'gap-0')}
+      className={cn("gap-1.5", variant === "line" && "gap-0")}
     >
-      <Tabs.List className={cn('border-b-0', variant === 'line' && 'mx-4')}>
+      <Tabs.List className={cn("border-b-0", variant === "line" && "mx-4")}>
         <Tabs.ScrollView
-          contentContainerClassName={cn('gap-4', variant === 'line' && 'px-0')}
+          contentContainerClassName={cn("gap-4", variant === "line" && "px-0")}
         >
           <Tabs.Indicator />
           <TabTrigger value="general" label="General" />
@@ -130,8 +130,8 @@ const TabsContent = ({ variant }: TabsContentProps) => {
       <StyleAnimatedView
         layout={LinearTransition.duration(DURATION)}
         className={cn(
-          'px-2 py-6',
-          variant === 'line' && 'px-5 border border-foreground/10 rounded-2xl'
+          "px-2 py-6",
+          variant === "line" && "px-5 border border-foreground/10 rounded-2xl",
         )}
         style={styles.borderCurve}
       >
@@ -351,13 +351,13 @@ const LineVariantContent = () => {
 
 const TABS_VARIANTS: UsageVariant[] = [
   {
-    value: 'pill-variant',
-    label: 'Pill variant',
+    value: "pill-variant",
+    label: "Pill variant",
     content: <PillVariantContent />,
   },
   {
-    value: 'line-variant',
-    label: 'Line variant',
+    value: "line-variant",
+    label: "Line variant",
     content: <LineVariantContent />,
   },
 ];
@@ -368,6 +368,6 @@ export default function TabsScreen() {
 
 const styles = StyleSheet.create({
   borderCurve: {
-    borderCurve: 'continuous',
+    borderCurve: "continuous",
   },
 });

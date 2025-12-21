@@ -131,6 +131,17 @@ const availableThemes: ThemeOption[] = [
       tertiary: "hsl(48 58% 75%)",
     },
   },
+  {
+    id: "brand",
+    name: "Brand",
+    lightVariant: "brand-light",
+    darkVariant: "brand-dark",
+    colors: {
+      primary: "#F64D00",
+      secondary: "#1F3A5F",
+      tertiary: "#2FBF71",
+    },
+  },
 ];
 
 export const ThemeSelectorBar: React.FC = () => {
@@ -141,6 +152,7 @@ export const ThemeSelectorBar: React.FC = () => {
     if (currentTheme.startsWith("lavender")) return "lavender";
     if (currentTheme.startsWith("mint")) return "mint";
     if (currentTheme.startsWith("sky")) return "sky";
+    if (currentTheme.startsWith("brand")) return "brand";
     return "default";
   };
 

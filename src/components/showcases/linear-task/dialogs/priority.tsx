@@ -1,13 +1,13 @@
-import Feather from '@expo/vector-icons/Feather';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import * as Haptics from 'expo-haptics';
-import { Chip, Dialog, RadioGroup } from 'heroui-native';
-import { useState, type FC } from 'react';
-import { Platform, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import { withUniwind } from 'uniwind';
-import { DialogBlurBackdrop } from '../../../dialog-blur-backdrop';
-import { DialogHeader } from '../dialog-header';
+import Feather from "@expo/vector-icons/Feather";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import * as Haptics from "expo-haptics";
+import { Chip, Dialog, RadioGroup } from "heroui-native";
+import { useState, type FC } from "react";
+import { Platform, View } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
+import { withUniwind } from "uniwind";
+import { DialogBlurBackdrop } from "../../../dialog-blur-backdrop";
+import { DialogHeader } from "../dialog-header";
 
 const StyledFeather = withUniwind(Feather);
 const StyledFontAwesome6 = withUniwind(FontAwesome6);
@@ -19,12 +19,12 @@ type PriorityItem = {
 };
 
 export const Priority: FC = () => {
-  const [value, setValue] = useState('high');
+  const [value, setValue] = useState("high");
 
   const items: PriorityItem[] = [
     {
-      value: 'no-priority',
-      label: 'No Priority',
+      value: "no-priority",
+      label: "No Priority",
       indicator: (
         <View className="flex-row items-center gap-0.5">
           <View className="h-[1.5px] w-1 bg-muted/50" />
@@ -34,8 +34,8 @@ export const Priority: FC = () => {
       ),
     },
     {
-      value: 'urgent',
-      label: 'Urgent',
+      value: "urgent",
+      label: "Urgent",
       indicator: (
         <StyledFontAwesome6
           name="circle-exclamation"
@@ -45,8 +45,8 @@ export const Priority: FC = () => {
       ),
     },
     {
-      value: 'high',
-      label: 'High',
+      value: "high",
+      label: "High",
       indicator: (
         <View className="flex-row items-end gap-0.5">
           <View className="h-1 w-[3px] rounded-[1px] bg-foreground" />
@@ -56,8 +56,8 @@ export const Priority: FC = () => {
       ),
     },
     {
-      value: 'medium',
-      label: 'Medium',
+      value: "medium",
+      label: "Medium",
       indicator: (
         <View className="flex-row items-end gap-0.5">
           <View className="h-1 w-[3px] rounded-[1px] bg-foreground" />
@@ -67,8 +67,8 @@ export const Priority: FC = () => {
       ),
     },
     {
-      value: 'low',
-      label: 'Low',
+      value: "low",
+      label: "Low",
       indicator: (
         <View className="flex-row items-end gap-0.5">
           <View className="h-1 w-[3px] rounded-[1px] bg-foreground" />
@@ -85,7 +85,7 @@ export const Priority: FC = () => {
         <Chip
           className="h-7 bg-surface-quaternary px-2"
           onPress={() => {
-            if (Platform.OS === 'ios') {
+            if (Platform.OS === "ios") {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }
           }}
@@ -106,7 +106,7 @@ export const Priority: FC = () => {
                 <RadioGroup.Item
                   value={item.value}
                   onPress={() => {
-                    if (Platform.OS === 'ios') {
+                    if (Platform.OS === "ios") {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
                   }}

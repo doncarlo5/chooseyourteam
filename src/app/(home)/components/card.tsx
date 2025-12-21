@@ -1,12 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Button, Card, type CardRootProps } from 'heroui-native';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
-import { withUniwind } from 'uniwind';
-import { AppText } from '../../../components/app-text';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { Button, Card, type CardRootProps } from "heroui-native";
+import { Image, Pressable, StyleSheet, View } from "react-native";
+import { withUniwind } from "uniwind";
+import { AppText } from "../../../components/app-text";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
 
 const StyledIonicons = withUniwind(Ionicons);
 
@@ -53,7 +53,7 @@ const CardWithImageContent = () => {
             <Card.Header>
               <Image
                 source={{
-                  uri: 'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/demo1.jpg',
+                  uri: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/demo1.jpg",
                 }}
                 style={{
                   height: 60,
@@ -81,7 +81,7 @@ const CardWithImageContent = () => {
             <Card.Header>
               <Image
                 source={{
-                  uri: 'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/demo2.jpg',
+                  uri: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/demo2.jpg",
                 }}
                 style={{
                   height: 60,
@@ -118,7 +118,7 @@ const HorizontalCardWithImageContent = () => {
         <Card className="flex-row rounded-2xl gap-4 p-4" variant="tertiary">
           <Image
             source={{
-              uri: 'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/avocado.jpeg',
+              uri: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/avocado.jpeg",
             }}
             style={{
               height: 110,
@@ -151,7 +151,7 @@ const HorizontalCardWithImageContent = () => {
         <Card className="flex-row rounded-2xl gap-4 p-4" variant="tertiary">
           <Image
             source={{
-              uri: 'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/oranges.jpeg',
+              uri: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/oranges.jpeg",
             }}
             style={{
               height: 110,
@@ -194,13 +194,13 @@ const BackgroundImageCardContent = () => {
       <Card className="w-full aspect-square">
         <Image
           source={{
-            uri: 'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/neo2.jpeg',
+            uri: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/neo2.jpeg",
           }}
           className="absolute inset-0"
           resizeMode="cover"
         />
         <LinearGradient
-          colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.5)']}
+          colors={["rgba(0,0,0,0.1)", "rgba(0,0,0,0.5)"]}
           style={StyleSheet.absoluteFill}
         />
         <View className="flex-1 gap-4">
@@ -225,7 +225,7 @@ const BackgroundImageCardContent = () => {
               <Button
                 size="sm"
                 className="bg-white"
-                animation={{ highlight: 'disabled' }}
+                animation={{ highlight: "disabled" }}
               >
                 <Button.Label className="text-black">Notify me</Button.Label>
               </Button>
@@ -240,7 +240,7 @@ const BackgroundImageCardContent = () => {
 // ------------------------------------------------------------------------------
 
 type CardItemProps = {
-  variant: CardRootProps['variant'];
+  variant: CardRootProps["variant"];
   title: string;
   description: string;
 };
@@ -292,28 +292,28 @@ const VariantsContent = () => {
 
 const CARD_VARIANTS: UsageVariant[] = [
   {
-    value: 'basic-card',
-    label: 'Basic card',
+    value: "basic-card",
+    label: "Basic card",
     content: <BasicCardContent />,
   },
   {
-    value: 'card-with-image',
-    label: 'Card with image',
+    value: "card-with-image",
+    label: "Card with image",
     content: <CardWithImageContent />,
   },
   {
-    value: 'horizontal-card-with-image',
-    label: 'Horizontal card with image',
+    value: "horizontal-card-with-image",
+    label: "Horizontal card with image",
     content: <HorizontalCardWithImageContent />,
   },
   {
-    value: 'background-image-card',
-    label: 'Background image card',
+    value: "background-image-card",
+    label: "Background image card",
     content: <BackgroundImageCardContent />,
   },
   {
-    value: 'variants',
-    label: 'Variants',
+    value: "variants",
+    label: "Variants",
     content: <VariantsContent />,
   },
 ];

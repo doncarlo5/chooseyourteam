@@ -1,6 +1,6 @@
-import { type FC } from 'react';
-import { View } from 'react-native';
-import { AppText } from '../../app-text';
+import { type FC } from "react";
+import { View } from "react-native";
+import { AppText } from "../../app-text";
 
 type HighlightItemProps = {
   label: string;

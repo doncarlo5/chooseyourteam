@@ -1,9 +1,9 @@
-import { BlurView, type BlurViewProps } from 'expo-blur';
-import { type FC } from 'react';
+import { BlurView, type BlurViewProps } from "expo-blur";
+import { type FC } from "react";
 import Animated, {
   type SharedValue,
   useAnimatedProps,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
 
 const RBlurView = Animated.createAnimatedComponent(BlurView);
 

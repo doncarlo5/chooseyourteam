@@ -1,6 +1,6 @@
-import { Divider, FormField, Surface } from 'heroui-native';
-import React from 'react';
-import { View } from 'react-native';
+import { Divider, FormField, Surface } from "heroui-native";
+import React from "react";
+import { View } from "react-native";
 
 interface SwitchFieldProps {
   isSelected: boolean;

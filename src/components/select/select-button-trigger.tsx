@@ -1,12 +1,12 @@
-import Feather from '@expo/vector-icons/Feather';
-import { Divider, Select, useSelectAnimation } from 'heroui-native';
-import React, { useState, type FC } from 'react';
-import { StyleSheet, View } from 'react-native';
+import Feather from "@expo/vector-icons/Feather";
+import { Divider, Select, useSelectAnimation } from "heroui-native";
+import React, { useState, type FC } from "react";
+import { StyleSheet, View } from "react-native";
 import Animated, {
   interpolate,
   useAnimatedStyle,
-} from 'react-native-reanimated';
-import { withUniwind } from 'uniwind';
+} from "react-native-reanimated";
+import { withUniwind } from "uniwind";
 
 const StyledFeather = withUniwind(Feather);
 const StyleAnimatedView = withUniwind(Animated.View);
@@ -17,10 +17,10 @@ type SelectOption = {
 };
 
 const US_STATES: SelectOption[] = [
-  { value: 'CA', label: 'California' },
-  { value: 'NY', label: 'New York' },
-  { value: 'TX', label: 'Texas' },
-  { value: 'FL', label: 'Florida' },
+  { value: "CA", label: "California" },
+  { value: "NY", label: "New York" },
+  { value: "TX", label: "Texas" },
+  { value: "FL", label: "Florida" },
 ];
 
 const AnimatedTrigger: FC = () => {
@@ -91,6 +91,6 @@ export function SelectButtonTrigger({ contentOffset }: Props) {
 
 const styles = StyleSheet.create({
   borderCurve: {
-    borderCurve: 'continuous',
+    borderCurve: "continuous",
   },
 });

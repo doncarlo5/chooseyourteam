@@ -5,5 +5,6 @@
 @import './themes/lavander.css';
 @import './themes/mint.css';
 @import './themes/sky.css';
+@import './themes/brand.css';
 
 @source './node_modules/heroui-native/lib';

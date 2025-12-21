@@ -1,17 +1,17 @@
-import Feather from '@expo/vector-icons/Feather';
+import Feather from "@expo/vector-icons/Feather";
 import {
   Button,
   cn,
   Popover,
   useThemeColor,
   type PopoverTriggerRef,
-} from 'heroui-native';
-import { type FC, type RefObject } from 'react';
-import { withUniwind } from 'uniwind';
-import { simulatePress } from '../../../helpers/utils/simulate-press';
-import { AppText } from '../../app-text';
-import { popoverAnimation } from './constants';
-import { className } from './styles';
+} from "heroui-native";
+import { type FC, type RefObject } from "react";
+import { withUniwind } from "uniwind";
+import { simulatePress } from "../../../helpers/utils/simulate-press";
+import { AppText } from "../../app-text";
+import { popoverAnimation } from "./constants";
+import { className } from "./styles";
 
 const StyledFeather = withUniwind(Feather);
 
@@ -21,7 +21,7 @@ type Props = {
 };
 
 export const Save: FC<Props> = ({ isOnboardingDone, triggerRef }) => {
-  const themeColorForeground = useThemeColor('foreground');
+  const themeColorForeground = useThemeColor("foreground");
 
   return (
     <Popover animation={popoverAnimation}>
@@ -30,7 +30,7 @@ export const Save: FC<Props> = ({ isOnboardingDone, triggerRef }) => {
           variant="secondary"
           className={cn(
             className.buttonSecondarySquare,
-            className.buttonSecondaryColors
+            className.buttonSecondaryColors,
           )}
           onPress={isOnboardingDone ? simulatePress : undefined}
           isIconOnly

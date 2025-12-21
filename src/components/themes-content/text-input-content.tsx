@@ -1,16 +1,16 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Button, TextField } from 'heroui-native';
-import { useState } from 'react';
-import { Pressable, View } from 'react-native';
-import { withUniwind } from 'uniwind';
-import { DialogContent } from './dialog-content';
+import { Ionicons } from "@expo/vector-icons";
+import { Button, TextField } from "heroui-native";
+import { useState } from "react";
+import { Pressable, View } from "react-native";
+import { withUniwind } from "uniwind";
+import { DialogContent } from "./dialog-content";
 
 const StyledIonicons = withUniwind(Ionicons);
 
 export const TextInputContent = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
 
@@ -28,7 +28,7 @@ export const TextInputContent = () => {
 
     if (isEmailValid && isPasswordValid) {
       // Form is valid
-      console.log('Form submitted successfully');
+      console.log("Form submitted successfully");
     }
   };
 
@@ -48,7 +48,7 @@ export const TextInputContent = () => {
           }}
         />
         <TextField.Description>
-          We'll never share your email with anyone else.
+          {`We'll never share your email with anyone else.`}
         </TextField.Description>
         <TextField.ErrorMessage>
           Please enter a valid email address
@@ -77,7 +77,7 @@ export const TextInputContent = () => {
           <TextField.InputEndContent>
             <Pressable onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
               <StyledIonicons
-                name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
+                name={isPasswordVisible ? "eye-off-outline" : "eye-outline"}
                 size={16}
                 className="text-muted"
               />

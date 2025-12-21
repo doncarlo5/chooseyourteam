@@ -1,8 +1,8 @@
 /* eslint-disable react-native/no-inline-styles */
-import { Image } from 'expo-image';
-import { Card, PressableFeedback } from 'heroui-native';
-import { View } from 'react-native';
-import { AppText } from '../app-text';
+import { Image } from "expo-image";
+import { Card, PressableFeedback } from "heroui-native";
+import { View } from "react-native";
+import { AppText } from "../app-text";
 
 export const CardContent = () => {
   return (
@@ -12,7 +12,7 @@ export const CardContent = () => {
         className="flex-1 aspect-[1/1.3] rounded-3xl"
         animation={{
           ripple: {
-            backgroundColor: { value: '#fecdd3' },
+            backgroundColor: { value: "#fecdd3" },
             opacity: { value: [0, 0.2, 0] },
           },
         }}
@@ -22,7 +22,7 @@ export const CardContent = () => {
             <Card.Header>
               <Image
                 source={{
-                  uri: 'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/demo1.jpg',
+                  uri: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/demo1.jpg",
                 }}
                 style={{
                   height: 60,
@@ -51,7 +51,7 @@ export const CardContent = () => {
         className="flex-1 aspect-[1/1.3] rounded-3xl"
         animation={{
           ripple: {
-            backgroundColor: { value: '#67e8f9' },
+            backgroundColor: { value: "#67e8f9" },
           },
         }}
       >
@@ -60,7 +60,7 @@ export const CardContent = () => {
             <Card.Header>
               <Image
                 source={{
-                  uri: 'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/demo2.jpg',
+                  uri: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/demo2.jpg",
                 }}
                 style={{
                   height: 60,

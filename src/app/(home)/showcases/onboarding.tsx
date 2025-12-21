@@ -1,51 +1,51 @@
-import Feather from '@expo/vector-icons/Feather';
-import { useRouter } from 'expo-router';
-import { Button, cn, Divider } from 'heroui-native';
-import { View } from 'react-native';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { withUniwind } from 'uniwind';
-import { AppText } from '../../../components/app-text';
+import Feather from "@expo/vector-icons/Feather";
+import { useRouter } from "expo-router";
+import { Button, cn, Divider } from "heroui-native";
+import { View } from "react-native";
+import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { withUniwind } from "uniwind";
+import { AppText } from "../../../components/app-text";
 import MarqueeCarousel, {
   type CardProps,
-} from '../../../components/showcases/onboarding/marquee-carousel';
-import { useAppTheme } from '../../../contexts/app-theme-context';
+} from "../../../components/showcases/onboarding/marquee-carousel";
+import { useAppTheme } from "../../../contexts/app-theme-context";
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 const StyledFeather = withUniwind(Feather);
 
 const cards: CardProps[] = [
   {
-    title: 'My First Show',
+    title: "My First Show",
     image:
-      'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/showcase-onboarding-sneakers-1.png',
+      "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/showcase-onboarding-sneakers-1.png",
     liveCount: 23,
-    category: 'Sneakers',
-    brands: 'AetherStep',
+    category: "Sneakers",
+    brands: "AetherStep",
   },
   {
-    title: 'Fashion Week Special',
+    title: "Fashion Week Special",
     image:
-      'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/showcase-onboarding-fashion.png',
+      "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/showcase-onboarding-fashion.png",
     liveCount: 45,
-    category: 'Fashion',
-    brands: 'Maison Orrix',
+    category: "Fashion",
+    brands: "Maison Orrix",
   },
   {
-    title: 'Tech Gadgets',
+    title: "Tech Gadgets",
     image:
-      'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/showcase-onboarding-headphones.png',
+      "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/showcase-onboarding-headphones.png",
     liveCount: 12,
-    category: 'Electronics',
-    brands: 'QuantaLabs',
+    category: "Electronics",
+    brands: "QuantaLabs",
   },
   {
-    title: 'Air Collection',
+    title: "Air Collection",
     image:
-      'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/showcase-onboarding-sneakers-2.png',
+      "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/showcase-onboarding-sneakers-2.png",
     liveCount: 8,
-    category: 'Collectibles',
-    brands: 'CurioVault',
+    category: "Collectibles",
+    brands: "CurioVault",
   },
 ];
 
@@ -70,28 +70,28 @@ const OnboardingScreen = () => {
       >
         <Button
           size="sm"
-          className={cn('rounded-full bg-black/10', isDark && 'bg-white/20')}
+          className={cn("rounded-full bg-black/10", isDark && "bg-white/20")}
           isIconOnly
           onPress={router.back}
-          animation={{ highlight: 'disabled' }}
+          animation={{ highlight: "disabled" }}
         >
           <StyledFeather
             name="chevron-left"
             size={24}
-            className={cn('text-black', isDark && 'text-white')}
+            className={cn("text-black", isDark && "text-white")}
           />
         </Button>
         <Button
           size="sm"
-          className={cn('rounded-full bg-black/10', isDark && 'bg-white/20')}
+          className={cn("rounded-full bg-black/10", isDark && "bg-white/20")}
           isIconOnly
           onPress={router.back}
-          animation={{ highlight: 'disabled' }}
+          animation={{ highlight: "disabled" }}
         >
           <StyledFeather
             name="x"
             size={24}
-            className={cn('text-black', isDark && 'text-white')}
+            className={cn("text-black", isDark && "text-white")}
           />
         </Button>
       </AnimatedView>
@@ -120,9 +120,9 @@ const OnboardingScreen = () => {
 
       <AnimatedView entering={FadeInDown.delay(400).springify()}>
         <Button
-          onPress={() => console.log('Next pressed')}
+          onPress={() => console.log("Next pressed")}
           className="mx-8 rounded-full bg-[#F8DD00]"
-          animation={{ highlight: 'disabled' }}
+          animation={{ highlight: "disabled" }}
         >
           <Button.Label className="text-lg font-semibold text-black">
             Next

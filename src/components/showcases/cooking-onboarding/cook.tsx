@@ -1,16 +1,16 @@
-import AntDesign from '@expo/vector-icons/AntDesign';
+import AntDesign from "@expo/vector-icons/AntDesign";
 import {
   Button,
   Popover,
   useThemeColor,
   type PopoverTriggerRef,
-} from 'heroui-native';
-import { type FC, type RefObject } from 'react';
-import { withUniwind } from 'uniwind';
-import { simulatePress } from '../../../helpers/utils/simulate-press';
-import { AppText } from '../../app-text';
-import { popoverAnimation } from './constants';
-import { className } from './styles';
+} from "heroui-native";
+import { type FC, type RefObject } from "react";
+import { withUniwind } from "uniwind";
+import { simulatePress } from "../../../helpers/utils/simulate-press";
+import { AppText } from "../../app-text";
+import { popoverAnimation } from "./constants";
+import { className } from "./styles";
 
 const StyledAntDesign = withUniwind(AntDesign);
 
@@ -20,13 +20,13 @@ type Props = {
 };
 
 export const Cook: FC<Props> = ({ isOnboardingDone, triggerRef }) => {
-  const themeColorForeground = useThemeColor('foreground');
+  const themeColorForeground = useThemeColor("foreground");
 
   return (
     <Popover animation={popoverAnimation}>
       <Popover.Trigger ref={triggerRef}>
         <Button
-          animation={{ highlight: 'disabled' }}
+          animation={{ highlight: "disabled" }}
           className="h-12 px-4 rounded-[14px] flex-row items-center gap-1 bg-orange-300"
           onPress={isOnboardingDone ? simulatePress : undefined}
         >

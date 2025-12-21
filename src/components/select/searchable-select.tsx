@@ -4,16 +4,16 @@ import {
   useSelectAnimation,
   useThemeColor,
   type SelectTriggerRef,
-} from 'heroui-native';
-import React, { useRef, useState, type FC } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
-import { KeyboardController } from 'react-native-keyboard-controller';
+} from "heroui-native";
+import React, { useRef, useState, type FC } from "react";
+import { StyleSheet, TextInput, View } from "react-native";
+import { KeyboardController } from "react-native-keyboard-controller";
 import Animated, {
   interpolate,
   useAnimatedStyle,
-} from 'react-native-reanimated';
-import { withUniwind } from 'uniwind';
-import { AppText } from '../app-text';
+} from "react-native-reanimated";
+import { withUniwind } from "uniwind";
+import { AppText } from "../app-text";
 
 const StyleAnimatedView = withUniwind(Animated.View);
 
@@ -23,11 +23,11 @@ type SelectOption = {
 };
 
 const US_STATES: SelectOption[] = [
-  { value: 'CA', label: 'California' },
-  { value: 'NY', label: 'New York' },
-  { value: 'TX', label: 'Texas' },
-  { value: 'FL', label: 'Florida' },
-  { value: 'IL', label: 'Illinois' },
+  { value: "CA", label: "California" },
+  { value: "NY", label: "New York" },
+  { value: "TX", label: "Texas" },
+  { value: "FL", label: "Florida" },
+  { value: "IL", label: "Illinois" },
 ];
 
 const AnimatedTextInputBorder: FC = () => {
@@ -50,10 +50,10 @@ const AnimatedTextInputBorder: FC = () => {
 
 export function SearchableSelect() {
   const [value, setValue] = useState<SelectOption | undefined>();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
 
-  const themeColorMuted = useThemeColor('muted');
+  const themeColorMuted = useThemeColor("muted");
 
   const triggerRef = useRef<SelectTriggerRef>(null);
 
@@ -62,7 +62,7 @@ export function SearchableSelect() {
       value={value}
       onValueChange={(newValue) => {
         setValue(newValue);
-        setSearchQuery('');
+        setSearchQuery("");
       }}
       defaultValue={US_STATES[1]}
     >
@@ -72,7 +72,7 @@ export function SearchableSelect() {
           value={isFocused ? searchQuery : searchQuery || value?.label}
           onChangeText={setSearchQuery}
           placeholder={
-            isFocused ? (value?.label ?? 'Search state...') : 'Search state...'
+            isFocused ? (value?.label ?? "Search state...") : "Search state..."
           }
           placeholderTextColor={themeColorMuted}
           className="w-[256px] h-[48px] px-3 rounded-2xl flex-row items-center bg-surface text-foreground text-base/5 shadow-md shadow-black/5"
@@ -84,7 +84,7 @@ export function SearchableSelect() {
             setIsFocused(false);
             triggerRef.current?.close();
           }}
-          selectionColor={isFocused ? themeColorMuted : 'transparent'}
+          selectionColor={isFocused ? themeColorMuted : "transparent"}
         />
       </Select.Trigger>
       <Select.Portal>
@@ -94,7 +94,7 @@ export function SearchableSelect() {
         />
         <Select.Content width="trigger">
           {US_STATES.filter((state) =>
-            state.label.toLowerCase().includes(searchQuery.toLowerCase())
+            state.label.toLowerCase().includes(searchQuery.toLowerCase()),
           ).map((state, index, filteredArray) => (
             <React.Fragment key={state.value}>
               <Select.Item
@@ -106,7 +106,7 @@ export function SearchableSelect() {
             </React.Fragment>
           ))}
           {US_STATES.filter((state) =>
-            state.label.toLowerCase().includes(searchQuery.toLowerCase())
+            state.label.toLowerCase().includes(searchQuery.toLowerCase()),
           ).length === 0 && (
             <View className="py-6 items-center">
               <AppText className="text-muted">No states found</AppText>
@@ -120,6 +120,6 @@ export function SearchableSelect() {
 
 const styles = StyleSheet.create({
   focusRing: {
-    borderCurve: 'continuous',
+    borderCurve: "continuous",
   },
 });

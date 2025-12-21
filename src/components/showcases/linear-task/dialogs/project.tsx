@@ -1,18 +1,18 @@
-import Feather from '@expo/vector-icons/Feather';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import * as Haptics from 'expo-haptics';
-import { Chip, Dialog, RadioGroup } from 'heroui-native';
-import { useMemo, useState, type FC } from 'react';
-import { Platform, useWindowDimensions, View } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { withUniwind } from 'uniwind';
-import { AppText } from '../../../app-text';
-import { DialogBlurBackdrop } from '../../../dialog-blur-backdrop';
-import { DialogHeader } from '../dialog-header';
-import { SearchBar } from '../search-bar';
+import Feather from "@expo/vector-icons/Feather";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import * as Haptics from "expo-haptics";
+import { Chip, Dialog, RadioGroup } from "heroui-native";
+import { useMemo, useState, type FC } from "react";
+import { Platform, useWindowDimensions, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import Animated, { FadeIn } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { withUniwind } from "uniwind";
+import { AppText } from "../../../app-text";
+import { DialogBlurBackdrop } from "../../../dialog-blur-backdrop";
+import { DialogHeader } from "../dialog-header";
+import { SearchBar } from "../search-bar";
 
 const StyledFeather = withUniwind(Feather);
 const StyledMaterialCommunityIcons = withUniwind(MaterialCommunityIcons);
@@ -24,8 +24,8 @@ type ProjectItem = {
 };
 
 export const Project: FC = () => {
-  const [value, setValue] = useState('hero-ui-native');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [value, setValue] = useState("hero-ui-native");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -36,8 +36,8 @@ export const Project: FC = () => {
   const items: ProjectItem[] = useMemo(
     () => [
       {
-        value: 'no-project',
-        label: 'No Project',
+        value: "no-project",
+        label: "No Project",
         indicator: (
           <StyledMaterialCommunityIcons
             name="cube-outline"
@@ -47,8 +47,8 @@ export const Project: FC = () => {
         ),
       },
       {
-        value: 'hero-ui-native',
-        label: 'HeroUI Native',
+        value: "hero-ui-native",
+        label: "HeroUI Native",
         indicator: (
           <StyledMaterialCommunityIcons
             name="arrow-right-drop-circle"
@@ -58,8 +58,8 @@ export const Project: FC = () => {
         ),
       },
       {
-        value: 'hero-ui-web',
-        label: 'HeroUI Web',
+        value: "hero-ui-web",
+        label: "HeroUI Web",
         indicator: (
           <StyledMaterialCommunityIcons
             name="web"
@@ -69,8 +69,8 @@ export const Project: FC = () => {
         ),
       },
       {
-        value: 'hero-ui-chat',
-        label: 'HeroUI Chat',
+        value: "hero-ui-chat",
+        label: "HeroUI Chat",
         indicator: (
           <StyledMaterialCommunityIcons
             name="adjust"
@@ -80,13 +80,13 @@ export const Project: FC = () => {
         ),
       },
     ],
-    []
+    [],
   );
 
   const filteredItems = useMemo(() => {
     if (!searchQuery) return items;
     return items.filter((item) =>
-      item.label.toLowerCase().includes(searchQuery.toLowerCase())
+      item.label.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [searchQuery, items]);
 
@@ -96,7 +96,7 @@ export const Project: FC = () => {
         <Chip
           className="h-7 bg-surface-quaternary px-2"
           onPress={() => {
-            if (Platform.OS === 'ios') {
+            if (Platform.OS === "ios") {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }
           }}
@@ -147,9 +147,9 @@ export const Project: FC = () => {
                       <RadioGroup.Item
                         value={item.value}
                         onPress={() => {
-                          if (Platform.OS === 'ios') {
+                          if (Platform.OS === "ios") {
                             Haptics.impactAsync(
-                              Haptics.ImpactFeedbackStyle.Light
+                              Haptics.ImpactFeedbackStyle.Light,
                             );
                           }
                         }}

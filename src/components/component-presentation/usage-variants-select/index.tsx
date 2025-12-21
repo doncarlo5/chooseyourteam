@@ -1,23 +1,23 @@
-import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
-import { colorKit, Select, useThemeColor } from 'heroui-native';
+import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
+import { colorKit, Select, useThemeColor } from "heroui-native";
 import {
   FlatList,
   Platform,
   StyleSheet,
   useWindowDimensions,
   View,
-} from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
-import Animated, { Easing, SlideInDown } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { withUniwind } from 'uniwind';
-import { SelectBlurBackdrop } from '../../select/select-blur-backdrop';
-import type { UsageVariant } from '../types';
-import { CloseButton } from './close-button';
-import { SelectContentContainer } from './select-content-container';
-import { SelectItem } from './select-item';
-import { TriggerButton } from './trigger-button';
+} from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+import Animated, { Easing, SlideInDown } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { withUniwind } from "uniwind";
+import { SelectBlurBackdrop } from "../../select/select-blur-backdrop";
+import type { UsageVariant } from "../types";
+import { CloseButton } from "./close-button";
+import { SelectContentContainer } from "./select-content-container";
+import { SelectItem } from "./select-item";
+import { TriggerButton } from "./trigger-button";
 
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 const StyledAnimatedScrollView = withUniwind(AnimatedScrollView);
@@ -38,7 +38,7 @@ export const UsageVariantsSelect = ({
   const insets = useSafeAreaInsets();
   const { height: screenHeight } = useWindowDimensions();
 
-  const themeColorSurface = useThemeColor('surface');
+  const themeColorSurface = useThemeColor("surface");
 
   return (
     <Select
@@ -56,14 +56,14 @@ export const UsageVariantsSelect = ({
       defaultValue={data[0]}
       animation={{
         entering: {
-          type: 'timing',
+          type: "timing",
           config: {
             duration: 400,
             easing: Easing.out(Easing.quad),
           },
         },
         exiting: {
-          type: 'timing',
+          type: "timing",
           config: {
             duration: 200,
             easing: Easing.out(Easing.quad),
@@ -75,7 +75,7 @@ export const UsageVariantsSelect = ({
         isDisabled={data.length === 1}
         hitSlop={12}
         onPress={() => {
-          if (Platform.OS === 'ios') {
+          if (Platform.OS === "ios") {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           }
         }}
@@ -83,7 +83,7 @@ export const UsageVariantsSelect = ({
         <TriggerButton />
       </Select.Trigger>
       <Select.Portal>
-        {Platform.OS === 'android' ? (
+        {Platform.OS === "android" ? (
           <Select.Overlay className="bg-background" />
         ) : (
           <SelectBlurBackdrop />
@@ -131,17 +131,17 @@ export const UsageVariantsSelect = ({
 
 const styles = StyleSheet.create({
   topGradient: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    pointerEvents: 'none',
+    pointerEvents: "none",
   },
   bottomGradient: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    pointerEvents: 'none',
+    pointerEvents: "none",
   },
 });

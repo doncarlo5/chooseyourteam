@@ -1,20 +1,20 @@
-import { type FC, memo } from 'react';
-import { useWindowDimensions, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { type FC, memo } from "react";
+import { useWindowDimensions, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Easing,
   FadeInUp,
   useFrameCallback,
   useSharedValue,
   withTiming,
-} from 'react-native-reanimated';
-import { PreviewCard, type PreviewCardProps } from './preview-card';
+} from "react-native-reanimated";
+import { PreviewCard, type PreviewCardProps } from "./preview-card";
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 
 export type CardProps = Pick<
   PreviewCardProps,
-  'title' | 'image' | 'liveCount' | 'category' | 'brands'
+  "title" | "image" | "liveCount" | "category" | "brands"
 >;
 
 const _defaultScrollSpeed = 40;

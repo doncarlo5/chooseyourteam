@@ -1,34 +1,34 @@
-import Feather from '@expo/vector-icons/Feather';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { useRouter } from 'expo-router';
-import { Avatar, cn } from 'heroui-native';
-import { useState, type FC } from 'react';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { withUniwind } from 'uniwind';
-import { AppText } from '../../../components/app-text';
-import { ModelSelect } from '../../../components/showcases/raycast/model-select';
-import type { ModelOption } from '../../../components/showcases/raycast/model-select/types';
-import { useAppTheme } from '../../../contexts/app-theme-context';
-import { simulatePress } from '../../../helpers/utils/simulate-press';
+import Feather from "@expo/vector-icons/Feather";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useRouter } from "expo-router";
+import { Avatar, cn } from "heroui-native";
+import { useState, type FC } from "react";
+import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { withUniwind } from "uniwind";
+import { AppText } from "../../../components/app-text";
+import { ModelSelect } from "../../../components/showcases/raycast/model-select";
+import type { ModelOption } from "../../../components/showcases/raycast/model-select/types";
+import { useAppTheme } from "../../../contexts/app-theme-context";
+import { simulatePress } from "../../../helpers/utils/simulate-press";
 
 const StyledFeather = withUniwind(Feather);
 const StyledFontAwesome6 = withUniwind(FontAwesome6);
 const StyledIonicons = withUniwind(Ionicons);
 
 const MODELS: ModelOption[] = [
-  { value: 'raycast', label: 'Raycast AI', emoji: '⚡' },
-  { value: 'chatgpt', label: 'ChatGPT', emoji: '🤖' },
-  { value: 'claude', label: 'Claude', emoji: '🎭' },
-  { value: 'gemini', label: 'Gemini', emoji: '✨' },
-  { value: 'perplexity', label: 'Perplexity', emoji: '🔍' },
-  { value: 'deepseek', label: 'DeepSeek', emoji: '🌊' },
-  { value: 'llama', label: 'Llama', emoji: '🦙' },
-  { value: 'grok', label: 'Grok', emoji: '🚀' },
-  { value: 'mistral', label: 'Mistral', emoji: '🌬️' },
-  { value: 'moonshot', label: 'Moonshot AI', emoji: '🌙' },
-  { value: 'qwen', label: 'Qwen', emoji: '🎯' },
+  { value: "raycast", label: "Raycast AI", emoji: "⚡" },
+  { value: "chatgpt", label: "ChatGPT", emoji: "🤖" },
+  { value: "claude", label: "Claude", emoji: "🎭" },
+  { value: "gemini", label: "Gemini", emoji: "✨" },
+  { value: "perplexity", label: "Perplexity", emoji: "🔍" },
+  { value: "deepseek", label: "DeepSeek", emoji: "🌊" },
+  { value: "llama", label: "Llama", emoji: "🦙" },
+  { value: "grok", label: "Grok", emoji: "🚀" },
+  { value: "mistral", label: "Mistral", emoji: "🌬️" },
+  { value: "moonshot", label: "Moonshot AI", emoji: "🌙" },
+  { value: "qwen", label: "Qwen", emoji: "🎯" },
 ];
 
 type FavoriteItemProps = {
@@ -43,11 +43,11 @@ const FavoriteItem: FC<FavoriteItemProps> = ({
   return (
     <View className="flex-1 gap-3 items-center justify-center">
       <View
-        className={cn('size-14 rounded-2xl', iconClassName)}
+        className={cn("size-14 rounded-2xl", iconClassName)}
         style={styles.borderCurve}
       />
       <View
-        className={cn('h-2 w-8 rounded-full bg-muted/20', labelClassName)}
+        className={cn("h-2 w-8 rounded-full bg-muted/20", labelClassName)}
       />
     </View>
   );
@@ -93,7 +93,7 @@ export default function Raycast() {
           <Avatar alt="junior" className="size-8">
             <Avatar.Image
               source={{
-                uri: 'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/junior-avatar.jpg',
+                uri: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/junior-avatar.jpg",
               }}
             />
             <Avatar.Fallback>
@@ -119,8 +119,8 @@ export default function Raycast() {
       </View>
       <View
         className={cn(
-          'p-2 bg-surface-quaternary/70 rounded-3xl border border-neutral-400/10 gap-7',
-          isDark && 'border-neutral-600/10'
+          "p-2 bg-surface-quaternary/70 rounded-3xl border border-neutral-400/10 gap-7",
+          isDark && "border-neutral-600/10",
         )}
         style={styles.borderCurve}
       >
@@ -128,12 +128,12 @@ export default function Raycast() {
           <ModelSelect data={MODELS} model={model} setModel={setModel} />
           <Pressable
             className="flex-row items-center gap-1.5"
-            onPress={() => Alert.alert('Coming soon!')}
+            onPress={() => Alert.alert("Coming soon!")}
           >
             <AppText
               className={cn(
-                'text-lg text-neutral-800',
-                isDark && 'text-neutral-300'
+                "text-lg text-neutral-800",
+                isDark && "text-neutral-300",
               )}
             >
               Auto
@@ -160,8 +160,8 @@ export default function Raycast() {
           </Pressable>
           <Pressable
             className={cn(
-              'flex-row items-center justify-center gap-1 px-7 py-4 rounded-[16px] bg-neutral-300/50 border border-neutral-400/30',
-              isDark && 'bg-neutral-700/50 border-neutral-600/30'
+              "flex-row items-center justify-center gap-1 px-7 py-4 rounded-[16px] bg-neutral-300/50 border border-neutral-400/30",
+              isDark && "bg-neutral-700/50 border-neutral-600/30",
             )}
             style={styles.borderCurve}
             onPress={simulatePress}
@@ -179,6 +179,6 @@ export default function Raycast() {
 
 const styles = StyleSheet.create({
   borderCurve: {
-    borderCurve: 'continuous',
+    borderCurve: "continuous",
   },
 });

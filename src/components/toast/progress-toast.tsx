@@ -1,18 +1,18 @@
-import { Toast, type ToastComponentProps } from 'heroui-native';
-import { useCallback, useEffect } from 'react';
-import { View } from 'react-native';
+import { Toast, type ToastComponentProps } from "heroui-native";
+import { useCallback, useEffect } from "react";
+import { View } from "react-native";
 import Animated, {
   LinearTransition,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-} from 'react-native-reanimated';
-import { withUniwind } from 'uniwind';
-import { useSharedState } from './use-shared-state';
+} from "react-native-reanimated";
+import { withUniwind } from "uniwind";
+import { useSharedState } from "./use-shared-state";
 
 const StyleAnimatedView = withUniwind(Animated.View);
 
-const PROGRESS_STATE_KEY = 'progress-toast-state';
+const PROGRESS_STATE_KEY = "progress-toast-state";
 
 /**
  * Hook to access and update shared progress state
@@ -43,7 +43,7 @@ export const useProgressState = (initialProgress = 0) => {
       const clampedProgress = Math.max(0, Math.min(100, newProgress));
       setProgressState(clampedProgress);
     },
-    [setProgressState]
+    [setProgressState],
   );
 
   /**
@@ -115,7 +115,7 @@ export const ProgressToast = (props: ToastComponentProps) => {
         <Toast.Title className="text-sm mb-2">
           {progress < 100
             ? `Uploading... ${Math.round(progress)}%`
-            : 'Upload complete!'}
+            : "Upload complete!"}
         </Toast.Title>
         <View className="h-1 w-full overflow-hidden rounded-full bg-muted/20">
           <StyleAnimatedView

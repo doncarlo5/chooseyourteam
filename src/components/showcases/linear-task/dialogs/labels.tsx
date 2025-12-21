@@ -1,17 +1,17 @@
-import Feather from '@expo/vector-icons/Feather';
-import * as Haptics from 'expo-haptics';
-import { Checkbox, Chip, Dialog, FormField } from 'heroui-native';
-import { useMemo, useState, type FC } from 'react';
-import { Platform, useWindowDimensions, View } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { withUniwind } from 'uniwind';
-import { AppText } from '../../../app-text';
-import { DialogBlurBackdrop } from '../../../dialog-blur-backdrop';
-import { DialogHeader } from '../dialog-header';
-import { SearchBar } from '../search-bar';
+import Feather from "@expo/vector-icons/Feather";
+import * as Haptics from "expo-haptics";
+import { Checkbox, Chip, Dialog, FormField } from "heroui-native";
+import { useMemo, useState, type FC } from "react";
+import { Platform, useWindowDimensions, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import Animated, { FadeIn } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { withUniwind } from "uniwind";
+import { AppText } from "../../../app-text";
+import { DialogBlurBackdrop } from "../../../dialog-blur-backdrop";
+import { DialogHeader } from "../dialog-header";
+import { SearchBar } from "../search-bar";
 
 const StyledFeather = withUniwind(Feather);
 
@@ -23,9 +23,9 @@ type LabelItem = {
 
 export const Labels: FC = () => {
   const [selectedValues, setSelectedValues] = useState<Set<string>>(
-    new Set(['feature'])
+    new Set(["feature"]),
   );
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -36,38 +36,38 @@ export const Labels: FC = () => {
   const items: LabelItem[] = useMemo(
     () => [
       {
-        value: 'feature',
-        label: 'Feature',
+        value: "feature",
+        label: "Feature",
         indicator: <View className="size-2.5 rounded-full bg-purple-400" />,
       },
       {
-        value: 'bug',
-        label: 'Bug',
+        value: "bug",
+        label: "Bug",
         indicator: <View className="size-2.5 rounded-full bg-red-400" />,
       },
       {
-        value: 'chore',
-        label: 'Chore',
+        value: "chore",
+        label: "Chore",
         indicator: <View className="size-2.5 rounded-full bg-orange-200" />,
       },
       {
-        value: 'improvement',
-        label: 'Improvement',
+        value: "improvement",
+        label: "Improvement",
         indicator: <View className="size-2.5 rounded-full bg-blue-400" />,
       },
       {
-        value: 'refactor',
-        label: 'Refactor',
+        value: "refactor",
+        label: "Refactor",
         indicator: <View className="size-2.5 rounded-full bg-cyan-400" />,
       },
     ],
-    []
+    [],
   );
 
   const filteredItems = useMemo(() => {
     if (!searchQuery) return items;
     return items.filter((item) =>
-      item.label.toLowerCase().includes(searchQuery.toLowerCase())
+      item.label.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [searchQuery, items]);
 
@@ -86,7 +86,7 @@ export const Labels: FC = () => {
       return newSet;
     });
 
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === "ios") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
   };
@@ -118,9 +118,9 @@ export const Labels: FC = () => {
 
   const getChipLabel = () => {
     if (selectedItems.length === 0) {
-      return 'No labels';
+      return "No labels";
     } else if (selectedItems.length === 1) {
-      return selectedItems[0]?.label ?? 'No labels';
+      return selectedItems[0]?.label ?? "No labels";
     } else {
       return `${selectedItems.length} labels`;
     }
@@ -132,7 +132,7 @@ export const Labels: FC = () => {
         <Chip
           className="h-7 bg-surface-quaternary px-2"
           onPress={() => {
-            if (Platform.OS === 'ios') {
+            if (Platform.OS === "ios") {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }
           }}

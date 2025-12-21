@@ -1,17 +1,17 @@
-import { Ionicons } from '@expo/vector-icons';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import { Divider, FormField, Surface, Switch } from 'heroui-native';
-import React from 'react';
-import { View } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { Divider, FormField, Surface, Switch } from "heroui-native";
+import React from "react";
+import { View } from "react-native";
 import Animated, {
   FadeInLeft,
   FadeInRight,
   ZoomIn,
-} from 'react-native-reanimated';
-import { withUniwind } from 'uniwind';
-import { AppText } from '../../../components/app-text';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
+} from "react-native-reanimated";
+import { withUniwind } from "uniwind";
+import { AppText } from "../../../components/app-text";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
 
 const StyledIonicons = withUniwind(Ionicons);
 const StyledFontAwesome6 = withUniwind(FontAwesome6);
@@ -50,16 +50,16 @@ export const DefaultContent = () => {
     { title: string; description: string }
   > = {
     notifications: {
-      title: 'Enable notifications',
-      description: 'Receive push notifications about your account activity',
+      title: "Enable notifications",
+      description: "Receive push notifications about your account activity",
     },
     darkMode: {
-      title: 'Dark mode',
-      description: 'Switch between light and dark theme',
+      title: "Dark mode",
+      description: "Switch between light and dark theme",
     },
     autoUpdate: {
-      title: 'Auto-update',
-      description: 'Automatically download and install updates',
+      title: "Auto-update",
+      description: "Automatically download and install updates",
     },
   };
 
@@ -101,12 +101,12 @@ const StatesContent = () => {
     { title: string; description: string; disabled?: boolean }
   > = {
     emailNotifications: {
-      title: 'Email notifications',
-      description: 'Receive notifications via email',
+      title: "Email notifications",
+      description: "Receive notifications via email",
     },
     pushNotifications: {
-      title: 'Push notifications',
-      description: 'This feature is currently unavailable',
+      title: "Push notifications",
+      description: "This feature is currently unavailable",
       disabled: true,
     },
   };
@@ -177,7 +177,7 @@ const CustomStylesContent = () => {
           className="w-[56px] h-[32px]"
           animation={{
             backgroundColor: {
-              value: ['#172554', '#eab308'],
+              value: ["#172554", "#eab308"],
             },
           }}
         >
@@ -224,7 +224,7 @@ const CustomStylesContent = () => {
           className="w-[60px] h-[32px]"
           animation={{
             backgroundColor: {
-              value: ['#71717a', '#16a34a'],
+              value: ["#71717a", "#16a34a"],
             },
           }}
         >
@@ -240,7 +240,7 @@ const CustomStylesContent = () => {
                 },
               },
               backgroundColor: {
-                value: ['#fff', '#fff'],
+                value: ["#fff", "#fff"],
               },
             }}
           />
@@ -274,18 +274,18 @@ const CustomStylesContent = () => {
 
 const SWITCH_VARIANTS: UsageVariant[] = [
   {
-    value: 'default',
-    label: 'Default',
+    value: "default",
+    label: "Default",
     content: <DefaultContent />,
   },
   {
-    value: 'states',
-    label: 'States',
+    value: "states",
+    label: "States",
     content: <StatesContent />,
   },
   {
-    value: 'custom-styles',
-    label: 'Custom styles',
+    value: "custom-styles",
+    label: "Custom styles",
     content: <CustomStylesContent />,
   },
 ];

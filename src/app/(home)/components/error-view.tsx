@@ -1,12 +1,12 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Button, ErrorView, TextField } from 'heroui-native';
-import { useState } from 'react';
-import { View } from 'react-native';
-import { FadeInDown } from 'react-native-reanimated';
-import { withUniwind } from 'uniwind';
-import { AppText } from '../../../components/app-text';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
+import { Ionicons } from "@expo/vector-icons";
+import { Button, ErrorView, TextField } from "heroui-native";
+import { useState } from "react";
+import { View } from "react-native";
+import { FadeInDown } from "react-native-reanimated";
+import { withUniwind } from "uniwind";
+import { AppText } from "../../../components/app-text";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
 
 const StyledIonicons = withUniwind(Ionicons);
 
@@ -91,7 +91,7 @@ const CustomStylingContent = () => {
           isInvalid={true}
           className="bg-danger/10 p-3 rounded-xl border border-danger/20"
           classNames={{
-            text: 'text-danger font-semibold text-sm',
+            text: "text-danger font-semibold text-sm",
           }}
         >
           Server connection failed. Please try again.
@@ -101,7 +101,7 @@ const CustomStylingContent = () => {
           isInvalid={true}
           className="bg-amber-500/10 p-2 rounded"
           classNames={{
-            text: 'text-amber-600 text-xs italic',
+            text: "text-amber-600 text-xs italic",
           }}
         >
           Session will expire in 5 minutes
@@ -111,7 +111,7 @@ const CustomStylingContent = () => {
           isInvalid={true}
           className="border-l-4 border-danger pl-2"
           classNames={{
-            text: 'text-danger text-sm',
+            text: "text-danger text-sm",
           }}
         >
           Invalid credentials provided
@@ -224,7 +224,7 @@ const MultipleErrorsContent = () => {
           size="sm"
           className="self-start"
         >
-          {showMultipleErrors ? 'Hide Errors' : 'Validate Password'}
+          {showMultipleErrors ? "Hide Errors" : "Validate Password"}
         </Button>
       </View>
     </View>
@@ -233,28 +233,28 @@ const MultipleErrorsContent = () => {
 
 const ERROR_VIEW_VARIANTS: UsageVariant[] = [
   {
-    value: 'basic-error-view',
-    label: 'Basic ErrorView',
+    value: "basic-error-view",
+    label: "Basic ErrorView",
     content: <BasicErrorViewContent />,
   },
   {
-    value: 'custom-text-with-icons',
-    label: 'Custom text with icons',
+    value: "custom-text-with-icons",
+    label: "Custom text with icons",
     content: <CustomTextWithIconsContent />,
   },
   {
-    value: 'custom-styling',
-    label: 'Custom styling',
+    value: "custom-styling",
+    label: "Custom styling",
     content: <CustomStylingContent />,
   },
   {
-    value: 'inline-error-messages',
-    label: 'Inline error messages',
+    value: "inline-error-messages",
+    label: "Inline error messages",
     content: <InlineErrorMessagesContent />,
   },
   {
-    value: 'multiple-errors',
-    label: 'Multiple errors',
+    value: "multiple-errors",
+    label: "Multiple errors",
     content: <MultipleErrorsContent />,
   },
 ];

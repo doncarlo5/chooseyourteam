@@ -1,10 +1,10 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Button, Spinner } from 'heroui-native';
-import React from 'react';
-import { Text, View } from 'react-native';
-import { withUniwind } from 'uniwind';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
+import { Ionicons } from "@expo/vector-icons";
+import { Button, Spinner } from "heroui-native";
+import React from "react";
+import { Text, View } from "react-native";
+import { withUniwind } from "uniwind";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
 
 const StyledIonicons = withUniwind(Ionicons);
 
@@ -123,7 +123,7 @@ const StateAnimationContent = () => {
           size="sm"
           onPress={() => setIsLoading(!isLoading)}
         >
-          {isLoading ? 'Tap to stop' : 'Tap to start'}
+          {isLoading ? "Tap to stop" : "Tap to start"}
         </Button>
       </View>
     </View>
@@ -134,33 +134,33 @@ const StateAnimationContent = () => {
 
 const SPINNER_VARIANTS: UsageVariant[] = [
   {
-    value: 'sizes',
-    label: 'Sizes',
+    value: "sizes",
+    label: "Sizes",
     content: <SizesContent />,
   },
   {
-    value: 'colors',
-    label: 'Colors',
+    value: "colors",
+    label: "Colors",
     content: <ColorsContent />,
   },
   {
-    value: 'custom-colors',
-    label: 'Custom colors',
+    value: "custom-colors",
+    label: "Custom colors",
     content: <CustomColorsContent />,
   },
   {
-    value: 'custom-content',
-    label: 'With custom content',
+    value: "custom-content",
+    label: "With custom content",
     content: <CustomContentContent />,
   },
   {
-    value: 'animation-speed',
-    label: 'Animation speed',
+    value: "animation-speed",
+    label: "Animation speed",
     content: <AnimationSpeedContent />,
   },
   {
-    value: 'state-animation',
-    label: 'State animation preview',
+    value: "state-animation",
+    label: "State animation preview",
     content: <StateAnimationContent />,
   },
 ];

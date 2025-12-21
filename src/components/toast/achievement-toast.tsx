@@ -1,15 +1,15 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Toast, useThemeColor, type ToastComponentProps } from 'heroui-native';
-import { useEffect } from 'react';
-import { View } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import { Toast, useThemeColor, type ToastComponentProps } from "heroui-native";
+import { useEffect } from "react";
+import { View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withSequence,
   withTiming,
-} from 'react-native-reanimated';
-import { withUniwind } from 'uniwind';
+} from "react-native-reanimated";
+import { withUniwind } from "uniwind";
 
 const StyleAnimatedView = withUniwind(Animated.View);
 const StyledIonicons = withUniwind(Ionicons);
@@ -21,7 +21,7 @@ const StyledIonicons = withUniwind(Ionicons);
 export const AchievementToast = (props: ToastComponentProps) => {
   const { id, hide } = props;
 
-  const themeColorWarning = useThemeColor('warning');
+  const themeColorWarning = useThemeColor("warning");
 
   /**
    * Auto-hide toast after 5 seconds
@@ -51,34 +51,34 @@ export const AchievementToast = (props: ToastComponentProps) => {
     confetti1.value = withRepeat(
       withSequence(
         withTiming(1, { duration: 800 }),
-        withTiming(0, { duration: 800 })
+        withTiming(0, { duration: 800 }),
       ),
       -1,
-      false
+      false,
     );
     confetti2.value = withRepeat(
       withSequence(
         withTiming(1, { duration: 1000 }),
-        withTiming(0, { duration: 1000 })
+        withTiming(0, { duration: 1000 }),
       ),
       -1,
-      false
+      false,
     );
     confetti3.value = withRepeat(
       withSequence(
         withTiming(1, { duration: 1200 }),
-        withTiming(0, { duration: 1200 })
+        withTiming(0, { duration: 1200 }),
       ),
       -1,
-      false
+      false,
     );
     confetti4.value = withRepeat(
       withSequence(
         withTiming(1, { duration: 900 }),
-        withTiming(0, { duration: 900 })
+        withTiming(0, { duration: 900 }),
       ),
       -1,
-      false
+      false,
     );
   }, [confetti1, confetti2, confetti3, confetti4]);
 
@@ -174,7 +174,7 @@ export const AchievementToast = (props: ToastComponentProps) => {
             New achievement!
           </Toast.Title>
           <Toast.Title className="text-base font-bold text-[#2D3748]">
-            You're on a 1-day
+            {`You're on a 1-day`}
           </Toast.Title>
           <Toast.Title className="text-base font-bold text-[#2D3748]">
             study streak

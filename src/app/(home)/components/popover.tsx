@@ -1,11 +1,11 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { Button, Popover } from 'heroui-native';
-import { Platform, View } from 'react-native';
-import { withUniwind } from 'uniwind';
-import { AppText } from '../../../components/app-text';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { Button, Popover } from "heroui-native";
+import { Platform, View } from "react-native";
+import { withUniwind } from "uniwind";
+import { AppText } from "../../../components/app-text";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
 
 const StyledIonicons = withUniwind(Ionicons);
 
@@ -191,7 +191,7 @@ const PresentationVariantsContent = () => {
 const PlacementPopover = ({
   placement,
 }: {
-  placement: 'top' | 'bottom' | 'left' | 'right';
+  placement: "top" | "bottom" | "left" | "right";
 }) => {
   const label = placement.charAt(0).toUpperCase() + placement.slice(1);
 
@@ -245,7 +245,7 @@ const PlacementOptionsContent = () => {
 
 // ------------------------------------------------------------------------------
 
-const AlignmentPopover = ({ align }: { align: 'start' | 'center' | 'end' }) => {
+const AlignmentPopover = ({ align }: { align: "start" | "center" | "end" }) => {
   const label = align.charAt(0).toUpperCase() + align.slice(1);
 
   return (
@@ -305,7 +305,7 @@ const NativeModalTestContent = () => {
     <View className="flex-1 px-5 items-center justify-center">
       <Button
         variant="secondary"
-        onPress={() => router.push('components/popover-native-modal')}
+        onPress={() => router.push("components/popover-native-modal")}
       >
         Popover from native modal
       </Button>
@@ -317,31 +317,31 @@ const NativeModalTestContent = () => {
 
 const POPOVER_VARIANTS: UsageVariant[] = [
   {
-    value: 'with-title-description',
-    label: 'With title & description',
+    value: "with-title-description",
+    label: "With title & description",
     content: <WithTitleDescriptionContent />,
   },
   {
-    value: 'presentation-variants',
-    label: 'Presentation variants',
+    value: "presentation-variants",
+    label: "Presentation variants",
     content: <PresentationVariantsContent />,
   },
   {
-    value: 'placement-options',
-    label: 'Placement options',
+    value: "placement-options",
+    label: "Placement options",
     content: <PlacementOptionsContent />,
   },
   {
-    value: 'alignment-options',
-    label: 'Alignment options',
+    value: "alignment-options",
+    label: "Alignment options",
     content: <AlignmentOptionsContent />,
   },
 ];
 
-if (Platform.OS === 'ios') {
+if (Platform.OS === "ios") {
   POPOVER_VARIANTS.push({
-    value: 'native-modal-test',
-    label: 'Native modal test',
+    value: "native-modal-test",
+    label: "Native modal test",
     content: <NativeModalTestContent />,
   });
 }

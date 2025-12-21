@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import {
   Button,
   cn,
@@ -9,22 +9,22 @@ import {
   ScrollShadow,
   TextField,
   useThemeColor,
-} from 'heroui-native';
-import { useState } from 'react';
-import { Platform, Text, useWindowDimensions, View } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+} from "heroui-native";
+import { useState } from "react";
+import { Platform, Text, useWindowDimensions, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import {
   KeyboardAvoidingView,
   KeyboardController,
-} from 'react-native-keyboard-controller';
+} from "react-native-keyboard-controller";
 
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { withUniwind } from 'uniwind';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
-import { DialogBlurBackdrop } from '../../../components/dialog-blur-backdrop';
-import { useAppTheme } from '../../../contexts/app-theme-context';
-import { simulatePress } from '../../../helpers/utils/simulate-press';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { withUniwind } from "uniwind";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
+import { DialogBlurBackdrop } from "../../../components/dialog-blur-backdrop";
+import { useAppTheme } from "../../../contexts/app-theme-context";
+import { simulatePress } from "../../../helpers/utils/simulate-press";
 
 const StyleScrollView = withUniwind(ScrollView);
 const StyledIonicons = withUniwind(Ionicons);
@@ -81,7 +81,7 @@ const BasicDialogContent = () => {
 const BlurBackdropDialogContent = () => {
   const [blurBackdropDialogOpen, setBlurBackdropDialogOpen] = useState(false);
 
-  if (Platform.OS !== 'ios') {
+  if (Platform.OS !== "ios") {
     return null;
   }
 
@@ -138,10 +138,10 @@ const BlurBackdropDialogContent = () => {
 
 const TextInputDialogContent = () => {
   const [textInputDialogOpen, setTextInputDialogOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [nameError, setNameError] = useState('');
-  const [emailError, setEmailError] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
 
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -149,8 +149,8 @@ const TextInputDialogContent = () => {
   const insetTop = insets.top + 12;
   const maxTextInputDialogHeight = (height - insetTop) / 2;
 
-  const themeColorSurfaceSecondary = useThemeColor('surface-secondary');
-  const themeColorMuted = useThemeColor('muted');
+  const themeColorSurfaceSecondary = useThemeColor("surface-secondary");
+  const themeColorMuted = useThemeColor("muted");
 
   const validateEmail = (emailValue: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -161,31 +161,31 @@ const TextInputDialogContent = () => {
     let hasError = false;
 
     if (!name.trim()) {
-      setNameError('Name is required');
+      setNameError("Name is required");
       hasError = true;
     } else if (name.trim().length < 2) {
-      setNameError('Name must be at least 2 characters');
+      setNameError("Name must be at least 2 characters");
       hasError = true;
     } else {
-      setNameError('');
+      setNameError("");
     }
 
     if (!email.trim()) {
-      setEmailError('Email is required');
+      setEmailError("Email is required");
       hasError = true;
     } else if (!validateEmail(email)) {
-      setEmailError('Please enter a valid email address');
+      setEmailError("Please enter a valid email address");
       hasError = true;
     } else {
-      setEmailError('');
+      setEmailError("");
     }
 
     if (!hasError) {
       simulatePress();
-      setName('');
-      setEmail('');
-      setNameError('');
-      setEmailError('');
+      setName("");
+      setEmail("");
+      setNameError("");
+      setEmailError("");
       return true;
     }
 
@@ -201,10 +201,10 @@ const TextInputDialogContent = () => {
             setTextInputDialogOpen(isOpen);
             // Reset form and errors when dialog closes
             if (!isOpen) {
-              setName('');
-              setEmail('');
-              setNameError('');
-              setEmailError('');
+              setName("");
+              setEmail("");
+              setNameError("");
+              setEmailError("");
             }
           }}
         >
@@ -218,7 +218,7 @@ const TextInputDialogContent = () => {
               keyboardVerticalOffset={24}
               style={{
                 flex: 1,
-                justifyContent: 'flex-start',
+                justifyContent: "flex-start",
               }}
             >
               <Dialog.Content
@@ -247,7 +247,7 @@ const TextInputDialogContent = () => {
                         value={name}
                         onChangeText={(text) => {
                           setName(text);
-                          if (nameError) setNameError('');
+                          if (nameError) setNameError("");
                         }}
                         autoCapitalize="words"
                         autoCorrect
@@ -277,7 +277,7 @@ const TextInputDialogContent = () => {
                         value={email}
                         onChangeText={(text) => {
                           setEmail(text);
-                          if (emailError) setEmailError('');
+                          if (emailError) setEmailError("");
                         }}
                         autoCapitalize="none"
                         isInvalid={false}
@@ -304,10 +304,10 @@ const TextInputDialogContent = () => {
                       variant="ghost"
                       size="sm"
                       onPress={() => {
-                        setName('');
-                        setEmail('');
-                        setNameError('');
-                        setEmailError('');
+                        setName("");
+                        setEmail("");
+                        setNameError("");
+                        setEmailError("");
                       }}
                     >
                       Cancel
@@ -332,7 +332,7 @@ const LongContentDialogContent = () => {
   const [scrollDialogOpen, setScrollDialogOpen] = useState(false);
   const { height } = useWindowDimensions();
   const { isDark } = useAppTheme();
-  const themeColorOverlay = useThemeColor('overlay');
+  const themeColorOverlay = useThemeColor("overlay");
 
   return (
     <View className="flex-1">
@@ -343,7 +343,7 @@ const LongContentDialogContent = () => {
           </Dialog.Trigger>
           <Dialog.Portal>
             <Dialog.Overlay
-              className={cn('bg-stone-100', isDark && 'bg-stone-950')}
+              className={cn("bg-stone-100", isDark && "bg-stone-950")}
             />
             <Dialog.Content className="rounded-2xl px-0 shadow-2xl shadow-black/10">
               <Dialog.Close className="self-end mr-4" />
@@ -361,36 +361,36 @@ const LongContentDialogContent = () => {
                     do eiusmod tempor incididunt ut labore et dolore magna
                     aliqua. Ut enim ad minim veniam, quis nostrud exercitation
                     ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                    {'\n\n'}
+                    {"\n\n"}
                     Duis aute irure dolor in reprehenderit in voluptate velit
                     esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
                     occaecat cupidatat non proident, sunt in culpa qui officia
                     deserunt mollit anim id est laborum.
-                    {'\n\n'}
+                    {"\n\n"}
                     Sed ut perspiciatis unde omnis iste natus error sit
                     voluptatem accusantium doloremque laudantium, totam rem
                     aperiam, eaque ipsa quae ab illo inventore veritatis et
                     quasi architecto beatae vitae dicta sunt explicabo.
-                    {'\n\n'}
+                    {"\n\n"}
                     Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut
                     odit aut fugit, sed quia consequuntur magni dolores eos qui
                     ratione voluptatem sequi nesciunt.
-                    {'\n\n'}
+                    {"\n\n"}
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
                     do eiusmod tempor incididunt ut labore et dolore magna
                     aliqua. Ut enim ad minim veniam, quis nostrud exercitation
                     ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                    {'\n\n'}
+                    {"\n\n"}
                     Duis aute irure dolor in reprehenderit in voluptate velit
                     esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
                     occaecat cupidatat non proident, sunt in culpa qui officia
                     deserunt mollit anim id est laborum.
-                    {'\n\n'}
+                    {"\n\n"}
                     Sed ut perspiciatis unde omnis iste natus error sit
                     voluptatem accusantium doloremque laudantium, totam rem
                     aperiam, eaque ipsa quae ab illo inventore veritatis et
                     quasi architecto beatae vitae dicta sunt explicabo.
-                    {'\n\n'}
+                    {"\n\n"}
                     Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut
                     odit aut fugit, sed quia consequuntur magni dolores eos qui
                     ratione voluptatem sequi nesciunt.
@@ -419,7 +419,7 @@ const LongContentDialogContent = () => {
 const NativeModalDialogContent = () => {
   const router = useRouter();
 
-  if (Platform.OS !== 'ios') {
+  if (Platform.OS !== "ios") {
     return null;
   }
 
@@ -428,7 +428,7 @@ const NativeModalDialogContent = () => {
       <View className="flex-1 items-center justify-center">
         <Button
           variant="secondary"
-          onPress={() => router.push('components/dialog-native-modal')}
+          onPress={() => router.push("components/dialog-native-modal")}
         >
           Dialog from native modal
         </Button>
@@ -441,46 +441,46 @@ const NativeModalDialogContent = () => {
 
 const DIALOG_VARIANTS_IOS: UsageVariant[] = [
   {
-    value: 'basic-dialog',
-    label: 'Basic dialog',
+    value: "basic-dialog",
+    label: "Basic dialog",
     content: <BasicDialogContent />,
   },
   {
-    value: 'blur-backdrop-dialog',
-    label: 'Dialog with blur backdrop',
+    value: "blur-backdrop-dialog",
+    label: "Dialog with blur backdrop",
     content: <BlurBackdropDialogContent />,
   },
   {
-    value: 'text-input-dialog',
-    label: 'Dialog with text input',
+    value: "text-input-dialog",
+    label: "Dialog with text input",
     content: <TextInputDialogContent />,
   },
   {
-    value: 'long-content-dialog',
-    label: 'Dialog with long content',
+    value: "long-content-dialog",
+    label: "Dialog with long content",
     content: <LongContentDialogContent />,
   },
   {
-    value: 'native-modal-dialog',
-    label: 'Dialog from native modal',
+    value: "native-modal-dialog",
+    label: "Dialog from native modal",
     content: <NativeModalDialogContent />,
   },
 ];
 
 const DIALOG_VARIANTS_ANDROID: UsageVariant[] = [
   {
-    value: 'basic-dialog',
-    label: 'Basic dialog',
+    value: "basic-dialog",
+    label: "Basic dialog",
     content: <BasicDialogContent />,
   },
   {
-    value: 'text-input-dialog',
-    label: 'Dialog with text input',
+    value: "text-input-dialog",
+    label: "Dialog with text input",
     content: <TextInputDialogContent />,
   },
   {
-    value: 'long-content-dialog',
-    label: 'Dialog with long content',
+    value: "long-content-dialog",
+    label: "Dialog with long content",
     content: <LongContentDialogContent />,
   },
 ];
@@ -489,7 +489,7 @@ export default function DialogScreen() {
   return (
     <UsageVariantFlatList
       data={
-        Platform.OS === 'ios' ? DIALOG_VARIANTS_IOS : DIALOG_VARIANTS_ANDROID
+        Platform.OS === "ios" ? DIALOG_VARIANTS_IOS : DIALOG_VARIANTS_ANDROID
       }
     />
   );

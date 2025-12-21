@@ -1,25 +1,25 @@
-import Feather from '@expo/vector-icons/Feather';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { useFocusEffect } from '@react-navigation/native';
-import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
-import { Button, Chip, RadioGroup } from 'heroui-native';
-import { useCallback, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import Feather from "@expo/vector-icons/Feather";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useFocusEffect } from "@react-navigation/native";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { Button, Chip, RadioGroup } from "heroui-native";
+import { useCallback, useRef, useState } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
 import Animated, {
   Easing,
   FadeIn,
   FadeInDown,
   FadeInUp,
-} from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Uniwind, useUniwind, withUniwind } from 'uniwind';
-import BG from '../../../../assets/images/paywall-showcase-bg.jpeg';
-import LogoDark from '../../../../assets/logo-dark.png';
-import { AppText } from '../../../components/app-text';
-import { StyledFormField } from '../../../components/showcases/paywall/styled-form-field';
-import { StyledRadio } from '../../../components/showcases/paywall/styled-radio';
-import { simulatePress } from '../../../helpers/utils/simulate-press';
+} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Uniwind, useUniwind, withUniwind } from "uniwind";
+import BG from "../../../../assets/images/paywall-showcase-bg.jpeg";
+import LogoDark from "../../../../assets/logo-dark.png";
+import { AppText } from "../../../components/app-text";
+import { StyledFormField } from "../../../components/showcases/paywall/styled-form-field";
+import { StyledRadio } from "../../../components/showcases/paywall/styled-radio";
+import { simulatePress } from "../../../helpers/utils/simulate-press";
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 const StyledFeather = withUniwind(Feather);
@@ -27,7 +27,7 @@ const StyledIonicons = withUniwind(Ionicons);
 
 export default function Paywall() {
   const [isFreeTrialEnabled, setIsFreeTrialEnabled] = useState(false);
-  const [access, setAccess] = useState<'yearly' | 'monthly'>('monthly');
+  const [access, setAccess] = useState<"yearly" | "monthly">("monthly");
 
   const router = useRouter();
 
@@ -40,12 +40,12 @@ export default function Paywall() {
   useFocusEffect(
     useCallback(() => {
       prevTheme.current = theme;
-      Uniwind.setTheme('dark');
+      Uniwind.setTheme("dark");
       return () => {
         Uniwind.setTheme(prevTheme.current);
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, []),
   );
 
   return (
@@ -90,7 +90,7 @@ export default function Paywall() {
         />
         <RadioGroup
           value={access}
-          onValueChange={(value) => setAccess(value as 'yearly' | 'monthly')}
+          onValueChange={(value) => setAccess(value as "yearly" | "monthly")}
           className="gap-4 mb-6"
         >
           <View>
@@ -132,7 +132,7 @@ export default function Paywall() {
           size="lg"
           className="rounded-full bg-white mb-5"
           onPress={simulatePress}
-          animation={{ highlight: 'disabled' }}
+          animation={{ highlight: "disabled" }}
         >
           <Button.Label className="text-black">Continue</Button.Label>
         </Button>

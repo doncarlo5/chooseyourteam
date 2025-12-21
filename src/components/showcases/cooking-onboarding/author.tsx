@@ -1,10 +1,10 @@
-import Feather from '@expo/vector-icons/Feather';
-import { Avatar } from 'heroui-native';
-import { type FC } from 'react';
-import { Pressable, View } from 'react-native';
-import { withUniwind } from 'uniwind';
-import { simulatePress } from '../../../helpers/utils/simulate-press';
-import { AppText } from '../../app-text';
+import Feather from "@expo/vector-icons/Feather";
+import { Avatar } from "heroui-native";
+import { type FC } from "react";
+import { Pressable, View } from "react-native";
+import { withUniwind } from "uniwind";
+import { simulatePress } from "../../../helpers/utils/simulate-press";
+import { AppText } from "../../app-text";
 
 const StyledFeather = withUniwind(Feather);
 
@@ -14,7 +14,7 @@ export const Author: FC = () => {
       <Avatar alt="junior" size="sm" className="size-8 border-foreground/20">
         <Avatar.Image
           source={{
-            uri: 'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/junior-avatar.jpg',
+            uri: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/junior-avatar.jpg",
           }}
         />
         <Avatar.Fallback>

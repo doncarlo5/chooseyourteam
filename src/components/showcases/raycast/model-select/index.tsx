@@ -1,25 +1,25 @@
-import Feather from '@expo/vector-icons/Feather';
-import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Button, cn, colorKit, Select, useThemeColor } from 'heroui-native';
+import Feather from "@expo/vector-icons/Feather";
+import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
+import { Button, cn, colorKit, Select, useThemeColor } from "heroui-native";
 import {
   Platform,
   Pressable,
   StyleSheet,
   useWindowDimensions,
   View,
-} from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
-import Animated, { Easing, SlideInDown } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { withUniwind } from 'uniwind';
-import { useAppTheme } from '../../../../contexts/app-theme-context';
-import { simulatePress } from '../../../../helpers/utils/simulate-press';
-import { AppText } from '../../../app-text';
-import { SelectBlurBackdrop } from '../../../select/select-blur-backdrop';
-import { SelectContentContainer } from './select-content-container';
-import { SelectItem } from './select-item';
-import { type ModelOption } from './types';
+} from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+import Animated, { Easing, SlideInDown } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { withUniwind } from "uniwind";
+import { useAppTheme } from "../../../../contexts/app-theme-context";
+import { simulatePress } from "../../../../helpers/utils/simulate-press";
+import { AppText } from "../../../app-text";
+import { SelectBlurBackdrop } from "../../../select/select-blur-backdrop";
+import { SelectContentContainer } from "./select-content-container";
+import { SelectItem } from "./select-item";
+import { type ModelOption } from "./types";
 
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 const StyledAnimatedScrollView = withUniwind(AnimatedScrollView);
@@ -37,7 +37,7 @@ export const ModelSelect = ({ data, model, setModel }: Props) => {
 
   const { isDark } = useAppTheme();
 
-  const themeColorSurface = useThemeColor('surface');
+  const themeColorSurface = useThemeColor("surface");
 
   return (
     <Select
@@ -49,14 +49,14 @@ export const ModelSelect = ({ data, model, setModel }: Props) => {
       defaultValue={data[0]}
       animation={{
         entering: {
-          type: 'timing',
+          type: "timing",
           config: {
             duration: 400,
             easing: Easing.out(Easing.quad),
           },
         },
         exiting: {
-          type: 'timing',
+          type: "timing",
           config: {
             duration: 200,
             easing: Easing.out(Easing.quad),
@@ -69,11 +69,11 @@ export const ModelSelect = ({ data, model, setModel }: Props) => {
           variant="tertiary"
           size="sm"
           className={cn(
-            'rounded-full px-4 h-11 bg-transparent border border-neutral-400/25',
-            isDark && 'border-neutral-600/25'
+            "rounded-full px-4 h-11 bg-transparent border border-neutral-400/25",
+            isDark && "border-neutral-600/25",
           )}
           onPress={() => {
-            if (Platform.OS === 'android') return;
+            if (Platform.OS === "android") return;
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
           }}
         >
@@ -84,7 +84,7 @@ export const ModelSelect = ({ data, model, setModel }: Props) => {
         </Button>
       </Select.Trigger>
       <Select.Portal>
-        {Platform.OS === 'android' ? (
+        {Platform.OS === "android" ? (
           <Select.Overlay className="bg-background" />
         ) : (
           <SelectBlurBackdrop />
@@ -104,8 +104,8 @@ export const ModelSelect = ({ data, model, setModel }: Props) => {
             <Pressable className="absolute" onPress={simulatePress}>
               <AppText
                 className={cn(
-                  'text-xl font-semibold text-foreground',
-                  isDark && 'font-bold'
+                  "text-xl font-semibold text-foreground",
+                  isDark && "font-bold",
                 )}
               >
                 Presets
@@ -162,17 +162,17 @@ export const ModelSelect = ({ data, model, setModel }: Props) => {
 
 const styles = StyleSheet.create({
   topGradient: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    pointerEvents: 'none',
+    pointerEvents: "none",
   },
   bottomGradient: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    pointerEvents: 'none',
+    pointerEvents: "none",
   },
 });

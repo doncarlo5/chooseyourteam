@@ -1,9 +1,9 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Button, Popover } from 'heroui-native';
-import { View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { withUniwind } from 'uniwind';
-import { AppText } from '../../../components/app-text';
+import { Ionicons } from "@expo/vector-icons";
+import { Button, Popover } from "heroui-native";
+import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { withUniwind } from "uniwind";
+import { AppText } from "../../../components/app-text";
 
 const StyledIonicons = withUniwind(Ionicons);
 

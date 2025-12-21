@@ -1,9 +1,9 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { Button, Dialog } from 'heroui-native';
-import { useState } from 'react';
-import { View } from 'react-native';
-import { withUniwind } from 'uniwind';
-import { DialogBlurBackdrop } from '../dialog-blur-backdrop';
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Button, Dialog } from "heroui-native";
+import { useState } from "react";
+import { View } from "react-native";
+import { withUniwind } from "uniwind";
+import { DialogBlurBackdrop } from "../dialog-blur-backdrop";
 
 const StyledIonicons = withUniwind(Ionicons);
 
@@ -38,7 +38,7 @@ export const DialogContent = () => {
               variant="danger"
               onPress={() => {
                 setDialogOpen(false);
-                console.log('Account deleted');
+                console.log("Account deleted");
               }}
             >
               Delete Account

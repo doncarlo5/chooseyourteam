@@ -1,9 +1,9 @@
-import { Divider, RadioGroup, Surface } from 'heroui-native';
-import React from 'react';
-import { View } from 'react-native';
+import { Divider, RadioGroup, Surface } from "heroui-native";
+import React from "react";
+import { View } from "react-native";
 
 export const RadioGroupContent = () => {
-  const [frequency, setFrequency] = React.useState('daily');
+  const [frequency, setFrequency] = React.useState("daily");
 
   return (
     <Surface className="py-5">

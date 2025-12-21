@@ -1,15 +1,15 @@
-import { LinearGradient } from 'expo-linear-gradient';
-import { colorKit, useThemeColor } from 'heroui-native';
-import type { PropsWithChildren, ReactElement } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { LinearGradient } from "expo-linear-gradient";
+import { colorKit, useThemeColor } from "heroui-native";
+import type { PropsWithChildren, ReactElement } from "react";
+import { StyleSheet, useWindowDimensions, View } from "react-native";
 import Animated, {
   interpolate,
   useAnimatedRef,
   useAnimatedStyle,
   useScrollOffset,
-} from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { withUniwind } from 'uniwind';
+} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { withUniwind } from "uniwind";
 
 const StyleAnimatedView = withUniwind(Animated.View);
 
@@ -29,7 +29,7 @@ export default function ParallaxScrollView({
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
 
-  const themeColorBackground = useThemeColor('background');
+  const themeColorBackground = useThemeColor("background");
 
   const headerHeight = height * 0.6;
 
@@ -38,21 +38,21 @@ export default function ParallaxScrollView({
       opacity: interpolate(
         scrollOffset.get(),
         [-headerHeight, 0, headerHeight / 2],
-        [1, 1, 0]
+        [1, 1, 0],
       ),
       transform: [
         {
           translateY: interpolate(
             scrollOffset.get(),
             [-headerHeight, 0, headerHeight],
-            [-headerHeight / 2, 0, headerHeight * 0.75]
+            [-headerHeight / 2, 0, headerHeight * 0.75],
           ),
         },
         {
           scale: interpolate(
             scrollOffset.get(),
             [-headerHeight, 0, headerHeight],
-            [2, 1, 1]
+            [2, 1, 1],
           ),
         },
       ],
@@ -89,11 +89,11 @@ export default function ParallaxScrollView({
 
 const styles = StyleSheet.create({
   gradient: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
     height: 200,
-    pointerEvents: 'none',
+    pointerEvents: "none",
   },
 });

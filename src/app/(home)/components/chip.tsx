@@ -1,11 +1,11 @@
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Chip } from 'heroui-native';
-import { StyleSheet, View } from 'react-native';
-import { withUniwind } from 'uniwind';
-import { AppText } from '../../../components/app-text';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { Chip } from "heroui-native";
+import { StyleSheet, View } from "react-native";
+import { withUniwind } from "uniwind";
+import { AppText } from "../../../components/app-text";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
 
 const StyledIonicons = withUniwind(Ionicons);
 
@@ -266,7 +266,7 @@ const CustomStylingContent = () => {
 
         <Chip>
           <LinearGradient
-            colors={['#ec4899', '#8b5cf6']}
+            colors={["#ec4899", "#8b5cf6"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={StyleSheet.absoluteFill}
@@ -276,7 +276,7 @@ const CustomStylingContent = () => {
 
         <Chip size="lg">
           <LinearGradient
-            colors={['#10b981', '#3b82f6']}
+            colors={["#10b981", "#3b82f6"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={StyleSheet.absoluteFill}
@@ -286,7 +286,7 @@ const CustomStylingContent = () => {
 
         <Chip>
           <LinearGradient
-            colors={['#f59e0b', '#ef4444']}
+            colors={["#f59e0b", "#ef4444"]}
             start={{ x: 0, y: 0.5 }}
             end={{ x: 1, y: 0.5 }}
             style={StyleSheet.absoluteFill}
@@ -302,48 +302,48 @@ const CustomStylingContent = () => {
 
 const CHIP_VARIANTS: UsageVariant[] = [
   {
-    value: 'sizes',
-    label: 'Sizes',
+    value: "sizes",
+    label: "Sizes",
     content: <SizesContent />,
   },
   {
-    value: 'variants',
-    label: 'Variants',
+    value: "variants",
+    label: "Variants",
     content: <VariantsContent />,
   },
   {
-    value: 'primary-variant-colors',
-    label: 'Primary variant colors',
+    value: "primary-variant-colors",
+    label: "Primary variant colors",
     content: <PrimaryVariantColorsContent />,
   },
   {
-    value: 'secondary-variant-colors',
-    label: 'Secondary variant colors',
+    value: "secondary-variant-colors",
+    label: "Secondary variant colors",
     content: <SecondaryVariantColorsContent />,
   },
   {
-    value: 'tertiary-variant-colors',
-    label: 'Tertiary variant colors',
+    value: "tertiary-variant-colors",
+    label: "Tertiary variant colors",
     content: <TertiaryVariantColorsContent />,
   },
   {
-    value: 'soft-variant-colors',
-    label: 'Soft variant colors',
+    value: "soft-variant-colors",
+    label: "Soft variant colors",
     content: <SoftVariantColorsContent />,
   },
   {
-    value: 'with-start-content',
-    label: 'With start content',
+    value: "with-start-content",
+    label: "With start content",
     content: <WithStartContentContent />,
   },
   {
-    value: 'with-end-content',
-    label: 'With end content',
+    value: "with-end-content",
+    label: "With end content",
     content: <WithEndContentContent />,
   },
   {
-    value: 'custom-styling',
-    label: 'Custom styling',
+    value: "custom-styling",
+    label: "Custom styling",
     content: <CustomStylingContent />,
   },
 ];

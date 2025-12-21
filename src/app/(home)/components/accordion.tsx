@@ -1,18 +1,18 @@
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { Accordion, PressableFeedback, useAccordionItem } from 'heroui-native';
-import { View } from 'react-native';
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Accordion, PressableFeedback, useAccordionItem } from "heroui-native";
+import { View } from "react-native";
 import Animated, {
   Easing,
   FadeInLeft,
   FadeInRight,
   ZoomIn,
   ZoomOut,
-} from 'react-native-reanimated';
-import { withUniwind } from 'uniwind';
-import { AccordionWithDepthEffect } from '../../../components/accordion/accordion-with-depth-effect';
-import { AppText } from '../../../components/app-text';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
+} from "react-native-reanimated";
+import { withUniwind } from "uniwind";
+import { AccordionWithDepthEffect } from "../../../components/accordion/accordion-with-depth-effect";
+import { AppText } from "../../../components/app-text";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
 
 const StyledIonicons = withUniwind(Ionicons);
 const StyledMaterialIcons = withUniwind(MaterialIcons);
@@ -20,10 +20,10 @@ const StyledMaterialIcons = withUniwind(MaterialIcons);
 const ICON_SIZE = 16;
 
 const CUSTOM_INDICATOR_ENTERING = ZoomIn.duration(200).easing(
-  Easing.inOut(Easing.ease)
+  Easing.inOut(Easing.ease),
 );
 const CUSTOM_INDICATOR_EXITING = ZoomOut.duration(200).easing(
-  Easing.inOut(Easing.ease)
+  Easing.inOut(Easing.ease),
 );
 
 const CustomIndicator = () => {
@@ -56,8 +56,8 @@ const CustomIndicator = () => {
 
 const accordionData = [
   {
-    id: '1',
-    title: 'How do I place an order?',
+    id: "1",
+    title: "How do I place an order?",
     icon: (
       <StyledIonicons
         name="bag-outline"
@@ -66,11 +66,11 @@ const accordionData = [
       />
     ),
     content:
-      'Lorem ipsum dolor sit amet consectetur. Netus nunc mauris risus consequat. Libero placerat dignissim consectetur nisl.',
+      "Lorem ipsum dolor sit amet consectetur. Netus nunc mauris risus consequat. Libero placerat dignissim consectetur nisl.",
   },
   {
-    id: '2',
-    title: 'Can I modify or cancel my order?',
+    id: "2",
+    title: "Can I modify or cancel my order?",
     icon: (
       <StyledIonicons
         name="receipt-outline"
@@ -79,11 +79,11 @@ const accordionData = [
       />
     ),
     content:
-      'Lorem ipsum dolor sit amet consectetur. Netus nunc mauris risus consequat. Libero placerat dignissim consectetur nisl. Ornare imperdiet amet lorem adipiscing.',
+      "Lorem ipsum dolor sit amet consectetur. Netus nunc mauris risus consequat. Libero placerat dignissim consectetur nisl. Ornare imperdiet amet lorem adipiscing.",
   },
   {
-    id: '3',
-    title: 'How much does shipping cost?',
+    id: "3",
+    title: "How much does shipping cost?",
     icon: (
       <StyledMaterialIcons
         name="inventory-2"
@@ -92,11 +92,11 @@ const accordionData = [
       />
     ),
     content:
-      'Lorem ipsum dolor sit amet consectetur. Netus nunc mauris risus consequat.',
+      "Lorem ipsum dolor sit amet consectetur. Netus nunc mauris risus consequat.",
   },
   {
-    id: '4',
-    title: 'Do you ship internationally?',
+    id: "4",
+    title: "Do you ship internationally?",
     icon: (
       <StyledIonicons
         name="globe-outline"
@@ -105,16 +105,16 @@ const accordionData = [
       />
     ),
     content:
-      'Lorem ipsum dolor sit amet consectetur. Netus nunc mauris risus consequat. Libero placerat dignissim consectetur nisl. Ornare imperdiet amet lorem adipiscing.',
+      "Lorem ipsum dolor sit amet consectetur. Netus nunc mauris risus consequat. Libero placerat dignissim consectetur nisl. Ornare imperdiet amet lorem adipiscing.",
   },
 ];
 
 // ------------------------------------------------------------------------------
 
 const classNames = {
-  triggerContentContainer: 'flex-row items-center flex-1 gap-3',
-  triggerTitle: 'text-foreground text-base flex-1',
-  contentText: 'text-muted text-base/relaxed px-[28px]',
+  triggerContentContainer: "flex-row items-center flex-1 gap-3",
+  triggerTitle: "text-foreground text-base flex-1",
+  contentText: "text-muted text-base/relaxed px-[28px]",
 };
 
 // ------------------------------------------------------------------------------
@@ -187,7 +187,7 @@ const MultipleSelectionContent = () => {
       <Accordion
         selectionMode="multiple"
         variant="surface"
-        defaultValue={['1', '3']}
+        defaultValue={["1", "3"]}
         className="w-full"
       >
         {accordionData.slice(0, 3).map((item) => (
@@ -332,38 +332,38 @@ const WithDepthEffectContent = () => {
 
 const ACCORDION_VARIANTS: UsageVariant[] = [
   {
-    value: 'default-variant',
-    label: 'Default variant',
+    value: "default-variant",
+    label: "Default variant",
     content: <DefaultVariantContent />,
   },
   {
-    value: 'surface-variant',
-    label: 'Surface variant',
+    value: "surface-variant",
+    label: "Surface variant",
     content: <SurfaceVariantContent />,
   },
   {
-    value: 'multiple-selection',
-    label: 'Multiple selection',
+    value: "multiple-selection",
+    label: "Multiple selection",
     content: <MultipleSelectionContent />,
   },
   {
-    value: 'without-dividers',
-    label: 'Without dividers',
+    value: "without-dividers",
+    label: "Without dividers",
     content: <WithoutDividersContent />,
   },
   {
-    value: 'custom-indicator',
-    label: 'Custom indicator',
+    value: "custom-indicator",
+    label: "Custom indicator",
     content: <CustomIndicatorContent />,
   },
   {
-    value: 'custom-entering-animation',
-    label: 'Custom entering animation',
+    value: "custom-entering-animation",
+    label: "Custom entering animation",
     content: <CustomEnteringAnimationContent />,
   },
   {
-    value: 'with-depth-effect',
-    label: 'With depth effect',
+    value: "with-depth-effect",
+    label: "With depth effect",
     content: <WithDepthEffectContent />,
   },
 ];

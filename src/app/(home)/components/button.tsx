@@ -1,13 +1,13 @@
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Button, cn, Spinner, useThemeColor } from 'heroui-native';
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { FadeIn, LinearTransition } from 'react-native-reanimated';
-import { withUniwind } from 'uniwind';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
-import { useAppTheme } from '../../../contexts/app-theme-context';
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { Button, cn, Spinner, useThemeColor } from "heroui-native";
+import React from "react";
+import { StyleSheet, View } from "react-native";
+import { FadeIn, LinearTransition } from "react-native-reanimated";
+import { withUniwind } from "uniwind";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
+import { useAppTheme } from "../../../contexts/app-theme-context";
 
 const StyledIonicons = withUniwind(Ionicons);
 
@@ -47,7 +47,7 @@ const VariantsContent = () => {
 // ------------------------------------------------------------------------------
 
 const DisabledStateContent = () => {
-  const themeColorMuted = useThemeColor('muted');
+  const themeColorMuted = useThemeColor("muted");
 
   return (
     <View className="flex-1">
@@ -207,7 +207,7 @@ const CustomStylingContent = () => {
             animation={{
               highlight: {
                 backgroundColor: {
-                  value: '#c084fc',
+                  value: "#c084fc",
                 },
                 opacity: {
                   value: [0, 1],
@@ -225,7 +225,7 @@ const CustomStylingContent = () => {
             animation={{
               highlight: {
                 backgroundColor: {
-                  value: '#ec4899',
+                  value: "#ec4899",
                 },
                 opacity: {
                   value: [0, 0.25],
@@ -234,7 +234,7 @@ const CustomStylingContent = () => {
             }}
           >
             <LinearGradient
-              colors={['#0d9488', '#ec4899']}
+              colors={["#0d9488", "#ec4899"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={StyleSheet.absoluteFill}
@@ -245,20 +245,20 @@ const CustomStylingContent = () => {
           </Button>
           <Button
             className={cn(
-              'bg-neutral-950 rounded-none',
-              isDark && 'bg-neutral-50'
+              "bg-neutral-950 rounded-none",
+              isDark && "bg-neutral-50",
             )}
             animation={{
-              highlight: { backgroundColor: { value: 'transparent' } },
+              highlight: { backgroundColor: { value: "transparent" } },
             }}
           >
             <StyledIonicons
               name="cart-outline"
               size={18}
-              className={cn('text-neutral-50', isDark && 'text-neutral-950')}
+              className={cn("text-neutral-50", isDark && "text-neutral-950")}
             />
             <Button.Label
-              className={cn('text-neutral-50', isDark && 'text-neutral-950')}
+              className={cn("text-neutral-50", isDark && "text-neutral-950")}
             >
               Add to Cart
             </Button.Label>
@@ -291,7 +291,7 @@ const LayoutTransitionsContent = () => {
           {isDownloading ? (
             <Spinner entering={FadeIn.delay(50)} color="white" />
           ) : (
-            'Download now'
+            "Download now"
           )}
         </Button>
       </View>
@@ -303,43 +303,43 @@ const LayoutTransitionsContent = () => {
 
 const BUTTON_VARIANTS: UsageVariant[] = [
   {
-    value: 'sizes',
-    label: 'Sizes',
+    value: "sizes",
+    label: "Sizes",
     content: <SizesContent />,
   },
   {
-    value: 'variants',
-    label: 'Variants',
+    value: "variants",
+    label: "Variants",
     content: <VariantsContent />,
   },
   {
-    value: 'disabled-state',
-    label: 'Disabled state',
+    value: "disabled-state",
+    label: "Disabled state",
     content: <DisabledStateContent />,
   },
   {
-    value: 'width-alignment',
-    label: 'Width/alignment control',
+    value: "width-alignment",
+    label: "Width/alignment control",
     content: <WidthAlignmentContent />,
   },
   {
-    value: 'with-icons',
-    label: 'With icons',
+    value: "with-icons",
+    label: "With icons",
     content: <WithIconsContent />,
   },
   {
-    value: 'icon-only',
-    label: 'Icon only',
+    value: "icon-only",
+    label: "Icon only",
     content: <IconOnlyContent />,
   },
   {
-    value: 'custom-styling',
-    label: 'Custom styling',
+    value: "custom-styling",
+    label: "Custom styling",
     content: <CustomStylingContent />,
   },
   {
-    value: 'layout-transitions',
-    label: 'Layout transitions demo',
+    value: "layout-transitions",
+    label: "Layout transitions demo",
     content: <LayoutTransitionsContent />,
   },
 ];

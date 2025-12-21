@@ -1,8 +1,8 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { useThemeColor } from 'heroui-native';
-import { type FC } from 'react';
-import { TextInput, View } from 'react-native';
-import { withUniwind } from 'uniwind';
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useThemeColor } from "heroui-native";
+import { type FC } from "react";
+import { TextInput, View } from "react-native";
+import { withUniwind } from "uniwind";
 
 const StyledFontAwesome = withUniwind(FontAwesome);
 
@@ -15,9 +15,9 @@ interface SearchBarProps {
 export const SearchBar: FC<SearchBarProps> = ({
   value,
   onChangeText,
-  placeholder = 'Search...',
+  placeholder = "Search...",
 }) => {
-  const themeColorMuted = useThemeColor('muted');
+  const themeColorMuted = useThemeColor("muted");
 
   return (
     <View className="flex-row items-center gap-2 rounded-xl bg-surface-secondary h-12 px-3 mb-2">

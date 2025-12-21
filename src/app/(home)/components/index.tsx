@@ -1,12 +1,12 @@
-import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
-import { usePathname, useRouter } from 'expo-router';
-import { Accordion, useToast } from 'heroui-native';
-import { useEffect } from 'react';
-import { Platform, View } from 'react-native';
-import { withUniwind } from 'uniwind';
-import { AppText } from '../../../components/app-text';
-import { ScreenScrollView } from '../../../components/screen-scroll-view';
+import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import { usePathname, useRouter } from "expo-router";
+import { Accordion, useToast } from "heroui-native";
+import { useEffect } from "react";
+import { Platform, View } from "react-native";
+import { withUniwind } from "uniwind";
+import { AppText } from "../../../components/app-text";
+import { ScreenScrollView } from "../../../components/screen-scroll-view";
 
 const StyledIonicons = withUniwind(Ionicons);
 
@@ -17,92 +17,92 @@ type Component = {
 
 const components: Component[] = [
   {
-    title: 'Accordion',
-    path: 'accordion',
+    title: "Accordion",
+    path: "accordion",
   },
   {
-    title: 'Avatar',
-    path: 'avatar',
+    title: "Avatar",
+    path: "avatar",
   },
   {
-    title: 'Button',
-    path: 'button',
+    title: "Button",
+    path: "button",
   },
   {
-    title: 'Card',
-    path: 'card',
+    title: "Card",
+    path: "card",
   },
   {
-    title: 'Checkbox',
-    path: 'checkbox',
+    title: "Checkbox",
+    path: "checkbox",
   },
   {
-    title: 'Chip',
-    path: 'chip',
+    title: "Chip",
+    path: "chip",
   },
   {
-    title: 'Dialog',
-    path: 'dialog',
+    title: "Dialog",
+    path: "dialog",
   },
   {
-    title: 'Divider',
-    path: 'divider',
+    title: "Divider",
+    path: "divider",
   },
   {
-    title: 'Error View',
-    path: 'error-view',
+    title: "Error View",
+    path: "error-view",
   },
   {
-    title: 'Form Field',
-    path: 'form-field',
+    title: "Form Field",
+    path: "form-field",
   },
   {
-    title: 'Popover',
-    path: 'popover',
+    title: "Popover",
+    path: "popover",
   },
   {
-    title: 'Pressable Feedback',
-    path: 'pressable-feedback',
+    title: "Pressable Feedback",
+    path: "pressable-feedback",
   },
   {
-    title: 'Radio Group',
-    path: 'radio-group',
+    title: "Radio Group",
+    path: "radio-group",
   },
   {
-    title: 'Scroll Shadow',
-    path: 'scroll-shadow',
+    title: "Scroll Shadow",
+    path: "scroll-shadow",
   },
   {
-    title: 'Select',
-    path: 'select',
+    title: "Select",
+    path: "select",
   },
   {
-    title: 'Skeleton',
-    path: 'skeleton',
+    title: "Skeleton",
+    path: "skeleton",
   },
   {
-    title: 'Spinner',
-    path: 'spinner',
+    title: "Spinner",
+    path: "spinner",
   },
   {
-    title: 'Surface',
-    path: 'surface',
+    title: "Surface",
+    path: "surface",
   },
   {
-    title: 'Switch',
-    path: 'switch',
+    title: "Switch",
+    path: "switch",
   },
   {
-    title: 'Tabs',
-    path: 'tabs',
+    title: "Tabs",
+    path: "tabs",
   },
   {
-    title: 'Text Field',
-    path: 'text-field',
+    title: "Text Field",
+    path: "text-field",
   },
   {
-    title: 'Toast',
-    path: 'toast',
+    title: "Toast",
+    path: "toast",
   },
 ];
 
@@ -113,8 +113,8 @@ export default function App() {
   const { toast, isToastVisible } = useToast();
 
   useEffect(() => {
-    if (isToastVisible && pathname === '/components') {
-      toast.hide('all');
+    if (isToastVisible && pathname === "/components") {
+      toast.hide("all");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isToastVisible, pathname]);
@@ -127,7 +127,7 @@ export default function App() {
           <Accordion.Item key={item.title} value={item.title}>
             <Accordion.Trigger
               onPress={() => {
-                if (Platform.OS === 'ios') {
+                if (Platform.OS === "ios") {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
                 router.push(`/components/${item.path}`);

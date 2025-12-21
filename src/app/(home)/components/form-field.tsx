@@ -1,10 +1,10 @@
-import { Checkbox, Divider, FormField, Surface } from 'heroui-native';
-import React from 'react';
-import { View } from 'react-native';
-import Animated, { LinearTransition } from 'react-native-reanimated';
-import { withUniwind } from 'uniwind';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
+import { Checkbox, Divider, FormField, Surface } from "heroui-native";
+import React from "react";
+import { View } from "react-native";
+import Animated, { LinearTransition } from "react-native-reanimated";
+import { withUniwind } from "uniwind";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
 
 const StyleAnimatedView = withUniwind(Animated.View);
 interface SwitchFieldProps {
@@ -41,16 +41,16 @@ const SwitchFormFieldSetContent = () => {
     { title: string; description: string }
   > = {
     notifications: {
-      title: 'Enable notifications',
-      description: 'Receive push notifications about your account activity',
+      title: "Enable notifications",
+      description: "Receive push notifications about your account activity",
     },
     darkMode: {
-      title: 'Dark mode',
-      description: 'Switch between light and dark theme',
+      title: "Dark mode",
+      description: "Switch between light and dark theme",
     },
     autoUpdate: {
-      title: 'Auto-update',
-      description: 'Automatically download and install updates',
+      title: "Auto-update",
+      description: "Automatically download and install updates",
     },
   };
 
@@ -124,16 +124,16 @@ const CheckboxFormFieldSetContent = () => {
     { title: string; description: string }
   > = {
     newsletter: {
-      title: 'Subscribe to newsletter',
-      description: 'Get weekly updates about new features and tips',
+      title: "Subscribe to newsletter",
+      description: "Get weekly updates about new features and tips",
     },
     marketing: {
-      title: 'Marketing communications',
-      description: 'Receive promotional emails and special offers',
+      title: "Marketing communications",
+      description: "Receive promotional emails and special offers",
     },
     terms: {
-      title: 'Accept terms and conditions',
-      description: 'Agree to our Terms of Service and Privacy Policy',
+      title: "Accept terms and conditions",
+      description: "Agree to our Terms of Service and Privacy Policy",
     },
   };
 
@@ -199,14 +199,14 @@ const InlineLayoutCompactContent = () => {
   });
 
   const filterLabels: Record<keyof typeof filters, string> = {
-    freeShipping: 'Free Shipping',
-    inStock: 'In Stock',
-    onSale: 'On Sale',
-    newArrivals: 'New Arrivals',
-    featured: 'Featured',
-    topRated: 'Top Rated',
-    clearance: 'Clearance',
-    bestSeller: 'Best Seller',
+    freeShipping: "Free Shipping",
+    inStock: "In Stock",
+    onSale: "On Sale",
+    newArrivals: "New Arrivals",
+    featured: "Featured",
+    topRated: "Top Rated",
+    clearance: "Clearance",
+    bestSeller: "Best Seller",
   };
 
   const handleFilterChange =
@@ -359,28 +359,28 @@ const ValidationErrorStatesContent = () => {
 
 const FORM_FIELD_VARIANTS: UsageVariant[] = [
   {
-    value: 'switch-form-field-set',
-    label: 'Switch FormField set',
+    value: "switch-form-field-set",
+    label: "Switch FormField set",
     content: <SwitchFormFieldSetContent />,
   },
   {
-    value: 'checkbox-form-field-set',
-    label: 'Checkbox FormField set',
+    value: "checkbox-form-field-set",
+    label: "Checkbox FormField set",
     content: <CheckboxFormFieldSetContent />,
   },
   {
-    value: 'inline-layout-compact',
-    label: 'Inline compact layout',
+    value: "inline-layout-compact",
+    label: "Inline compact layout",
     content: <InlineLayoutCompactContent />,
   },
   {
-    value: 'disabled-state',
-    label: 'Disabled state',
+    value: "disabled-state",
+    label: "Disabled state",
     content: <DisabledStateContent />,
   },
   {
-    value: 'validation-error-states',
-    label: 'Validation & error states',
+    value: "validation-error-states",
+    label: "Validation & error states",
     content: <ValidationErrorStatesContent />,
   },
 ];

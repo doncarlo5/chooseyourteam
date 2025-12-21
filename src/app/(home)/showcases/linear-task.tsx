@@ -1,18 +1,18 @@
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { useRouter } from 'expo-router';
-import { Avatar, Card, Divider } from 'heroui-native';
-import { Pressable, View } from 'react-native';
-import { KeyboardController } from 'react-native-keyboard-controller';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { withUniwind } from 'uniwind';
-import { AppText } from '../../../components/app-text';
-import { Assignee } from '../../../components/showcases/linear-task/dialogs/assignee';
-import { Labels } from '../../../components/showcases/linear-task/dialogs/labels';
-import { Priority } from '../../../components/showcases/linear-task/dialogs/priority';
-import { Project } from '../../../components/showcases/linear-task/dialogs/project';
-import { Status } from '../../../components/showcases/linear-task/dialogs/status';
-import { simulatePress } from '../../../helpers/utils/simulate-press';
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { useRouter } from "expo-router";
+import { Avatar, Card, Divider } from "heroui-native";
+import { Pressable, View } from "react-native";
+import { KeyboardController } from "react-native-keyboard-controller";
+import Animated, { FadeIn } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { withUniwind } from "uniwind";
+import { AppText } from "../../../components/app-text";
+import { Assignee } from "../../../components/showcases/linear-task/dialogs/assignee";
+import { Labels } from "../../../components/showcases/linear-task/dialogs/labels";
+import { Priority } from "../../../components/showcases/linear-task/dialogs/priority";
+import { Project } from "../../../components/showcases/linear-task/dialogs/project";
+import { Status } from "../../../components/showcases/linear-task/dialogs/status";
+import { simulatePress } from "../../../helpers/utils/simulate-press";
 
 const StyledMaterialCommunityIcons = withUniwind(MaterialCommunityIcons);
 
@@ -107,7 +107,7 @@ export default function LinearTaskScreen() {
               <Avatar alt="volo" className="size-6 bg-purple-500">
                 <Avatar.Image
                   source={{
-                    uri: 'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/volo-avatar.png',
+                    uri: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/volo-avatar.png",
                   }}
                 />
                 <Avatar.Fallback>
@@ -119,7 +119,7 @@ export default function LinearTaskScreen() {
               <Avatar alt="Junior" className="-ml-3 size-6 bg-sky-500">
                 <Avatar.Image
                   source={{
-                    uri: 'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/junior-avatar.jpg',
+                    uri: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/junior-avatar.jpg",
                   }}
                 />
                 <Avatar.Fallback>
@@ -142,7 +142,7 @@ export default function LinearTaskScreen() {
               <AppText className="text-base text-foreground/60">
                 <AppText className="font-semibold text-foreground">
                   Junior
-                </AppText>{' '}
+                </AppText>{" "}
                 created the issue
               </AppText>
               <AppText className="text-sm text-foreground/35 mt-1">
@@ -160,12 +160,12 @@ export default function LinearTaskScreen() {
               <AppText className="text-base text-foreground/60">
                 <AppText className="font-semibold text-foreground">
                   volo
-                </AppText>{' '}
-                changed status from{' '}
+                </AppText>{" "}
+                changed status from{" "}
                 <AppText className="font-semibold text-foreground">
                   Todo
-                </AppText>{' '}
-                to{' '}
+                </AppText>{" "}
+                to{" "}
                 <AppText className="font-semibold text-foreground">
                   In Progress
                 </AppText>
@@ -182,12 +182,12 @@ export default function LinearTaskScreen() {
               <AppText className="text-base text-foreground/60">
                 <AppText className="font-semibold text-foreground">
                   volo
-                </AppText>{' '}
-                changed status from{' '}
+                </AppText>{" "}
+                changed status from{" "}
                 <AppText className="font-semibold text-foreground">
                   In Progress
-                </AppText>{' '}
-                to{' '}
+                </AppText>{" "}
+                to{" "}
                 <AppText className="font-semibold text-foreground">
                   In Review
                 </AppText>
@@ -203,12 +203,12 @@ export default function LinearTaskScreen() {
               <AppText className="text-base text-foreground/60">
                 <AppText className="font-semibold text-foreground">
                   Junior
-                </AppText>{' '}
-                changed status from{' '}
+                </AppText>{" "}
+                changed status from{" "}
                 <AppText className="font-semibold text-foreground">
                   In Review
-                </AppText>{' '}
-                to{' '}
+                </AppText>{" "}
+                to{" "}
                 <AppText className="font-semibold text-foreground">
                   Done
                 </AppText>

@@ -1,12 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
-import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Avatar, cn } from 'heroui-native';
-import { StyleSheet, Text, View } from 'react-native';
-import { withUniwind } from 'uniwind';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
+import { Avatar, cn } from "heroui-native";
+import { StyleSheet, Text, View } from "react-native";
+import { withUniwind } from "uniwind";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
 
 const StyledIonicons = withUniwind(Ionicons);
 
@@ -17,7 +17,7 @@ const SizesContent = () => {
         <Avatar size="sm" alt="Small Avatar">
           <Avatar.Image
             source={{
-              uri: 'https://img.heroui.chat/image/avatar?w=400&h=400&u=3',
+              uri: "https://img.heroui.chat/image/avatar?w=400&h=400&u=3",
             }}
           />
           <Avatar.Fallback />
@@ -25,7 +25,7 @@ const SizesContent = () => {
         <Avatar size="md" alt="Medium Avatar">
           <Avatar.Image
             source={{
-              uri: 'https://img.heroui.chat/image/avatar?w=400&h=400&u=5',
+              uri: "https://img.heroui.chat/image/avatar?w=400&h=400&u=5",
             }}
           />
           <Avatar.Fallback>MD</Avatar.Fallback>
@@ -33,7 +33,7 @@ const SizesContent = () => {
         <Avatar size="lg" alt="Large Avatar">
           <Avatar.Image
             source={{
-              uri: 'https://img.heroui.chat/image/avatar?w=400&h=400&u=20',
+              uri: "https://img.heroui.chat/image/avatar?w=400&h=400&u=20",
             }}
           />
           <Avatar.Fallback>LG</Avatar.Fallback>
@@ -179,15 +179,15 @@ const CustomFallbackContent = () => {
         <Avatar alt="Custom">
           <Avatar.Fallback>
             <LinearGradient
-              colors={['#ec4899', '#a855f7']}
+              colors={["#ec4899", "#a855f7"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={{
                 flex: 1,
-                width: '100%',
-                height: '100%',
-                alignItems: 'center',
-                justifyContent: 'center',
+                width: "100%",
+                height: "100%",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
               <Text className="text-white font-medium">GB</Text>
@@ -213,44 +213,44 @@ const AvatarGroupContent = () => {
         {[
           {
             id: 1,
-            image: 'https://img.heroui.chat/image/avatar?w=400&h=400&u=3',
-            name: 'John Doe',
+            image: "https://img.heroui.chat/image/avatar?w=400&h=400&u=3",
+            name: "John Doe",
           },
           {
             id: 2,
-            image: 'https://img.heroui.chat/image/avatar?w=400&h=400&u=5',
-            name: 'Kate Wilson',
+            image: "https://img.heroui.chat/image/avatar?w=400&h=400&u=5",
+            name: "Kate Wilson",
           },
           {
             id: 3,
-            image: 'https://img.heroui.chat/image/avatar?w=400&h=400&u=20',
-            name: 'Emily Chen',
+            image: "https://img.heroui.chat/image/avatar?w=400&h=400&u=20",
+            name: "Emily Chen",
           },
           {
             id: 4,
-            image: 'https://img.heroui.chat/image/avatar?w=400&h=400&u=23',
-            name: 'Michael Brown',
+            image: "https://img.heroui.chat/image/avatar?w=400&h=400&u=23",
+            name: "Michael Brown",
           },
         ].map((user, index) => (
           <Avatar
             key={user.id}
             className={cn(
-              'border-background border-[2px]',
-              index !== 0 && '-ml-3'
+              "border-background border-[2px]",
+              index !== 0 && "-ml-3",
             )}
             alt={user.name}
           >
             <Avatar.Image source={{ uri: user.image }} />
             <Avatar.Fallback
               classNames={{
-                container: 'bg-warning',
-                text: 'text-warning-foreground',
+                container: "bg-warning",
+                text: "text-warning-foreground",
               }}
             >
               {user.name
-                .split(' ')
+                .split(" ")
                 .map((n) => n[0])
-                .join('')}
+                .join("")}
             </Avatar.Fallback>
           </Avatar>
         ))}
@@ -268,7 +268,7 @@ const CustomStylesContent = () => {
         <Avatar className="h-16 w-16" alt="Extra Large">
           <Avatar.Image
             source={{
-              uri: 'https://img.heroui.chat/image/avatar?w=400&h=400&u=3',
+              uri: "https://img.heroui.chat/image/avatar?w=400&h=400&u=3",
             }}
           />
           <Avatar.Fallback>XL</Avatar.Fallback>
@@ -276,14 +276,14 @@ const CustomStylesContent = () => {
         <Avatar className="rounded-lg" alt="Square Avatar">
           <Avatar.Image
             source={{
-              uri: 'https://img.heroui.chat/image/avatar?w=400&h=400&u=5',
+              uri: "https://img.heroui.chat/image/avatar?w=400&h=400&u=5",
             }}
           />
           <Avatar.Fallback className="rounded-lg">SQ</Avatar.Fallback>
         </Avatar>
         <Avatar className="p-[2.5px]" size="lg" alt="Gradient Border">
           <LinearGradient
-            colors={['#ec4899', '#f59e0b']}
+            colors={["#ec4899", "#f59e0b"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={StyleSheet.absoluteFill}
@@ -291,7 +291,7 @@ const CustomStylesContent = () => {
           <Avatar.Image
             className="border-[0.5px] border-background rounded-full"
             source={{
-              uri: 'https://img.heroui.chat/image/avatar?w=400&h=400&u=20',
+              uri: "https://img.heroui.chat/image/avatar?w=400&h=400&u=20",
             }}
           />
           <Avatar.Fallback className="border-none">GB</Avatar.Fallback>
@@ -300,12 +300,12 @@ const CustomStylesContent = () => {
           <Avatar size="lg" alt="Online User">
             <Avatar.Image
               source={{
-                uri: 'https://img.heroui.chat/image/avatar?w=400&h=400&u=23',
+                uri: "https://img.heroui.chat/image/avatar?w=400&h=400&u=23",
               }}
               asChild
             >
               <Image
-                style={{ width: '100%', height: '100%' }}
+                style={{ width: "100%", height: "100%" }}
                 contentFit="cover"
               />
             </Avatar.Image>
@@ -322,43 +322,43 @@ const CustomStylesContent = () => {
 
 const AVATAR_VARIANTS: UsageVariant[] = [
   {
-    value: 'sizes',
-    label: 'Sizes',
+    value: "sizes",
+    label: "Sizes",
     content: <SizesContent />,
   },
   {
-    value: 'default-text-fallback',
-    label: 'Default text fallback',
+    value: "default-text-fallback",
+    label: "Default text fallback",
     content: <DefaultTextFallbackContent />,
   },
   {
-    value: 'soft-text-fallback',
-    label: 'Soft text fallback',
+    value: "soft-text-fallback",
+    label: "Soft text fallback",
     content: <SoftTextFallbackContent />,
   },
   {
-    value: 'default-icon-fallback',
-    label: 'Default icon fallback',
+    value: "default-icon-fallback",
+    label: "Default icon fallback",
     content: <DefaultIconFallbackContent />,
   },
   {
-    value: 'soft-icon-fallback',
-    label: 'Soft icon fallback',
+    value: "soft-icon-fallback",
+    label: "Soft icon fallback",
     content: <SoftIconFallbackContent />,
   },
   {
-    value: 'custom-fallback',
-    label: 'Custom fallback',
+    value: "custom-fallback",
+    label: "Custom fallback",
     content: <CustomFallbackContent />,
   },
   {
-    value: 'avatar-group',
-    label: 'Avatar group',
+    value: "avatar-group",
+    label: "Avatar group",
     content: <AvatarGroupContent />,
   },
   {
-    value: 'custom-styles',
-    label: 'Custom styles',
+    value: "custom-styles",
+    label: "Custom styles",
     content: <CustomStylesContent />,
   },
 ];

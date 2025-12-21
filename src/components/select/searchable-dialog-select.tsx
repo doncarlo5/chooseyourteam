@@ -1,17 +1,17 @@
-import { LinearGradient } from 'expo-linear-gradient';
-import { Button, cn, ScrollShadow, Select, useThemeColor } from 'heroui-native';
-import { useState } from 'react';
-import { TextInput, useWindowDimensions, View } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
+import { LinearGradient } from "expo-linear-gradient";
+import { Button, cn, ScrollShadow, Select, useThemeColor } from "heroui-native";
+import { useState } from "react";
+import { TextInput, useWindowDimensions, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import {
   KeyboardAvoidingView,
   KeyboardController,
-} from 'react-native-keyboard-controller';
-import { Easing } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAppTheme } from '../../contexts/app-theme-context';
-import { AppText } from '../app-text';
-import { SelectBlurBackdrop } from './select-blur-backdrop';
+} from "react-native-keyboard-controller";
+import { Easing } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAppTheme } from "../../contexts/app-theme-context";
+import { AppText } from "../app-text";
+import { SelectBlurBackdrop } from "./select-blur-backdrop";
 
 KeyboardController.preload();
 
@@ -23,27 +23,27 @@ type CountryOption = {
 };
 
 const COUNTRIES: CountryOption[] = [
-  { value: 'US', label: 'United States', flag: '🇺🇸', code: '+1' },
-  { value: 'GB', label: 'United Kingdom', flag: '🇬🇧', code: '+44' },
-  { value: 'CA', label: 'Canada', flag: '🇨🇦', code: '+1' },
-  { value: 'AU', label: 'Australia', flag: '🇦🇺', code: '+61' },
-  { value: 'DE', label: 'Germany', flag: '🇩🇪', code: '+49' },
-  { value: 'FR', label: 'France', flag: '🇫🇷', code: '+33' },
-  { value: 'JP', label: 'Japan', flag: '🇯🇵', code: '+81' },
-  { value: 'CN', label: 'China', flag: '🇨🇳', code: '+86' },
-  { value: 'IN', label: 'India', flag: '🇮🇳', code: '+91' },
-  { value: 'BR', label: 'Brazil', flag: '🇧🇷', code: '+55' },
+  { value: "US", label: "United States", flag: "🇺🇸", code: "+1" },
+  { value: "GB", label: "United Kingdom", flag: "🇬🇧", code: "+44" },
+  { value: "CA", label: "Canada", flag: "🇨🇦", code: "+1" },
+  { value: "AU", label: "Australia", flag: "🇦🇺", code: "+61" },
+  { value: "DE", label: "Germany", flag: "🇩🇪", code: "+49" },
+  { value: "FR", label: "France", flag: "🇫🇷", code: "+33" },
+  { value: "JP", label: "Japan", flag: "🇯🇵", code: "+81" },
+  { value: "CN", label: "China", flag: "🇨🇳", code: "+86" },
+  { value: "IN", label: "India", flag: "🇮🇳", code: "+91" },
+  { value: "BR", label: "Brazil", flag: "🇧🇷", code: "+55" },
 ];
 
 export function SearchableDialogSelect() {
   const [value, setValue] = useState<CountryOption | undefined>();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { isDark } = useAppTheme();
 
-  const themeColorMuted = useThemeColor('muted');
-  const themeColorOverlay = useThemeColor('overlay');
-  const themeColorSurface = useThemeColor('surface');
+  const themeColorMuted = useThemeColor("muted");
+  const themeColorOverlay = useThemeColor("overlay");
+  const themeColorSurface = useThemeColor("surface");
 
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -52,7 +52,7 @@ export function SearchableDialogSelect() {
   const maxDialogHeight = (height - insetTop) / 2;
 
   const filteredCountries = COUNTRIES.filter((country) =>
-    country.label.toLowerCase().includes(searchQuery.toLowerCase())
+    country.label.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -61,12 +61,12 @@ export function SearchableDialogSelect() {
       onValueChange={(newValue) => {
         const country = COUNTRIES.find((c) => c.value === newValue?.value);
         setValue(country);
-        setSearchQuery('');
+        setSearchQuery("");
       }}
       closeDelay={300}
       animation={{
         exiting: {
-          type: 'timing',
+          type: "timing",
           config: {
             duration: 250,
             easing: Easing.out(Easing.quad),
@@ -93,7 +93,7 @@ export function SearchableDialogSelect() {
         <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={24}>
           <Select.Content
             classNames={{
-              content: cn('gap-2 rounded-3xl', isDark && 'bg-surface'),
+              content: cn("gap-2 rounded-3xl", isDark && "bg-surface"),
             }}
             style={{ marginTop: insetTop, height: maxDialogHeight }}
             presentation="dialog"

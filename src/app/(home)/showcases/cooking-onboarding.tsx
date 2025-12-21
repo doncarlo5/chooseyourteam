@@ -1,13 +1,13 @@
-import Feather from '@expo/vector-icons/Feather';
-import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import Feather from "@expo/vector-icons/Feather";
+import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import {
   colorKit,
   Divider,
   useThemeColor,
   type PopoverTriggerRef,
-} from 'heroui-native';
+} from "heroui-native";
 import {
   useCallback,
   useEffect,
@@ -15,22 +15,22 @@ import {
   useReducer,
   useRef,
   type RefObject,
-} from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { withUniwind } from 'uniwind';
-import BgImage from '../../../../assets/images/pancakes.jpg';
-import { AppText } from '../../../components/app-text';
-import { Ask } from '../../../components/showcases/cooking-onboarding/ask';
-import { Author } from '../../../components/showcases/cooking-onboarding/author';
-import { Cook } from '../../../components/showcases/cooking-onboarding/cook';
-import { Highlights } from '../../../components/showcases/cooking-onboarding/highlights';
-import { Ingridients } from '../../../components/showcases/cooking-onboarding/ingridients';
-import ParallaxScrollView from '../../../components/showcases/cooking-onboarding/parallax-scroll-view';
-import { Plan } from '../../../components/showcases/cooking-onboarding/plan';
-import { Save } from '../../../components/showcases/cooking-onboarding/save';
-import { Share } from '../../../components/showcases/cooking-onboarding/share';
+} from "react";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { withUniwind } from "uniwind";
+import BgImage from "../../../../assets/images/pancakes.jpg";
+import { AppText } from "../../../components/app-text";
+import { Ask } from "../../../components/showcases/cooking-onboarding/ask";
+import { Author } from "../../../components/showcases/cooking-onboarding/author";
+import { Cook } from "../../../components/showcases/cooking-onboarding/cook";
+import { Highlights } from "../../../components/showcases/cooking-onboarding/highlights";
+import { Ingridients } from "../../../components/showcases/cooking-onboarding/ingridients";
+import ParallaxScrollView from "../../../components/showcases/cooking-onboarding/parallax-scroll-view";
+import { Plan } from "../../../components/showcases/cooking-onboarding/plan";
+import { Save } from "../../../components/showcases/cooking-onboarding/save";
+import { Share } from "../../../components/showcases/cooking-onboarding/share";
 
 const StyledAnimatedView = withUniwind(Animated.View);
 const StyledFeather = withUniwind(Feather);
@@ -49,23 +49,23 @@ type OnboardingState = {
 };
 
 type OnboardingAction =
-  | { type: 'START_ONBOARDING' }
-  | { type: 'NEXT_STEP' }
-  | { type: 'COMPLETE_ONBOARDING' }
-  | { type: 'RESET_ONBOARDING' };
+  | { type: "START_ONBOARDING" }
+  | { type: "NEXT_STEP" }
+  | { type: "COMPLETE_ONBOARDING" }
+  | { type: "RESET_ONBOARDING" };
 
 function onboardingReducer(
   state: OnboardingState,
-  action: OnboardingAction
+  action: OnboardingAction,
 ): OnboardingState {
   switch (action.type) {
-    case 'START_ONBOARDING':
+    case "START_ONBOARDING":
       return { ...state, isActive: true, currentStepIndex: 0 };
-    case 'NEXT_STEP':
+    case "NEXT_STEP":
       return { ...state, currentStepIndex: state.currentStepIndex + 1 };
-    case 'COMPLETE_ONBOARDING':
+    case "COMPLETE_ONBOARDING":
       return { ...state, isComplete: true, isActive: false };
-    case 'RESET_ONBOARDING':
+    case "RESET_ONBOARDING":
       return { currentStepIndex: 0, isComplete: false, isActive: false };
     default:
       return state;
@@ -73,7 +73,7 @@ function onboardingReducer(
 }
 
 export default function CookingOnboardingScreen() {
-  const themeColorBackground = useThemeColor('background');
+  const themeColorBackground = useThemeColor("background");
 
   const router = useRouter();
 
@@ -99,11 +99,11 @@ export default function CookingOnboardingScreen() {
       { ref: planTriggerRef, delay: 500 },
       { ref: askTriggerRef, delay: 500 },
     ],
-    []
+    [],
   );
 
   useEffect(() => {
-    dispatch({ type: 'START_ONBOARDING' });
+    dispatch({ type: "START_ONBOARDING" });
   }, []);
 
   useEffect(() => {
@@ -114,7 +114,7 @@ export default function CookingOnboardingScreen() {
     if (!currentStep) {
       const lastStep = onboardingSteps[onboardingState.currentStepIndex - 1];
       lastStep?.ref.current?.close();
-      dispatch({ type: 'COMPLETE_ONBOARDING' });
+      dispatch({ type: "COMPLETE_ONBOARDING" });
       return;
     }
 
@@ -136,7 +136,7 @@ export default function CookingOnboardingScreen() {
 
   const handleOverlayPress = useCallback(() => {
     if (onboardingState.isActive) {
-      dispatch({ type: 'NEXT_STEP' });
+      dispatch({ type: "NEXT_STEP" });
     }
   }, [onboardingState.isActive]);
 
@@ -229,11 +229,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   topGradient: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     height: 300,
-    pointerEvents: 'none',
+    pointerEvents: "none",
   },
 });

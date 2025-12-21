@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 
 /**
  * Shared state store for toast components
@@ -93,7 +93,7 @@ export function useSharedState<T>(key: string, initialValue: T) {
   const setState = useCallback(
     (value: T | ((prev: T) => T)) => {
       const newValue =
-        typeof value === 'function'
+        typeof value === "function"
           ? (value as (prev: T) => T)(sharedStateStore.get(key) as T)
           : value;
 
@@ -104,7 +104,7 @@ export function useSharedState<T>(key: string, initialValue: T) {
         listeners.forEach((listener) => listener(newValue));
       }
     },
-    [key]
+    [key],
   );
 
   /**

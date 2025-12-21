@@ -1,8 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Checkbox, Divider, FormField, Surface } from 'heroui-native';
-import React from 'react';
-import { View } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Checkbox, Divider, FormField, Surface } from "heroui-native";
+import React from "react";
+import { View } from "react-native";
 import Animated, {
   FadeInLeft,
   FadeInRight,
@@ -11,11 +11,11 @@ import Animated, {
   withTiming,
   ZoomIn,
   type SharedValue,
-} from 'react-native-reanimated';
-import { withUniwind } from 'uniwind';
-import { AppText } from '../../../components/app-text';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
+} from "react-native-reanimated";
+import { withUniwind } from "uniwind";
+import { AppText } from "../../../components/app-text";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 const StyleAnimatedView = withUniwind(Animated.View);
@@ -66,16 +66,16 @@ const BasicUsage = () => {
     { title: string; description: string }
   > = {
     newsletter: {
-      title: 'Subscribe to newsletter',
-      description: 'Get weekly updates about new features and tips',
+      title: "Subscribe to newsletter",
+      description: "Get weekly updates about new features and tips",
     },
     marketing: {
-      title: 'Marketing communications',
-      description: 'Receive promotional emails and special offers',
+      title: "Marketing communications",
+      description: "Receive promotional emails and special offers",
     },
     terms: {
-      title: 'Accept terms and conditions',
-      description: 'Agree to our Terms of Service and Privacy Policy',
+      title: "Accept terms and conditions",
+      description: "Agree to our Terms of Service and Privacy Policy",
     },
   };
 
@@ -223,7 +223,7 @@ const CustomStylesContent = () => {
           iconProps={{
             size: 32,
             strokeWidth: 1.5,
-            color: 'blue',
+            color: "blue",
             enterDuration: 350,
             exitDuration: 200,
           }}
@@ -291,18 +291,18 @@ const CustomStylesContent = () => {
 
 const CHECKBOX_VARIANTS: UsageVariant[] = [
   {
-    value: 'basic-usage',
-    label: 'Basic usage',
+    value: "basic-usage",
+    label: "Basic usage",
     content: <BasicUsage />,
   },
   {
-    value: 'states',
-    label: 'States',
+    value: "states",
+    label: "States",
     content: <StatesContent />,
   },
   {
-    value: 'custom-styles',
-    label: 'Custom styles',
+    value: "custom-styles",
+    label: "Custom styles",
     content: <CustomStylesContent />,
   },
 ];

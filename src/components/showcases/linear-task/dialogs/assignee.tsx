@@ -1,18 +1,18 @@
-import Feather from '@expo/vector-icons/Feather';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import * as Haptics from 'expo-haptics';
-import { Avatar, Chip, Dialog, RadioGroup } from 'heroui-native';
-import { useMemo, useState, type FC } from 'react';
-import { Platform, useWindowDimensions, View } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { withUniwind } from 'uniwind';
-import { AppText } from '../../../app-text';
-import { DialogBlurBackdrop } from '../../../dialog-blur-backdrop';
-import { DialogHeader } from '../dialog-header';
-import { SearchBar } from '../search-bar';
+import Feather from "@expo/vector-icons/Feather";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import * as Haptics from "expo-haptics";
+import { Avatar, Chip, Dialog, RadioGroup } from "heroui-native";
+import { useMemo, useState, type FC } from "react";
+import { Platform, useWindowDimensions, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
+import Animated, { FadeIn } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { withUniwind } from "uniwind";
+import { AppText } from "../../../app-text";
+import { DialogBlurBackdrop } from "../../../dialog-blur-backdrop";
+import { DialogHeader } from "../dialog-header";
+import { SearchBar } from "../search-bar";
 
 const StyledFeather = withUniwind(Feather);
 const StyledMaterialCommunityIcons = withUniwind(MaterialCommunityIcons);
@@ -24,8 +24,8 @@ type AssigneeItem = {
 };
 
 export const Assignee: FC = () => {
-  const [value, setValue] = useState('volo');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [value, setValue] = useState("volo");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -36,8 +36,8 @@ export const Assignee: FC = () => {
   const items: AssigneeItem[] = useMemo(
     () => [
       {
-        value: 'no-assignee',
-        label: 'No Assignee',
+        value: "no-assignee",
+        label: "No Assignee",
         indicator: (
           <StyledMaterialCommunityIcons
             name="account-circle"
@@ -47,13 +47,13 @@ export const Assignee: FC = () => {
         ),
       },
       {
-        value: 'junior',
-        label: 'Junior',
+        value: "junior",
+        label: "Junior",
         indicator: (
           <Avatar alt="junior" className="size-[18px] bg-sky-500">
             <Avatar.Image
               source={{
-                uri: 'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/junior-avatar.jpg',
+                uri: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/junior-avatar.jpg",
               }}
             />
             <Avatar.Fallback>
@@ -63,13 +63,13 @@ export const Assignee: FC = () => {
         ),
       },
       {
-        value: 'volo',
-        label: 'volo',
+        value: "volo",
+        label: "volo",
         indicator: (
           <Avatar alt="volo" className="size-[18px] bg-purple-500">
             <Avatar.Image
               source={{
-                uri: 'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/volo-avatar.png',
+                uri: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/volo-avatar.png",
               }}
             />
             <Avatar.Fallback>
@@ -79,13 +79,13 @@ export const Assignee: FC = () => {
         ),
       },
     ],
-    []
+    [],
   );
 
   const filteredItems = useMemo(() => {
     if (!searchQuery) return items;
     return items.filter((item) =>
-      item.label.toLowerCase().includes(searchQuery.toLowerCase())
+      item.label.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [searchQuery, items]);
 
@@ -95,7 +95,7 @@ export const Assignee: FC = () => {
         <Chip
           className="h-7 bg-surface-quaternary pl-1 pr-2"
           onPress={() => {
-            if (Platform.OS === 'ios') {
+            if (Platform.OS === "ios") {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }
           }}
@@ -146,9 +146,9 @@ export const Assignee: FC = () => {
                       <RadioGroup.Item
                         value={item.value}
                         onPress={() => {
-                          if (Platform.OS === 'ios') {
+                          if (Platform.OS === "ios") {
                             Haptics.impactAsync(
-                              Haptics.ImpactFeedbackStyle.Light
+                              Haptics.ImpactFeedbackStyle.Light,
                             );
                           }
                         }}

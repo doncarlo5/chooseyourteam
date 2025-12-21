@@ -1,15 +1,15 @@
-import { FlashList } from '@shopify/flash-list';
-import { LinearGradient } from 'expo-linear-gradient';
-import { ScrollShadow, Surface } from 'heroui-native';
+import { FlashList } from "@shopify/flash-list";
+import { LinearGradient } from "expo-linear-gradient";
+import { ScrollShadow, Surface } from "heroui-native";
 import {
   ScrollView,
   StyleSheet,
   Text,
   useWindowDimensions,
   View,
-} from 'react-native';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
+} from "react-native";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
 
 const VerticalContent = () => {
   const { height } = useWindowDimensions();
@@ -199,13 +199,13 @@ const HorizontalContent = () => {
 
 const SCROLL_SHADOW_VARIANTS: UsageVariant[] = [
   {
-    value: 'vertical',
-    label: 'Vertical',
+    value: "vertical",
+    label: "Vertical",
     content: <VerticalContent />,
   },
   {
-    value: 'horizontal',
-    label: 'Horizontal',
+    value: "horizontal",
+    label: "Horizontal",
     content: <HorizontalContent />,
   },
 ];

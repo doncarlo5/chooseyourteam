@@ -1,17 +1,17 @@
-import { Ionicons } from '@expo/vector-icons';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { cn, Divider, RadioGroup, Surface } from 'heroui-native';
-import React from 'react';
-import { View } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { cn, Divider, RadioGroup, Surface } from "heroui-native";
+import React from "react";
+import { View } from "react-native";
 import Animated, {
   FadeIn,
   LinearTransition,
   ZoomIn,
-} from 'react-native-reanimated';
-import { withUniwind } from 'uniwind';
-import { AppText } from '../../../components/app-text';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
+} from "react-native-reanimated";
+import { withUniwind } from "uniwind";
+import { AppText } from "../../../components/app-text";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 const StyleAnimatedView = withUniwind(Animated.View);
@@ -20,7 +20,7 @@ const StyledIonicons = withUniwind(Ionicons);
 const StyledFontAwesome = withUniwind(FontAwesome);
 
 const BasicRadioGroupContent = () => {
-  const [withDescSelection, setWithDescSelection] = React.useState('desc1');
+  const [withDescSelection, setWithDescSelection] = React.useState("desc1");
 
   return (
     <View className="flex-1 px-5 items-center justify-center">
@@ -101,15 +101,15 @@ const ShippingOptionItem = ({
       {({ isSelected }) => (
         <View
           className={cn(
-            'flex-row items-center justify-between gap-3 p-3 rounded-2xl bg-transparent',
-            isSelected && 'bg-surface',
-            containerClassName
+            "flex-row items-center justify-between gap-3 p-3 rounded-2xl bg-transparent",
+            isSelected && "bg-surface",
+            containerClassName,
           )}
         >
           <RadioGroup.Indicator
             className={cn(
-              !isSelected && 'border border-muted/10',
-              indicatorClassName
+              !isSelected && "border border-muted/10",
+              indicatorClassName,
             )}
           />
           <View className="flex-1">
@@ -118,9 +118,9 @@ const ShippingOptionItem = ({
           </View>
           <AppText
             className={cn(
-              'text-foreground font-semibold',
-              isSelected && 'text-accent',
-              priceClassName
+              "text-foreground font-semibold",
+              isSelected && "text-accent",
+              priceClassName,
             )}
           >
             {price}
@@ -132,7 +132,7 @@ const ShippingOptionItem = ({
 };
 
 const StartIndicatorAlignmentContent = () => {
-  const [shippingSpeed, setShippingSpeed] = React.useState('standard');
+  const [shippingSpeed, setShippingSpeed] = React.useState("standard");
 
   return (
     <View className="flex-1 px-5 items-center justify-center">
@@ -168,8 +168,8 @@ const StartIndicatorAlignmentContent = () => {
 // ------------------------------------------------------------------------------
 
 const InlineRadioOptionsContent = () => {
-  const [size, setSize] = React.useState('M');
-  const sizes = ['XS', 'S', 'M', 'L'];
+  const [size, setSize] = React.useState("M");
+  const sizes = ["XS", "S", "M", "L"];
 
   return (
     <View className="flex-1 px-5 items-center justify-center">
@@ -211,7 +211,7 @@ const InlineRadioOptionsContent = () => {
 // ------------------------------------------------------------------------------
 
 const RadioGroupStatesContent = () => {
-  const [plan, setPlan] = React.useState('basic');
+  const [plan, setPlan] = React.useState("basic");
 
   return (
     <View className="flex-1 px-5 items-center justify-center">
@@ -228,7 +228,7 @@ const RadioGroupStatesContent = () => {
           <RadioGroup
             value={plan}
             onValueChange={setPlan}
-            isInvalid={plan === 'enterprise'}
+            isInvalid={plan === "enterprise"}
           >
             <RadioGroup.Item value="basic" isInvalid={false}>
               <View className="flex-1">
@@ -275,7 +275,7 @@ const RadioGroupStatesContent = () => {
 // ------------------------------------------------------------------------------
 
 const CustomIndicatorBackgroundContent = () => {
-  const [priority, setPriority] = React.useState('medium');
+  const [priority, setPriority] = React.useState("medium");
 
   return (
     <View className="flex-1 px-5 items-center justify-center">
@@ -300,8 +300,8 @@ const CustomIndicatorBackgroundContent = () => {
                 </View>
                 <RadioGroup.Indicator
                   className={cn(
-                    'size-8',
-                    isSelected && 'bg-red-500 border-red-400'
+                    "size-8",
+                    isSelected && "bg-red-500 border-red-400",
                   )}
                 >
                   <RadioGroup.IndicatorThumb className="size-3.5 bg-red-100" />
@@ -323,8 +323,8 @@ const CustomIndicatorBackgroundContent = () => {
                 </View>
                 <RadioGroup.Indicator
                   className={cn(
-                    'size-8',
-                    isSelected && 'bg-amber-500 border-amber-400'
+                    "size-8",
+                    isSelected && "bg-amber-500 border-amber-400",
                   )}
                 >
                   <RadioGroup.IndicatorThumb className="size-3.5 bg-amber-100" />
@@ -346,8 +346,8 @@ const CustomIndicatorBackgroundContent = () => {
                 </View>
                 <RadioGroup.Indicator
                   className={cn(
-                    'size-8',
-                    isSelected && 'bg-emerald-500 border-emerald-400'
+                    "size-8",
+                    isSelected && "bg-emerald-500 border-emerald-400",
                   )}
                 >
                   <RadioGroup.IndicatorThumb className="size-3.5 bg-emerald-100" />
@@ -364,7 +364,7 @@ const CustomIndicatorBackgroundContent = () => {
 // ------------------------------------------------------------------------------
 
 const CustomIndicatorThumbContent = () => {
-  const [notification, setNotification] = React.useState('email');
+  const [notification, setNotification] = React.useState("email");
 
   return (
     <View className="flex-1 px-5 items-center justify-center">
@@ -461,33 +461,33 @@ const CustomIndicatorThumbContent = () => {
 
 const RADIO_GROUP_VARIANTS: UsageVariant[] = [
   {
-    value: 'basic-radio-group',
-    label: 'Basic RadioGroup',
+    value: "basic-radio-group",
+    label: "Basic RadioGroup",
     content: <BasicRadioGroupContent />,
   },
   {
-    value: 'start-indicator-alignment',
-    label: 'Start indicator alignment',
+    value: "start-indicator-alignment",
+    label: "Start indicator alignment",
     content: <StartIndicatorAlignmentContent />,
   },
   {
-    value: 'inline-radio-options',
-    label: 'Inline Radio Options',
+    value: "inline-radio-options",
+    label: "Inline Radio Options",
     content: <InlineRadioOptionsContent />,
   },
   {
-    value: 'radio-group-states',
-    label: 'RadioGroup States',
+    value: "radio-group-states",
+    label: "RadioGroup States",
     content: <RadioGroupStatesContent />,
   },
   {
-    value: 'custom-indicator-background',
-    label: 'Custom Indicator Background',
+    value: "custom-indicator-background",
+    label: "Custom Indicator Background",
     content: <CustomIndicatorBackgroundContent />,
   },
   {
-    value: 'custom-indicator-thumb',
-    label: 'Custom Indicator Thumb',
+    value: "custom-indicator-thumb",
+    label: "Custom Indicator Thumb",
     content: <CustomIndicatorThumbContent />,
   },
 ];

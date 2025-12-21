@@ -1,12 +1,12 @@
-import { Card, Chip, cn } from 'heroui-native';
-import { type FC } from 'react';
-import { Image, useWindowDimensions, View } from 'react-native';
+import { Card, Chip, cn } from "heroui-native";
+import { type FC } from "react";
+import { Image, useWindowDimensions, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   type SharedValue,
-} from 'react-native-reanimated';
-import { useAppTheme } from '../../../contexts/app-theme-context';
-import { AppText } from '../../app-text';
+} from "react-native-reanimated";
+import { useAppTheme } from "../../../contexts/app-theme-context";
+import { AppText } from "../../app-text";
 
 const AnimatedView = Animated.createAnimatedComponent(View);
 
@@ -59,8 +59,8 @@ export const PreviewCard: FC<PreviewCardProps> = ({
     >
       <Card
         className={cn(
-          'aspect-3/5 border-0 rounded-3xl',
-          isDark && 'border border-border/70'
+          "aspect-3/5 border-0 rounded-3xl",
+          isDark && "border border-border/70",
         )}
       >
         <Card.Body className="flex-1 p-2 mb-4">
@@ -77,7 +77,7 @@ export const PreviewCard: FC<PreviewCardProps> = ({
         <Card.Footer>
           <Card.Title className="font-semibold">{title}</Card.Title>
           <Card.Description>
-            <AppText className="text-blue-500 font-medium">{category}</AppText>{' '}
+            <AppText className="text-blue-500 font-medium">{category}</AppText>{" "}
             • {brands}
           </Card.Description>
         </Card.Footer>

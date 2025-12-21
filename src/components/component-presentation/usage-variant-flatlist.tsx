@@ -1,14 +1,14 @@
-import { BlurView } from 'expo-blur';
-import * as Haptics from 'expo-haptics';
-import { useToast } from 'heroui-native';
-import { memo, useCallback, useRef, useState } from 'react';
+import { BlurView } from "expo-blur";
+import * as Haptics from "expo-haptics";
+import { useToast } from "heroui-native";
+import { memo, useCallback, useRef, useState } from "react";
 import {
   FlatList,
   Platform,
   StyleSheet,
   useWindowDimensions,
   View,
-} from 'react-native';
+} from "react-native";
 import Animated, {
   Extrapolation,
   interpolate,
@@ -17,14 +17,14 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   type SharedValue,
-} from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { scheduleOnRN } from 'react-native-worklets';
-import { useAppTheme } from '../../contexts/app-theme-context';
-import { useAccessibilityInfo } from '../../helpers/hooks/use-accessability-info';
-import { PaginationIndicator } from './pagination-indicator';
-import type { UsageVariant } from './types';
-import { UsageVariantsSelect } from './usage-variants-select';
+} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { scheduleOnRN } from "react-native-worklets";
+import { useAppTheme } from "../../contexts/app-theme-context";
+import { useAccessibilityInfo } from "../../helpers/hooks/use-accessability-info";
+import { PaginationIndicator } from "./pagination-indicator";
+import type { UsageVariant } from "./types";
+import { UsageVariantsSelect } from "./usage-variants-select";
 
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView);
 
@@ -46,7 +46,7 @@ const VariantItem = memo(
   ({ item, index, scrollY, itemHeight, width, height }: VariantItemProps) => {
     const { reduceTransparencyEnabled } = useAccessibilityInfo();
 
-    const applyOpacity = reduceTransparencyEnabled || Platform.OS === 'android';
+    const applyOpacity = reduceTransparencyEnabled || Platform.OS === "android";
 
     const animatedStyle = useAnimatedStyle(() => {
       return {
@@ -55,7 +55,7 @@ const VariantItem = memo(
               scrollY.get() / itemHeight,
               [index - 0.5, index, index + 0.5],
               [0, 1, 0],
-              Extrapolation.CLAMP
+              Extrapolation.CLAMP,
             )
           : 1,
         transform: [
@@ -64,7 +64,7 @@ const VariantItem = memo(
               scrollY.get() / itemHeight,
               [index - 0.5, index, index + 0.5],
               [0.9, 1, 0.9],
-              Extrapolation.CLAMP
+              Extrapolation.CLAMP,
             ),
           },
         ],
@@ -76,10 +76,10 @@ const VariantItem = memo(
         {item.content}
       </Animated.View>
     );
-  }
+  },
 );
 
-VariantItem.displayName = 'VariantItem';
+VariantItem.displayName = "VariantItem";
 
 export const UsageVariantFlatList = ({
   data,
@@ -97,20 +97,20 @@ export const UsageVariantFlatList = ({
 
   const { reduceTransparencyEnabled } = useAccessibilityInfo();
 
-  const applyBlur = Platform.OS === 'ios' && !reduceTransparencyEnabled;
+  const applyBlur = Platform.OS === "ios" && !reduceTransparencyEnabled;
 
   const listRef = useRef<FlatList<UsageVariant>>(null);
 
   const handleViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: Array<{ item: UsageVariant }> }) => {
       if (viewableItems.length > 0 && viewableItems[0]) {
-        if (Platform.OS === 'ios') {
+        if (Platform.OS === "ios") {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }
         setCurrentVariant(viewableItems[0].item);
       }
     },
-    []
+    [],
   );
 
   const viewabilityConfig = useRef({
@@ -123,7 +123,7 @@ export const UsageVariantFlatList = ({
     onScroll: (event) => {
       scrollY.set(event.contentOffset.y);
       if (isToastVisible) {
-        scheduleOnRN(toast.hide, 'all');
+        scheduleOnRN(toast.hide, "all");
       }
     },
   });
@@ -152,7 +152,7 @@ export const UsageVariantFlatList = ({
       intensity: interpolate(
         scrollY.get() / itemHeight,
         inputRange,
-        outputRange
+        outputRange,
       ),
     };
   });
@@ -196,8 +196,8 @@ export const UsageVariantFlatList = ({
           animatedProps={animatedProps}
           tint={
             isDark
-              ? 'systemUltraThinMaterialDark'
-              : 'systemUltraThinMaterialLight'
+              ? "systemUltraThinMaterialDark"
+              : "systemUltraThinMaterialLight"
           }
         />
       )}

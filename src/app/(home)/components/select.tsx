@@ -1,16 +1,16 @@
 /* eslint-disable react-native/no-inline-styles */
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { Button, cn, Divider, Select, useThemeColor } from 'heroui-native';
-import React, { useState } from 'react';
-import { Platform, View } from 'react-native';
-import { ScrollView } from 'react-native-gesture-handler';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppText } from '../../../components/app-text';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
-import { PlacementSelect } from '../../../components/select/placement-select';
-import { SearchableDialogSelect } from '../../../components/select/searchable-dialog-select';
-import { SelectButtonTrigger } from '../../../components/select/select-button-trigger';
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { Button, cn, Divider, Select, useThemeColor } from "heroui-native";
+import React, { useState } from "react";
+import { Platform, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AppText } from "../../../components/app-text";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
+import { PlacementSelect } from "../../../components/select/placement-select";
+import { SearchableDialogSelect } from "../../../components/select/searchable-dialog-select";
+import { SelectButtonTrigger } from "../../../components/select/select-button-trigger";
 
 type SelectOption = {
   value: string;
@@ -25,28 +25,28 @@ type CountryOption = {
 };
 
 const US_STATES: SelectOption[] = [
-  { value: 'CA', label: 'California' },
-  { value: 'NY', label: 'New York' },
-  { value: 'TX', label: 'Texas' },
-  { value: 'FL', label: 'Florida' },
-  { value: 'IL', label: 'Illinois' },
-  { value: 'PA', label: 'Pennsylvania' },
-  { value: 'OH', label: 'Ohio' },
-  { value: 'GA', label: 'Georgia' },
-  { value: 'NC', label: 'North Carolina' },
+  { value: "CA", label: "California" },
+  { value: "NY", label: "New York" },
+  { value: "TX", label: "Texas" },
+  { value: "FL", label: "Florida" },
+  { value: "IL", label: "Illinois" },
+  { value: "PA", label: "Pennsylvania" },
+  { value: "OH", label: "Ohio" },
+  { value: "GA", label: "Georgia" },
+  { value: "NC", label: "North Carolina" },
 ];
 
 const COUNTRIES: CountryOption[] = [
-  { value: 'US', label: 'United States', flag: '🇺🇸', code: '+1' },
-  { value: 'GB', label: 'United Kingdom', flag: '🇬🇧', code: '+44' },
-  { value: 'CA', label: 'Canada', flag: '🇨🇦', code: '+1' },
-  { value: 'AU', label: 'Australia', flag: '🇦🇺', code: '+61' },
-  { value: 'DE', label: 'Germany', flag: '🇩🇪', code: '+49' },
-  { value: 'FR', label: 'France', flag: '🇫🇷', code: '+33' },
-  { value: 'JP', label: 'Japan', flag: '🇯🇵', code: '+81' },
-  { value: 'CN', label: 'China', flag: '🇨🇳', code: '+86' },
-  { value: 'IN', label: 'India', flag: '🇮🇳', code: '+91' },
-  { value: 'BR', label: 'Brazil', flag: '🇧🇷', code: '+55' },
+  { value: "US", label: "United States", flag: "🇺🇸", code: "+1" },
+  { value: "GB", label: "United Kingdom", flag: "🇬🇧", code: "+44" },
+  { value: "CA", label: "Canada", flag: "🇨🇦", code: "+1" },
+  { value: "AU", label: "Australia", flag: "🇦🇺", code: "+61" },
+  { value: "DE", label: "Germany", flag: "🇩🇪", code: "+49" },
+  { value: "FR", label: "France", flag: "🇫🇷", code: "+33" },
+  { value: "JP", label: "Japan", flag: "🇯🇵", code: "+81" },
+  { value: "CN", label: "China", flag: "🇨🇳", code: "+86" },
+  { value: "IN", label: "India", flag: "🇮🇳", code: "+91" },
+  { value: "BR", label: "Brazil", flag: "🇧🇷", code: "+55" },
 ];
 
 // ------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ const PresentationContent = () => {
   >();
 
   const insets = useSafeAreaInsets();
-  const themeColorMuted = useThemeColor('muted');
+  const themeColorMuted = useThemeColor("muted");
 
   return (
     <View className="flex-1 px-5 items-center justify-center">
@@ -157,12 +157,12 @@ const PresentationContent = () => {
             <Select.Overlay className="bg-black/15" />
             <Select.Content
               presentation="bottom-sheet"
-              snapPoints={['35%']}
+              snapPoints={["35%"]}
               detached
               enableDynamicSizing={false}
               enableOverDrag={false}
               backgroundStyle={{
-                backgroundColor: 'transparent',
+                backgroundColor: "transparent",
               }}
               handleStyle={{
                 height: 8,
@@ -172,17 +172,17 @@ const PresentationContent = () => {
                 backgroundColor: themeColorMuted,
               }}
               bottomSheetViewClassName={cn(
-                'h-full mx-2 border border-divider/20 bg-overlay overflow-hidden',
-                Platform.OS === 'ios'
-                  ? 'rounded-t-4xl rounded-b-[54px]'
-                  : 'rounded-4xl'
+                "h-full mx-2 border border-divider/20 bg-overlay overflow-hidden",
+                Platform.OS === "ios"
+                  ? "rounded-t-4xl rounded-b-[54px]"
+                  : "rounded-4xl",
               )}
               bottomSheetViewProps={{
                 style: {
                   padding: 0,
                 },
               }}
-              bottomInset={Platform.OS === 'ios' ? 8 : insets.bottom + 4}
+              bottomInset={Platform.OS === "ios" ? 8 : insets.bottom + 4}
             >
               <BottomSheetScrollView
                 contentContainerClassName="p-4"
@@ -323,13 +323,13 @@ const AlignmentOptionsContent = () => {
 // ------------------------------------------------------------------------------
 
 const NativeModalTestContent = () => {
-  const router = require('expo-router').useRouter();
+  const router = require("expo-router").useRouter();
 
   return (
     <View className="flex-1 px-5 items-center justify-center">
       <Button
         variant="secondary"
-        onPress={() => router.push('components/select-native-modal')}
+        onPress={() => router.push("components/select-native-modal")}
       >
         Select from Native Modal
       </Button>
@@ -341,31 +341,31 @@ const NativeModalTestContent = () => {
 
 const SELECT_VARIANTS: UsageVariant[] = [
   {
-    value: 'basic-usage-button-trigger',
-    label: 'Select with indicator',
+    value: "basic-usage-button-trigger",
+    label: "Select with indicator",
     content: <BasicUsageWithButtonTriggerContent />,
   },
   {
-    value: 'presentation',
-    label: 'Presentation variants',
+    value: "presentation",
+    label: "Presentation variants",
     content: <PresentationContent />,
   },
   {
-    value: 'placement-options',
-    label: 'Placement options',
+    value: "placement-options",
+    label: "Placement options",
     content: <PlacementOptionsContent />,
   },
   {
-    value: 'alignment-options',
-    label: 'Alignment options',
+    value: "alignment-options",
+    label: "Alignment options",
     content: <AlignmentOptionsContent />,
   },
 ];
 
-if (Platform.OS === 'ios') {
+if (Platform.OS === "ios") {
   SELECT_VARIANTS.push({
-    value: 'native-modal-test',
-    label: 'Native modal test',
+    value: "native-modal-test",
+    label: "Native modal test",
     content: <NativeModalTestContent />,
   });
 }

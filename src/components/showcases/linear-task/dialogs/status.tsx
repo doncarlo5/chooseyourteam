@@ -1,13 +1,13 @@
-import Feather from '@expo/vector-icons/Feather';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import * as Haptics from 'expo-haptics';
-import { Chip, Dialog, RadioGroup } from 'heroui-native';
-import { useState, type FC } from 'react';
-import { Platform, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
-import { withUniwind } from 'uniwind';
-import { DialogBlurBackdrop } from '../../../dialog-blur-backdrop';
-import { DialogHeader } from '../dialog-header';
+import Feather from "@expo/vector-icons/Feather";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import * as Haptics from "expo-haptics";
+import { Chip, Dialog, RadioGroup } from "heroui-native";
+import { useState, type FC } from "react";
+import { Platform, View } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
+import { withUniwind } from "uniwind";
+import { DialogBlurBackdrop } from "../../../dialog-blur-backdrop";
+import { DialogHeader } from "../dialog-header";
 
 const StyledFeather = withUniwind(Feather);
 const StyledMaterialCommunityIcons = withUniwind(MaterialCommunityIcons);
@@ -19,12 +19,12 @@ type StatusItem = {
 };
 
 export const Status: FC = () => {
-  const [value, setValue] = useState('done');
+  const [value, setValue] = useState("done");
 
   const items: StatusItem[] = [
     {
-      value: 'backlog',
-      label: 'Backlog',
+      value: "backlog",
+      label: "Backlog",
       indicator: (
         <StyledMaterialCommunityIcons
           name="circle-opacity"
@@ -34,8 +34,8 @@ export const Status: FC = () => {
       ),
     },
     {
-      value: 'todo',
-      label: 'Todo',
+      value: "todo",
+      label: "Todo",
       indicator: (
         <StyledMaterialCommunityIcons
           name="circle-outline"
@@ -45,8 +45,8 @@ export const Status: FC = () => {
       ),
     },
     {
-      value: 'in-progress',
-      label: 'In Progress',
+      value: "in-progress",
+      label: "In Progress",
       indicator: (
         <StyledMaterialCommunityIcons
           name="circle-slice-4"
@@ -56,8 +56,8 @@ export const Status: FC = () => {
       ),
     },
     {
-      value: 'in-review',
-      label: 'In Review',
+      value: "in-review",
+      label: "In Review",
       indicator: (
         <StyledMaterialCommunityIcons
           name="circle-slice-6"
@@ -67,8 +67,8 @@ export const Status: FC = () => {
       ),
     },
     {
-      value: 'done',
-      label: 'Done',
+      value: "done",
+      label: "Done",
       indicator: (
         <StyledMaterialCommunityIcons
           name="checkbox-marked-circle"
@@ -78,8 +78,8 @@ export const Status: FC = () => {
       ),
     },
     {
-      value: 'cancelled',
-      label: 'Cancelled',
+      value: "cancelled",
+      label: "Cancelled",
       indicator: (
         <StyledMaterialCommunityIcons
           name="close-circle"
@@ -89,8 +89,8 @@ export const Status: FC = () => {
       ),
     },
     {
-      value: 'duplicate',
-      label: 'Duplicate',
+      value: "duplicate",
+      label: "Duplicate",
       indicator: (
         <StyledMaterialCommunityIcons
           name="close-circle"
@@ -107,7 +107,7 @@ export const Status: FC = () => {
         <Chip
           className="h-7 bg-surface-quaternary px-2"
           onPress={() => {
-            if (Platform.OS === 'ios') {
+            if (Platform.OS === "ios") {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }
           }}
@@ -128,7 +128,7 @@ export const Status: FC = () => {
                 <RadioGroup.Item
                   value={item.value}
                   onPress={() => {
-                    if (Platform.OS === 'ios') {
+                    if (Platform.OS === "ios") {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     }
                   }}

@@ -1,8 +1,8 @@
-import { Divider, Surface } from 'heroui-native';
-import { View } from 'react-native';
-import { AppText } from '../../../components/app-text';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
+import { Divider, Surface } from "heroui-native";
+import { View } from "react-native";
+import { AppText } from "../../../components/app-text";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
 
 const DividerInActionContent = () => {
   return (
@@ -144,28 +144,28 @@ const CustomColorsContent = () => {
 
 const DIVIDER_VARIANTS: UsageVariant[] = [
   {
-    value: 'divider-in-action',
-    label: 'Divider in action',
+    value: "divider-in-action",
+    label: "Divider in action",
     content: <DividerInActionContent />,
   },
   {
-    value: 'variants',
-    label: 'Variants',
+    value: "variants",
+    label: "Variants",
     content: <VariantsContent />,
   },
   {
-    value: 'orientation',
-    label: 'Orientation',
+    value: "orientation",
+    label: "Orientation",
     content: <OrientationContent />,
   },
   {
-    value: 'custom-thickness',
-    label: 'Custom thickness',
+    value: "custom-thickness",
+    label: "Custom thickness",
     content: <CustomThicknessContent />,
   },
   {
-    value: 'custom-colors',
-    label: 'Custom colors',
+    value: "custom-colors",
+    label: "Custom colors",
     content: <CustomColorsContent />,
   },
 ];

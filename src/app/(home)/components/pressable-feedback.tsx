@@ -1,12 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
-import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Button, Card, PressableFeedback } from 'heroui-native';
-import { StyleSheet, View } from 'react-native';
-import { AppText } from '../../../components/app-text';
-import type { UsageVariant } from '../../../components/component-presentation/types';
-import { UsageVariantFlatList } from '../../../components/component-presentation/usage-variant-flatlist';
-import { simulatePress } from '../../../helpers/utils/simulate-press';
+import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
+import { Button, Card, PressableFeedback } from "heroui-native";
+import { StyleSheet, View } from "react-native";
+import { AppText } from "../../../components/app-text";
+import type { UsageVariant } from "../../../components/component-presentation/types";
+import { UsageVariantFlatList } from "../../../components/component-presentation/usage-variant-flatlist";
+import { simulatePress } from "../../../helpers/utils/simulate-press";
 
 const BackgroundImageCardContent = () => {
   return (
@@ -16,7 +16,7 @@ const BackgroundImageCardContent = () => {
         className="w-full aspect-square rounded-3xl"
         animation={{
           ripple: {
-            backgroundColor: { value: 'white' },
+            backgroundColor: { value: "white" },
             opacity: { value: [0, 0.3, 0] },
             progress: { baseDuration: 600 },
           },
@@ -25,13 +25,13 @@ const BackgroundImageCardContent = () => {
         <Card className="flex-1">
           <Image
             source={{
-              uri: 'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/neo2.jpeg',
+              uri: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/neo2.jpeg",
             }}
             style={StyleSheet.absoluteFill}
             contentFit="cover"
           />
           <LinearGradient
-            colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.4)']}
+            colors={["rgba(0,0,0,0.1)", "rgba(0,0,0,0.4)"]}
             style={StyleSheet.absoluteFill}
           />
           <View className="flex-1 gap-4">
@@ -56,7 +56,7 @@ const BackgroundImageCardContent = () => {
                 <Button
                   size="sm"
                   className="bg-white"
-                  animation={{ highlight: 'disabled' }}
+                  animation={{ highlight: "disabled" }}
                   onPress={simulatePress}
                 >
                   <Button.Label className="text-black">Notify me</Button.Label>
@@ -81,7 +81,7 @@ const CardWithImageContent = () => {
           className="flex-1 aspect-[1/1.3] rounded-3xl"
           animation={{
             ripple: {
-              backgroundColor: { value: '#fecdd3' },
+              backgroundColor: { value: "#fecdd3" },
               opacity: { value: [0, 0.2, 0] },
             },
           }}
@@ -91,7 +91,7 @@ const CardWithImageContent = () => {
               <Card.Header>
                 <Image
                   source={{
-                    uri: 'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/demo1.jpg',
+                    uri: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/demo1.jpg",
                   }}
                   style={{
                     height: 60,
@@ -120,7 +120,7 @@ const CardWithImageContent = () => {
           className="flex-1 aspect-[1/1.3] rounded-3xl"
           animation={{
             ripple: {
-              backgroundColor: { value: '#67e8f9' },
+              backgroundColor: { value: "#67e8f9" },
             },
           }}
         >
@@ -129,7 +129,7 @@ const CardWithImageContent = () => {
               <Card.Header>
                 <Image
                   source={{
-                    uri: 'https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/demo2.jpg',
+                    uri: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/docs/demo2.jpg",
                   }}
                   style={{
                     height: 60,
@@ -178,18 +178,18 @@ const ButtonHighlightContent = () => {
 
 const PRESSABLE_FEEDBACK_VARIANTS: UsageVariant[] = [
   {
-    value: 'background-image-card',
-    label: 'Background image card',
+    value: "background-image-card",
+    label: "Background image card",
     content: <BackgroundImageCardContent />,
   },
   {
-    value: 'card-with-image',
-    label: 'Card with image',
+    value: "card-with-image",
+    label: "Card with image",
     content: <CardWithImageContent />,
   },
   {
-    value: 'button-highlight',
-    label: 'Button highlight',
+    value: "button-highlight",
+    label: "Button highlight",
     content: <ButtonHighlightContent />,
   },
 ];

@@ -1,6 +1,6 @@
-import { Select, useSelectAnimation } from 'heroui-native';
-import { type FC, type PropsWithChildren } from 'react';
-import { interpolate, useAnimatedStyle } from 'react-native-reanimated';
+import { Select, useSelectAnimation } from "heroui-native";
+import { type FC, type PropsWithChildren } from "react";
+import { interpolate, useAnimatedStyle } from "react-native-reanimated";
 
 export const SelectContentContainer: FC<PropsWithChildren> = ({ children }) => {
   const { progress } = useSelectAnimation();
@@ -14,8 +14,8 @@ export const SelectContentContainer: FC<PropsWithChildren> = ({ children }) => {
   return (
     <Select.Content
       classNames={{
-        wrapper: 'p-0 justify-start',
-        content: 'w-full h-full border-0 bg-transparent gap-2',
+        wrapper: "p-0 justify-start",
+        content: "w-full h-full border-0 bg-transparent gap-2",
       }}
       presentation="dialog"
       animation={false}

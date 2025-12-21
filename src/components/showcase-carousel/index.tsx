@@ -1,13 +1,13 @@
-import { useWindowDimensions, View } from 'react-native';
+import { useWindowDimensions, View } from "react-native";
 import Animated, {
   useAnimatedRef,
   useScrollOffset,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
 import {
   ShowcaseItem,
   type ShowcaseItemData,
-} from '../showcases/showcase-item';
-import { PaginationIndicator } from './pagination-indicator';
+} from "../showcases/showcase-item";
+import { PaginationIndicator } from "./pagination-indicator";
 
 export type Props = {
   data: ShowcaseItemData[];
