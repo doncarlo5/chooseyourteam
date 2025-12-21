@@ -77,7 +77,7 @@ const Dot = ({
 };
 
 export default function SelectedPlayersLayer({
-  selectedPlayers,
+  selectedGroups,
   isDark,
   touches,
   revealedTouches,
@@ -91,7 +91,7 @@ export default function SelectedPlayersLayer({
   onBack,
   onBackLayout,
 }: SelectedPlayersLayerProps) {
-  if (!selectedPlayers) {
+  if (!selectedGroups) {
     return null;
   }
 

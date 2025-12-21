@@ -22,7 +22,7 @@ export type DotProps = {
 };
 
 export type SelectedPlayersLayerProps = {
-  selectedPlayers: number | null;
+  selectedGroups: number | null;
   isDark: boolean;
   touches: TouchPoint[];
   revealedTouches: TouchPoint[];
