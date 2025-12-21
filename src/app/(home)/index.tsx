@@ -143,10 +143,13 @@ export default function App() {
     }
 
     const steps = [
-      { offset: 800, style: Haptics.ImpactFeedbackStyle.Light },
-      { offset: 500, style: Haptics.ImpactFeedbackStyle.Medium },
-      { offset: 250, style: Haptics.ImpactFeedbackStyle.Medium },
-      { offset: 100, style: Haptics.ImpactFeedbackStyle.Heavy },
+      { offset: 1600, style: Haptics.ImpactFeedbackStyle.Light },
+      { offset: 1300, style: Haptics.ImpactFeedbackStyle.Light },
+      { offset: 1000, style: Haptics.ImpactFeedbackStyle.Medium },
+      { offset: 800, style: Haptics.ImpactFeedbackStyle.Medium },
+      { offset: 600, style: Haptics.ImpactFeedbackStyle.Medium },
+      { offset: 400, style: Haptics.ImpactFeedbackStyle.Heavy },
+      { offset: 200, style: Haptics.ImpactFeedbackStyle.Heavy },
     ];
 
     steps.forEach(({ offset, style }) => {
@@ -208,7 +211,7 @@ export default function App() {
       .map((touch) => touch.id)
       .sort()
       .join("|");
-    if (filteredTouches.length !== selectedPlayers) {
+    if (visibleTouches.length !== selectedPlayers) {
       stableCountRef.current = currentCount;
       touchSignatureRef.current = signature;
       resetReveal();
