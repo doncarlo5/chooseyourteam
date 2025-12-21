@@ -368,7 +368,7 @@ export default function App() {
             </Select>
           </View>
           <AppText className="text-xl font-semibold text-foreground">
-            How many players are you?
+            How many players?
           </AppText>
           <View className="w-full">
             <View className="flex-row flex-wrap -mx-2">
@@ -446,7 +446,7 @@ function PlayerCard({
             <View className="flex-1">
               <Card.Title
                 className={cn(
-                  "text-4xl font-extrabold ",
+                  "text-5xl font-extrabold ",
                   isDark ? "text-white" : "text-[#0B0B0B]"
                 )}
               >
