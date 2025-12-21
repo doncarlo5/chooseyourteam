@@ -1,31 +1,32 @@
 import { AppText } from "@/src/components/app-text";
-import { Ionicons } from "@expo/vector-icons";
+import Feather from "@expo/vector-icons/Feather";
 import * as Haptics from "expo-haptics";
 import { StatusBar } from "expo-status-bar";
-import { Button, Card, RadioGroup, cn } from "heroui-native";
-import { useEffect, useRef, useState } from "react";
-import { Pressable, View } from "react-native";
+import {
+  Card,
+  Divider,
+  PressableFeedback,
+  Select,
+  cn,
+  useSelectAnimation,
+  useThemeColor,
+} from "heroui-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { View } from "react-native";
 import Animated, {
   Easing,
   FadeInDown,
-  FadeOut,
-  ZoomIn,
   interpolate,
-  interpolateColor,
   useAnimatedStyle,
-  useSharedValue,
-  withTiming,
 } from "react-native-reanimated";
+import { withUniwind } from "uniwind";
 import { ThemeToggle } from "../../components/theme-toggle";
 import { useAppTheme } from "../../contexts/app-theme-context";
+import type { PlayerCardProps } from "../../helpers/types/home-screen";
+import type { TouchPoint } from "../../helpers/types/touch-point";
+import SelectedPlayersLayer from "./selected-players-layer";
 
-const PRESS_ORANGE = "#F64D00";
-
-type TouchPoint = {
-  id: string;
-  x: number;
-  y: number;
-};
+const StyledFeather = withUniwind(Feather);
 
 const BASE_CIRCLE_SIZE = 100;
 const REVEAL_CIRCLE_SIZE = BASE_CIRCLE_SIZE * 1.5;
@@ -33,165 +34,16 @@ const HIGHLIGHT_DELAY_MS = 4000;
 const TEAM_COLORS = ["#F64D00", "#1F3A5F", "#2FBF71"];
 const PLAYER_OPTIONS = [2, 3, 4, 5];
 
-type DotProps = {
-  x: number;
-  y: number;
-  baseColor: string;
-  revealColor: string;
-  isRevealed: boolean;
-  baseSize: number;
-  revealSize: number;
-};
-
-const Dot = ({
-  x,
-  y,
-  baseColor,
-  revealColor,
-  isRevealed,
-  baseSize,
-  revealSize,
-}: DotProps) => {
-  const progress = useSharedValue(isRevealed ? 1 : 0);
-  const size = useSharedValue(isRevealed ? revealSize : baseSize);
-
-  useEffect(() => {
-    progress.value = withTiming(isRevealed ? 1 : 0, { duration: 200 });
-    size.value = withTiming(isRevealed ? revealSize : baseSize, {
-      duration: 200,
-    });
-  }, [isRevealed, baseSize, revealSize, progress, size]);
-
-  const animatedStyle = useAnimatedStyle(() => {
-    const currentSize = size.value;
-    return {
-      position: "absolute",
-      left: x - currentSize / 2,
-      top: y - currentSize / 2,
-      width: currentSize,
-      height: currentSize,
-      borderRadius: currentSize / 2,
-      borderWidth: 0,
-      borderColor: interpolateColor(
-        progress.value,
-        [0, 1],
-        [baseColor, revealColor]
-      ),
-      backgroundColor: interpolateColor(
-        progress.value,
-        [0, 1],
-        [baseColor, revealColor]
-      ),
-    };
-  });
-
-  return (
-    <Animated.View
-      entering={ZoomIn.duration(150)}
-      exiting={FadeOut.duration(150)}
-      style={animatedStyle}
-    />
-  );
-};
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
-type PlayerCardProps = {
-  count: number;
-  index: number;
-  isDark: boolean;
-  isDisabled: boolean;
-  onPress: () => void;
-};
-
-const PlayerCard = ({
-  count,
-  index,
-  isDark,
-  isDisabled,
-  onPress,
-}: PlayerCardProps) => {
-  const pressed = useSharedValue(0);
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: interpolate(pressed.value, [0, 1], [1, 0.95]) }],
-    };
-  });
-
-  const overlayStyle = useAnimatedStyle(() => {
-    return {
-      position: "absolute" as const,
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      borderRadius: 16,
-      backgroundColor: PRESS_ORANGE,
-      opacity: interpolate(pressed.value, [0, 1], [0, 0.3]),
-    };
-  });
-
-  return (
-    <AnimatedPressable
-      onPress={onPress}
-      onPressIn={() => {
-        pressed.value = withTiming(1, { duration: 100 });
-      }}
-      onPressOut={() => {
-        pressed.value = withTiming(0, { duration: 150 });
-      }}
-      entering={FadeInDown.duration(300)
-        .delay(index * 100)
-        .easing(Easing.out(Easing.ease))}
-      disabled={isDisabled}
-      className="w-1/2 px-2 mb-4"
-      style={animatedStyle}
-    >
-      <Card
-        className={cn(
-          "p-0 border rounded-2xl overflow-hidden",
-          "border-zinc-200",
-          isDark && "border-zinc-900",
-          isDisabled && "opacity-50"
-        )}
-      >
-        <Animated.View style={overlayStyle} />
-        <Card.Body className="h-10" />
-        <Card.Footer className="px-3 pb-4 flex-row items-end gap-4">
-          <View className="flex-1">
-            <Card.Title
-              className={cn(
-                "text-4xl font-extrabold ",
-                isDark ? "text-white" : "text-[#0B0B0B]"
-              )}
-            >
-              {count}
-            </Card.Title>
-            <Card.Description
-              className={cn(
-                "pl-0.5 leading-none",
-                isDark ? "text-white" : "text-[#0B0B0B]"
-              )}
-            >
-              players
-            </Card.Description>
-          </View>
-        </Card.Footer>
-      </Card>
-    </AnimatedPressable>
-  );
-};
-
 export default function App() {
   const { isDark } = useAppTheme();
   const [selectedPlayers, setSelectedPlayers] = useState<number | null>(null);
-  const [teamCount, setTeamCount] = useState<"2" | "3">("2");
+  const [teamCount, setTeamCount] = useState({ value: "2", label: "2 teams" });
   const [touches, setTouches] = useState<TouchPoint[]>([]);
   const [isRevealed, setIsRevealed] = useState(false);
   const [teamAssignments, setTeamAssignments] = useState<
     Record<string, string>
   >({});
+  const [teamNumbers, setTeamNumbers] = useState<Record<string, number>>({});
   const [revealedTouches, setRevealedTouches] = useState<TouchPoint[]>([]);
   const [frozenTouches, setFrozenTouches] = useState<TouchPoint[]>([]);
   const [toggleRect, setToggleRect] = useState<{
@@ -207,23 +59,27 @@ export default function App() {
     height: number;
   } | null>(null);
   const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const releaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const preRevealHapticsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const toggleRef = useRef<View>(null);
   const backRef = useRef<View>(null);
   const stableCountRef = useRef<number>(0);
   const touchSignatureRef = useRef<string>("");
   const prevTouchIdsRef = useRef<Set<string>>(new Set());
+  const latestTouchesRef = useRef<TouchPoint[]>([]);
   const activeTeamColors =
-    teamCount === "2" ? TEAM_COLORS.slice(0, 2) : TEAM_COLORS;
+    teamCount.value === "2" ? TEAM_COLORS.slice(0, 2) : TEAM_COLORS;
 
   const assignTeams = (touchList: TouchPoint[]) => {
     const assignments: Record<string, string> = {};
+    const numbers: Record<string, number> = {};
     if (activeTeamColors.length === 0) {
-      return assignments;
+      return { assignments, numbers };
     }
     let colorPool = [...activeTeamColors];
+    const teamIndexPool = activeTeamColors.map((_, index) => index + 1);
+    let numberPool = [...teamIndexPool];
 
-    const shuffle = (values: string[]) => {
+    const shuffle = <T,>(values: T[]): T[] => {
       const result = [...values];
       for (let i = result.length - 1; i > 0; i -= 1) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -235,11 +91,14 @@ export default function App() {
     touchList.forEach((touch, index) => {
       if (index % activeTeamColors.length === 0) {
         colorPool = shuffle(activeTeamColors);
+        numberPool = shuffle(teamIndexPool);
       }
-      assignments[touch.id] = colorPool[index % activeTeamColors.length];
+      const poolIndex = index % activeTeamColors.length;
+      assignments[touch.id] = colorPool[poolIndex];
+      numbers[touch.id] = numberPool[poolIndex];
     });
 
-    return assignments;
+    return { assignments, numbers };
   };
 
   const isTouchInsideRect = (
@@ -260,6 +119,7 @@ export default function App() {
   const resetReveal = () => {
     setIsRevealed(false);
     setTeamAssignments({});
+    setTeamNumbers({});
     setRevealedTouches([]);
     setFrozenTouches([]);
     prevTouchIdsRef.current = new Set();
@@ -267,13 +127,40 @@ export default function App() {
       clearTimeout(highlightTimer.current);
       highlightTimer.current = null;
     }
-    if (releaseTimerRef.current) {
-      clearTimeout(releaseTimerRef.current);
-      releaseTimerRef.current = null;
-    }
+    preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
+    preRevealHapticsRef.current = [];
   };
 
-  const updateTouches = (nextTouches: TouchPoint[]) => {
+  const schedulePreRevealHaptics = (
+    totalDelayMs: number,
+    startAfterMs: number
+  ) => {
+    preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
+    preRevealHapticsRef.current = [];
+
+    if (totalDelayMs <= startAfterMs) {
+      return;
+    }
+
+    const steps = [
+      { offset: 800, style: Haptics.ImpactFeedbackStyle.Light },
+      { offset: 500, style: Haptics.ImpactFeedbackStyle.Medium },
+      { offset: 250, style: Haptics.ImpactFeedbackStyle.Medium },
+      { offset: 100, style: Haptics.ImpactFeedbackStyle.Heavy },
+    ];
+
+    steps.forEach(({ offset, style }) => {
+      const timeout = totalDelayMs - offset;
+      if (timeout > startAfterMs) {
+        const timerId = setTimeout(() => {
+          Haptics.impactAsync(style);
+        }, timeout);
+        preRevealHapticsRef.current.push(timerId);
+      }
+    });
+  };
+
+  const updateTouches = (nextTouches: TouchPoint[], isTouchStart: boolean) => {
     if (!selectedPlayers) {
       return;
     }
@@ -287,46 +174,33 @@ export default function App() {
     );
     const visibleTouches = filteredTouches.slice(0, selectedPlayers);
     setTouches(visibleTouches);
+    latestTouchesRef.current = visibleTouches;
+
+    if (isRevealed) {
+      if (visibleTouches.length === 0) {
+        setFrozenTouches(revealedTouches);
+        return;
+      }
+
+      setRevealedTouches((prevTouches) =>
+        prevTouches.map((touch) => {
+          const updated = visibleTouches.find((item) => item.id === touch.id);
+          return updated ?? touch;
+        })
+      );
+      return;
+    }
 
     const currentIds = new Set(visibleTouches.map((touch) => touch.id));
     const hasNewTouch = visibleTouches.some(
       (touch) => !prevTouchIdsRef.current.has(touch.id)
     );
-    if (hasNewTouch) {
+    if (isTouchStart && hasNewTouch) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     prevTouchIdsRef.current = currentIds;
-
-    if (isRevealed) {
-      if (visibleTouches.length > 0) {
-        setRevealedTouches((prevTouches) => {
-          const nextTouches = [...prevTouches];
-          visibleTouches.forEach((touch) => {
-            const existingIndex = nextTouches.findIndex(
-              (item) => item.id === touch.id
-            );
-            if (existingIndex === -1) {
-              nextTouches.push(touch);
-            } else {
-              nextTouches[existingIndex] = touch;
-            }
-          });
-          return nextTouches;
-        });
-        if (releaseTimerRef.current) {
-          clearTimeout(releaseTimerRef.current);
-          releaseTimerRef.current = null;
-        }
-      } else if (revealedTouches.length > 0 && !releaseTimerRef.current) {
-        setFrozenTouches(revealedTouches);
-        releaseTimerRef.current = setTimeout(() => {
-          setFrozenTouches([]);
-          setRevealedTouches([]);
-          setIsRevealed(false);
-          setTeamAssignments({});
-        }, HIGHLIGHT_DELAY_MS);
-      }
-      return;
+    if (nextTouches.length === 0) {
+      prevTouchIdsRef.current = new Set();
     }
 
     const currentCount = visibleTouches.length;
@@ -345,11 +219,15 @@ export default function App() {
       stableCountRef.current = currentCount;
       resetReveal();
       if (currentCount > 0) {
+        schedulePreRevealHaptics(HIGHLIGHT_DELAY_MS, 2000);
         highlightTimer.current = setTimeout(() => {
           if (stableCountRef.current === currentCount) {
-            setTeamAssignments(assignTeams(visibleTouches));
+            const latestTouches = latestTouchesRef.current;
+            const { assignments, numbers } = assignTeams(latestTouches);
+            setTeamAssignments(assignments);
+            setTeamNumbers(numbers);
             setIsRevealed(true);
-            setRevealedTouches(visibleTouches);
+            setRevealedTouches(latestTouches);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           }
         }, HIGHLIGHT_DELAY_MS);
@@ -360,11 +238,15 @@ export default function App() {
       stableCountRef.current = currentCount;
       resetReveal();
       if (currentCount > 0) {
+        schedulePreRevealHaptics(HIGHLIGHT_DELAY_MS, 2000);
         highlightTimer.current = setTimeout(() => {
           if (stableCountRef.current === currentCount) {
-            setTeamAssignments(assignTeams(visibleTouches));
+            const latestTouches = latestTouchesRef.current;
+            const { assignments, numbers } = assignTeams(latestTouches);
+            setTeamAssignments(assignments);
+            setTeamNumbers(numbers);
             setIsRevealed(true);
-            setRevealedTouches(visibleTouches);
+            setRevealedTouches(latestTouches);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           }
         }, HIGHLIGHT_DELAY_MS);
@@ -389,7 +271,7 @@ export default function App() {
           x: touch.pageX,
           y: touch.pageY,
         }));
-        updateTouches(nextTouches);
+        updateTouches(nextTouches, true);
       }}
       onTouchMove={(event) => {
         const nextTouches = event.nativeEvent.touches.map((touch) => ({
@@ -397,7 +279,7 @@ export default function App() {
           x: touch.pageX,
           y: touch.pageY,
         }));
-        updateTouches(nextTouches);
+        updateTouches(nextTouches, false);
       }}
       onTouchEnd={(event) => {
         const nextTouches = event.nativeEvent.touches.map((touch) => ({
@@ -405,7 +287,7 @@ export default function App() {
           x: touch.pageX,
           y: touch.pageY,
         }));
-        updateTouches(nextTouches);
+        updateTouches(nextTouches, false);
       }}
       onTouchCancel={(event) => {
         const nextTouches = event.nativeEvent.touches.map((touch) => ({
@@ -413,7 +295,7 @@ export default function App() {
           x: touch.pageX,
           y: touch.pageY,
         }));
-        updateTouches(nextTouches);
+        updateTouches(nextTouches, false);
       }}
       className={cn("flex-1", isDark ? "bg-[#0B0B0B]" : "bg-[#E4E4E4]")}
     >
@@ -431,117 +313,67 @@ export default function App() {
         </View>
       )}
 
-      {selectedPlayers && (
-        <Button
-          onPress={() => {
-            setSelectedPlayers(null);
-            setTouches([]);
-            resetReveal();
-            stableCountRef.current = 0;
-            touchSignatureRef.current = "";
-            if (highlightTimer.current) {
-              clearTimeout(highlightTimer.current);
-              highlightTimer.current = null;
-            }
-          }}
-          size="sm"
-          className={cn(
-            "absolute top-16 left-6 z-10 p-2 rounded-full",
-            isDark ? "bg-[#E4E4E4]" : "bg-[#0B0B0B]"
-          )}
-          onLayout={() => {
-            backRef.current?.measureInWindow((x, y, width, height) => {
-              setBackRect({ x, y, width, height });
-            });
-          }}
-          ref={backRef}
-        >
-          <Button.Label
-            className={cn(
-              "text-sm font-semibold",
-              isDark ? "text-[#0B0B0B]" : "text-[#E4E4E4]"
-            )}
-          >
-            <Ionicons
-              name="close"
-              size={20}
-              color={isDark ? "#0b0b0b" : "white"}
-            />
-          </Button.Label>
-        </Button>
-      )}
-
-      {(frozenTouches.length > 0
-        ? frozenTouches
-        : isRevealed
-          ? revealedTouches
-          : touches
-      ).map((touch) => {
-        const baseColor = isDark ? "#E4E4E4" : "#0B0B0B";
-        const revealColor = teamAssignments[touch.id] ?? baseColor;
-        return (
-          <Dot
-            key={touch.id}
-            x={touch.x}
-            y={touch.y}
-            baseColor={baseColor}
-            revealColor={revealColor}
-            isRevealed={isRevealed || frozenTouches.length > 0}
-            baseSize={BASE_CIRCLE_SIZE}
-            revealSize={REVEAL_CIRCLE_SIZE}
-          />
-        );
-      })}
+      <SelectedPlayersLayer
+        selectedPlayers={selectedPlayers}
+        isDark={isDark}
+        touches={touches}
+        revealedTouches={revealedTouches}
+        frozenTouches={frozenTouches}
+        isRevealed={isRevealed}
+        teamAssignments={teamAssignments}
+        teamNumbers={teamNumbers}
+        baseSize={BASE_CIRCLE_SIZE}
+        revealSize={REVEAL_CIRCLE_SIZE}
+        backRef={backRef}
+        onBack={() => {
+          setSelectedPlayers(null);
+          setTouches([]);
+          resetReveal();
+          stableCountRef.current = 0;
+          touchSignatureRef.current = "";
+          if (highlightTimer.current) {
+            clearTimeout(highlightTimer.current);
+            highlightTimer.current = null;
+          }
+        }}
+        onBackLayout={(rect) => {
+          setBackRect(rect);
+        }}
+      />
 
       {!selectedPlayers && (
-        <View className="flex-1 items-center justify-center px-8 gap-4">
-          <RadioGroup
-            value={teamCount}
-            onValueChange={(value) => setTeamCount(value as "2" | "3")}
-            className="flex-row items-center gap-6 mb-6"
-          >
-            <RadioGroup.Item value="2" className="flex-row items-center gap-2">
-              <RadioGroup.Indicator
-                className={cn(
-                  "border-2",
-                  teamCount === "2"
-                    ? "border-accent bg-accent"
-                    : "border-foreground"
-                )}
-              />
-              <RadioGroup.Label
-                className={cn(
-                  teamCount === "2" ? "text-accent" : "text-foreground"
-                )}
-              >
-                2 teams
-              </RadioGroup.Label>
-            </RadioGroup.Item>
-            <RadioGroup.Item value="3" className="flex-row items-center gap-2">
-              <RadioGroup.Indicator
-                className={cn(
-                  "border-2",
-                  teamCount === "3"
-                    ? "border-accent bg-accent"
-                    : "border-foreground"
-                )}
-              />
-              <RadioGroup.Label
-                className={cn(
-                  teamCount === "3" ? "text-accent" : "text-foreground"
-                )}
-              >
-                3 teams
-              </RadioGroup.Label>
-            </RadioGroup.Item>
-          </RadioGroup>
+        <View className="flex-1 justify-center px-8 gap-4">
+          <View className="w-full">
+            <AppText className="text-xl font-semibold text-foreground mb-2">
+              How many teams?
+            </AppText>
+            <Select
+              value={teamCount}
+              onValueChange={(option) => option && setTeamCount(option)}
+            >
+              <Select.Trigger>
+                <TeamSelectTrigger />
+              </Select.Trigger>
+              <Select.Portal>
+                <Select.Overlay />
+                <Select.Content width="trigger">
+                  <Select.ListLabel className="mb-2">
+                    Split group into
+                  </Select.ListLabel>
+                  <Select.Item value="2" label="2 teams" />
+                  <Divider />
+                  <Select.Item value="3" label="3 teams" />
+                </Select.Content>
+              </Select.Portal>
+            </Select>
+          </View>
           <AppText className="text-xl font-semibold text-foreground">
             How many players are you?
           </AppText>
           <View className="w-full">
             <View className="flex-row flex-wrap -mx-2">
               {PLAYER_OPTIONS.map((count, index) => {
-                const isDisabled = teamCount === "3" && count === 2;
+                const isDisabled = teamCount.value === "3" && count === 2;
                 return (
                   <PlayerCard
                     key={count}
@@ -569,6 +401,107 @@ export default function App() {
       )}
 
       <StatusBar style={isDark ? "light" : "dark"} />
+    </View>
+  );
+}
+
+function PlayerCard({
+  count,
+  index,
+  isDark,
+  isDisabled,
+  onPress,
+}: PlayerCardProps) {
+  const themeColorAccent = useThemeColor("accent");
+
+  return (
+    <Animated.View
+      entering={FadeInDown.duration(300)
+        .delay(index * 100)
+        .easing(Easing.out(Easing.ease))}
+      className="w-1/2 px-2 mb-4"
+      collapsable={false}
+    >
+      <PressableFeedback
+        onPress={onPress}
+        isDisabled={isDisabled}
+        feedbackVariant="ripple"
+        className="w-full rounded-3xl"
+        animation={{
+          ripple: {
+            backgroundColor: { value: themeColorAccent },
+            opacity: { value: [0, 0.2, 0] },
+            progress: { baseDuration: 600 },
+          },
+        }}
+      >
+        <Card
+          className={cn(
+            "p-0 rounded-3xl overflow-hidden shadow-sm shadow-black/10",
+            isDisabled && "opacity-50"
+          )}
+        >
+          <Card.Body className="h-10" />
+          <Card.Footer className="px-3 pb-4 flex-row items-end gap-4">
+            <View className="flex-1">
+              <Card.Title
+                className={cn(
+                  "text-4xl font-extrabold ",
+                  isDark ? "text-white" : "text-[#0B0B0B]"
+                )}
+              >
+                {count}
+              </Card.Title>
+              <Card.Description className="pl-0.5 leading-none text-muted">
+                players
+              </Card.Description>
+            </View>
+          </Card.Footer>
+        </Card>
+      </PressableFeedback>
+    </Animated.View>
+  );
+}
+
+function TeamSelectTrigger() {
+  const { progress } = useSelectAnimation();
+  const themeColorAccent = useThemeColor("accent");
+
+  const borderStyle = useMemo(
+    () => ({
+      position: "absolute" as const,
+      top: -4,
+      bottom: -4,
+      left: -4,
+      right: -4,
+      borderWidth: 2.5,
+      borderColor: themeColorAccent,
+      borderRadius: 18,
+    }),
+    [themeColorAccent]
+  );
+
+  const rBorderStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(progress.value, [0, 1, 2], [0, 1, 0]);
+    return { opacity };
+  });
+
+  const rChevronStyle = useAnimatedStyle(() => {
+    const rotate = interpolate(progress.value, [0, 1, 2], [0, -180, 0]);
+    return {
+      transform: [{ rotate: `${rotate}deg` }],
+    };
+  });
+
+  return (
+    <View className="relative bg-surface h-[48px] w-full px-3 rounded-2xl justify-center shadow-md shadow-black/5">
+      <Animated.View style={[borderStyle, rBorderStyle]} pointerEvents="none" />
+      <Select.Value placeholder="Select teams" />
+      <View className="absolute right-3">
+        <Animated.View style={rChevronStyle}>
+          <StyledFeather name="chevron-down" size={18} className="text-muted" />
+        </Animated.View>
+      </View>
     </View>
   );
 }
