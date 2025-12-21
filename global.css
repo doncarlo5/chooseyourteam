@@ -8,3 +8,18 @@
 @import './themes/brand.css';
 
 @source './node_modules/heroui-native/lib';
+
+/* Extend base themes with secondary colors */
+@layer theme {
+  :root {
+    @variant light {
+      --secondary: oklch(0.45 0.08 260);
+      --secondary-foreground: oklch(0.98 0.002 260);
+    }
+
+    @variant dark {
+      --secondary: oklch(0.6 0.1 260);
+      --secondary-foreground: oklch(0.14 0.02 260);
+    }
+  }
+}

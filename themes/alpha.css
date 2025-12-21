@@ -21,6 +21,10 @@
       --accent: var(--color-neutral-950);
       --accent-foreground: var(--snow);
 
+      /* Secondary */
+      --secondary: var(--color-neutral-600);
+      --secondary-foreground: var(--snow);
+
       /* Form Field Defaults - Colors */
       --field-background: var(--default);
       --field-foreground: var(--foreground);
@@ -67,6 +71,10 @@
 
       --accent: var(--color-neutral-50);
       --accent-foreground: var(--eclipse);
+
+      /* Secondary */
+      --secondary: var(--color-neutral-400);
+      --secondary-foreground: var(--eclipse);
 
       /* Form Field Defaults - Colors */
       --field-background: var(--default);
