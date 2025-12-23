@@ -3,7 +3,7 @@ import * as Haptics from "expo-haptics";
 import { StatusBar } from "expo-status-bar";
 import { Card, PressableFeedback, cn, useThemeColor } from "heroui-native";
 import { useEffect, useRef, useState } from "react";
-import { View } from "react-native";
+import { Alert, Platform, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { Easing, FadeInDown } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
@@ -18,6 +18,9 @@ const REVEAL_CIRCLE_SIZE = BASE_CIRCLE_SIZE * 1.5;
 const HIGHLIGHT_DELAY_MS = 4000;
 const TEAM_COLORS = ["#F64D00", "#1F3A5F", "#2FBF71", "#F2C14E", "#00A3E0"];
 const GROUP_OPTIONS = [2, 3, 4, 5];
+const IOS_MAX_TOUCHES = 5;
+const OVERFLOW_ALERT_COOLDOWN_MS = 4000;
+const MAX_TOUCH_HINT_DURATION_MS = 1600;
 
 export default function App() {
   const { isDark } = useAppTheme();
@@ -30,6 +33,7 @@ export default function App() {
   const [teamNumbers, setTeamNumbers] = useState<Record<string, number>>({});
   const [revealedTouches, setRevealedTouches] = useState<TouchPoint[]>([]);
   const [frozenTouches, setFrozenTouches] = useState<TouchPoint[]>([]);
+  const [showMaxTouchHint, setShowMaxTouchHint] = useState(false);
   const [toggleRect, setToggleRect] = useState<{
     x: number;
     y: number;
@@ -50,6 +54,10 @@ export default function App() {
   const touchSignatureRef = useRef<string>("");
   const prevTouchIdsRef = useRef<Set<string>>(new Set());
   const latestTouchesRef = useRef<TouchPoint[]>([]);
+  const maxTouchHintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+  const lastOverflowAlertAtRef = useRef<number>(0);
   const activeTeamColors = selectedGroups
     ? TEAM_COLORS.slice(0, selectedGroups)
     : [];
@@ -122,6 +130,48 @@ export default function App() {
     preRevealHapticsRef.current = [];
   };
 
+  const resetInteractionForOverflow = () => {
+    setTouches([]);
+    setShowMaxTouchHint(false);
+    resetReveal();
+    stableCountRef.current = 0;
+    touchSignatureRef.current = "";
+    prevTouchIdsRef.current = new Set();
+    latestTouchesRef.current = [];
+    if (highlightTimer.current) {
+      clearTimeout(highlightTimer.current);
+      highlightTimer.current = null;
+    }
+  };
+
+  const showOverflowAlert = () => {
+    const now = Date.now();
+    if (now - lastOverflowAlertAtRef.current < OVERFLOW_ALERT_COOLDOWN_MS) {
+      return;
+    }
+    lastOverflowAlertAtRef.current = now;
+    Alert.alert(
+      "Too many fingers (max. 5 fingers). Lift one finger and try again."
+    );
+  };
+
+  const maybeShowMaxTouchHint = (count: number) => {
+    if (Platform.OS !== "ios" || Platform.isPad) {
+      return;
+    }
+    if (count !== IOS_MAX_TOUCHES) {
+      return;
+    }
+    setShowMaxTouchHint(true);
+    if (maxTouchHintTimerRef.current) {
+      clearTimeout(maxTouchHintTimerRef.current);
+    }
+    maxTouchHintTimerRef.current = setTimeout(() => {
+      setShowMaxTouchHint(false);
+      maxTouchHintTimerRef.current = null;
+    }, MAX_TOUCH_HINT_DURATION_MS);
+  };
+
   const schedulePreRevealHaptics = (
     totalDelayMs: number,
     startAfterMs: number
@@ -155,7 +205,11 @@ export default function App() {
     });
   };
 
-  const updateTouches = (nextTouches: TouchPoint[], isTouchStart: boolean) => {
+  const updateTouches = (
+    nextTouches: TouchPoint[],
+    isTouchStart: boolean,
+    phase: "down" | "move" | "up" | "cancel"
+  ) => {
     if (!selectedGroups) {
       return;
     }
@@ -170,6 +224,19 @@ export default function App() {
     const visibleTouches = filteredTouches;
     setTouches(visibleTouches);
     latestTouchesRef.current = visibleTouches;
+    maybeShowMaxTouchHint(visibleTouches.length);
+
+    if (
+      Platform.OS === "ios" &&
+      !Platform.isPad &&
+      phase === "move" &&
+      prevTouchIdsRef.current.size > 0 &&
+      nextTouches.length === 0
+    ) {
+      resetInteractionForOverflow();
+      showOverflowAlert();
+      return;
+    }
 
     if (isRevealed) {
       if (visibleTouches.length === 0) {
@@ -230,6 +297,9 @@ export default function App() {
       if (highlightTimer.current) {
         clearTimeout(highlightTimer.current);
       }
+      if (maxTouchHintTimerRef.current) {
+        clearTimeout(maxTouchHintTimerRef.current);
+      }
     };
   }, []);
 
@@ -240,7 +310,7 @@ export default function App() {
         x: touch.absoluteX,
         y: touch.absoluteY,
       }));
-      scheduleOnRN(updateTouches, nextTouches, true);
+      scheduleOnRN(updateTouches, nextTouches, true, "down");
     })
     .onTouchesMove((event) => {
       const nextTouches = event.allTouches.map((touch) => ({
@@ -248,7 +318,7 @@ export default function App() {
         x: touch.absoluteX,
         y: touch.absoluteY,
       }));
-      scheduleOnRN(updateTouches, nextTouches, false);
+      scheduleOnRN(updateTouches, nextTouches, false, "move");
     })
     .onTouchesUp((event) => {
       const nextTouches = event.allTouches.map((touch) => ({
@@ -256,7 +326,7 @@ export default function App() {
         x: touch.absoluteX,
         y: touch.absoluteY,
       }));
-      scheduleOnRN(updateTouches, nextTouches, false);
+      scheduleOnRN(updateTouches, nextTouches, false, "up");
     })
     .onTouchesCancelled((event) => {
       const nextTouches = event.allTouches.map((touch) => ({
@@ -264,12 +334,30 @@ export default function App() {
         x: touch.absoluteX,
         y: touch.absoluteY,
       }));
-      scheduleOnRN(updateTouches, nextTouches, false);
+      scheduleOnRN(updateTouches, nextTouches, false, "cancel");
+      if (Platform.OS === "ios" && !Platform.isPad) {
+        scheduleOnRN(resetInteractionForOverflow);
+        scheduleOnRN(showOverflowAlert);
+      }
     });
 
   return (
     <GestureDetector gesture={touchGesture}>
       <View className={cn("flex-1", isDark ? "bg-[#0B0B0B]" : "bg-[#E4E4E4]")}>
+        {selectedGroups && showMaxTouchHint ? (
+          <View className="absolute top-6 left-0 right-0 z-20 items-center pointer-events-none">
+            <View
+              className={cn(
+                "px-4 py-2 rounded-full",
+                isDark ? "bg-white/10" : "bg-black/10"
+              )}
+            >
+              <AppText className={cn(isDark ? "text-white" : "text-black")}>
+                Max 5 fingers on this device
+              </AppText>
+            </View>
+          </View>
+        ) : null}
         {!selectedGroups && (
           <View
             ref={toggleRef}
