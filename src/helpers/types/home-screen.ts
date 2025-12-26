@@ -1,6 +1,6 @@
 import type { RefObject } from "react";
 import type { View } from "react-native";
-import type { TouchPoint } from "./touch-point";
+import type { SharedValue } from "react-native-reanimated";
 
 export type PlayerCardProps = {
   count: number;
@@ -11,8 +11,11 @@ export type PlayerCardProps = {
 };
 
 export type DotProps = {
-  x: number;
-  y: number;
+  x: SharedValue<number>;
+  y: SharedValue<number>;
+  active: SharedValue<number>;
+  opacity: SharedValue<number>;
+  scale: SharedValue<number>;
   baseColor: string;
   revealColor: string;
   isRevealed: boolean;
@@ -24,12 +27,14 @@ export type DotProps = {
 export type SelectedPlayersLayerProps = {
   selectedGroups: number | null;
   isDark: boolean;
-  touches: TouchPoint[];
-  revealedTouches: TouchPoint[];
-  frozenTouches: TouchPoint[];
+  slotX: SharedValue<number>[];
+  slotY: SharedValue<number>[];
+  slotActive: SharedValue<number>[];
+  slotOpacity: SharedValue<number>[];
+  slotScale: SharedValue<number>[];
+  slotRevealColors: string[];
+  slotRevealLabels: (string | null)[];
   isRevealed: boolean;
-  teamAssignments: Record<string, string>;
-  teamNumbers: Record<string, number>;
   baseSize: number;
   revealSize: number;
   onBack: () => void;

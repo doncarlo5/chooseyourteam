@@ -1,12 +1,21 @@
 import { AppText } from "@/src/components/app-text";
 import * as Haptics from "expo-haptics";
 import { StatusBar } from "expo-status-bar";
-import { Card, PressableFeedback, cn, useThemeColor } from "heroui-native";
-import { useEffect, useRef, useState } from "react";
+import { Card, cn, PressableFeedback, useThemeColor } from "heroui-native";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Platform, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, { Easing, FadeInDown } from "react-native-reanimated";
-import { scheduleOnRN } from "react-native-worklets";
+import Animated, {
+  cancelAnimation,
+  Easing,
+  FadeInDown,
+  makeMutable,
+  runOnJS,
+  useSharedValue,
+  withDelay,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { ThemeToggle } from "../../components/theme-toggle";
 import { useAppTheme } from "../../contexts/app-theme-context";
 import type { PlayerCardProps } from "../../helpers/types/home-screen";
@@ -15,52 +24,87 @@ import SelectedPlayersLayer from "./selected-players-layer";
 
 const BASE_CIRCLE_SIZE = 100;
 const REVEAL_CIRCLE_SIZE = BASE_CIRCLE_SIZE * 1.5;
-const HIGHLIGHT_DELAY_MS = 4000;
+const HIGHLIGHT_DELAY_MS = 3000;
 const TEAM_COLORS = ["#F64D00", "#1F3A5F", "#2FBF71", "#F2C14E", "#00A3E0"];
 const GROUP_OPTIONS = [2, 3, 4, 5];
 const IOS_MAX_TOUCHES = 5;
+const MAX_SLOTS = 12;
 const OVERFLOW_ALERT_COOLDOWN_MS = 4000;
 const MAX_TOUCH_HINT_DURATION_MS = 1600;
+
+type TouchRect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  isReady: boolean;
+};
 
 export default function App() {
   const { isDark } = useAppTheme();
   const [selectedGroups, setSelectedGroups] = useState<number | null>(null);
-  const [touches, setTouches] = useState<TouchPoint[]>([]);
   const [isRevealed, setIsRevealed] = useState(false);
-  const [teamAssignments, setTeamAssignments] = useState<
-    Record<string, string>
-  >({});
-  const [teamNumbers, setTeamNumbers] = useState<Record<string, number>>({});
-  const [revealedTouches, setRevealedTouches] = useState<TouchPoint[]>([]);
-  const [frozenTouches, setFrozenTouches] = useState<TouchPoint[]>([]);
+  const [slotRevealColors, setSlotRevealColors] = useState<string[]>(
+    Array.from({ length: MAX_SLOTS }, () => "")
+  );
+  const [slotRevealLabels, setSlotRevealLabels] = useState<(string | null)[]>(
+    Array.from({ length: MAX_SLOTS }, () => null)
+  );
   const [showMaxTouchHint, setShowMaxTouchHint] = useState(false);
-  const [toggleRect, setToggleRect] = useState<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null>(null);
-  const [backRect, setBackRect] = useState<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null>(null);
-  const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const preRevealHapticsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const toggleRef = useRef<View>(null);
   const backRef = useRef<View>(null);
-  const stableCountRef = useRef<number>(0);
-  const touchSignatureRef = useRef<string>("");
-  const prevTouchIdsRef = useRef<Set<string>>(new Set());
-  const latestTouchesRef = useRef<TouchPoint[]>([]);
   const maxTouchHintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
   const lastOverflowAlertAtRef = useRef<number>(0);
+  const isEnabledSv = useSharedValue(0);
+  const isRevealedSv = useSharedValue(0);
+  const stableCountSv = useSharedValue(0);
+  const revealProgress = useSharedValue(0);
+  const revealToken = useSharedValue(0);
+  const toggleRectSv = useSharedValue<TouchRect>({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+    isReady: false,
+  });
+  const backRectSv = useSharedValue<TouchRect>({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+    isReady: false,
+  });
+  const slotActive = useMemo(
+    () => Array.from({ length: MAX_SLOTS }, () => makeMutable(0)),
+    []
+  );
+  const slotX = useMemo(
+    () => Array.from({ length: MAX_SLOTS }, () => makeMutable(0)),
+    []
+  );
+  const slotY = useMemo(
+    () => Array.from({ length: MAX_SLOTS }, () => makeMutable(0)),
+    []
+  );
+  const slotOpacity = useMemo(
+    () => Array.from({ length: MAX_SLOTS }, () => makeMutable(0)),
+    []
+  );
+  const slotScale = useMemo(
+    () => Array.from({ length: MAX_SLOTS }, () => makeMutable(1)),
+    []
+  );
+  const slotTouchId = useMemo(
+    () => Array.from({ length: MAX_SLOTS }, () => makeMutable(-1)),
+    []
+  );
   const activeTeamColors = selectedGroups
     ? TEAM_COLORS.slice(0, selectedGroups)
     : [];
+  const isIosPhone = Platform.OS === "ios" && !Platform.isPad;
 
   const assignTeams = (touchList: TouchPoint[]) => {
     const assignments: Record<string, string> = {};
@@ -100,48 +144,36 @@ export default function App() {
     return { assignments, numbers };
   };
 
-  const isTouchInsideRect = (
-    touch: TouchPoint,
-    rect: { x: number; y: number; width: number; height: number } | null
-  ) => {
-    if (!rect) {
-      return false;
-    }
-    return (
-      touch.x >= rect.x &&
-      touch.x <= rect.x + rect.width &&
-      touch.y >= rect.y &&
-      touch.y <= rect.y + rect.height
-    );
-  };
-
-  const resetReveal = () => {
+  const resetRevealState = (shouldCancelAnimation = true) => {
     setIsRevealed(false);
-    setTeamAssignments({});
-    setTeamNumbers({});
-    setRevealedTouches([]);
-    setFrozenTouches([]);
-    prevTouchIdsRef.current = new Set();
-    if (highlightTimer.current) {
-      clearTimeout(highlightTimer.current);
-      highlightTimer.current = null;
+    setSlotRevealColors(Array.from({ length: MAX_SLOTS }, () => ""));
+    setSlotRevealLabels(Array.from({ length: MAX_SLOTS }, () => null));
+    isRevealedSv.value = 0;
+    if (shouldCancelAnimation) {
+      cancelAnimation(revealProgress);
+      revealProgress.value = 0;
     }
     preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
     preRevealHapticsRef.current = [];
   };
 
-  const resetInteractionForOverflow = () => {
-    setTouches([]);
+  const resetAllSlots = () => {
+    resetRevealState();
     setShowMaxTouchHint(false);
-    resetReveal();
-    stableCountRef.current = 0;
-    touchSignatureRef.current = "";
-    prevTouchIdsRef.current = new Set();
-    latestTouchesRef.current = [];
-    if (highlightTimer.current) {
-      clearTimeout(highlightTimer.current);
-      highlightTimer.current = null;
+    clearMaxTouchHintTimer();
+    stableCountSv.value = 0;
+    revealToken.value += 1;
+    for (let i = 0; i < MAX_SLOTS; i += 1) {
+      slotActive[i].value = 0;
+      slotOpacity[i].value = 0;
+      slotScale[i].value = 1;
+      slotTouchId[i].value = -1;
     }
+  };
+
+  const resetInteractionForOverflow = () => {
+    setShowMaxTouchHint(false);
+    resetAllSlots();
   };
 
   const showOverflowAlert = () => {
@@ -204,141 +236,294 @@ export default function App() {
       }
     });
   };
+  const handleCountChange = (count: number) => {
+    resetRevealState(false);
+    if (count > 0) {
+      schedulePreRevealHaptics(HIGHLIGHT_DELAY_MS, 2000);
+    } else {
+      setShowMaxTouchHint(false);
+      clearMaxTouchHintTimer();
+    }
+    maybeShowMaxTouchHint(count);
+  };
 
-  const updateTouches = (
-    nextTouches: TouchPoint[],
-    isTouchStart: boolean,
-    phase: "down" | "move" | "up" | "cancel"
-  ) => {
-    if (!selectedGroups) {
+  const handleReveal = () => {
+    if (activeTeamColors.length === 0) {
       return;
     }
-    if (frozenTouches.length > 0) {
-      return;
-    }
-    const filteredTouches = nextTouches.filter(
-      (touch) =>
-        !isTouchInsideRect(touch, toggleRect) &&
-        !isTouchInsideRect(touch, backRect)
-    );
-    const visibleTouches = filteredTouches;
-    setTouches(visibleTouches);
-    latestTouchesRef.current = visibleTouches;
-    maybeShowMaxTouchHint(visibleTouches.length);
-
-    if (
-      Platform.OS === "ios" &&
-      !Platform.isPad &&
-      phase === "move" &&
-      prevTouchIdsRef.current.size > 0 &&
-      nextTouches.length === 0
-    ) {
-      resetInteractionForOverflow();
-      showOverflowAlert();
-      return;
-    }
-
-    if (isRevealed) {
-      if (visibleTouches.length === 0) {
-        setFrozenTouches(revealedTouches);
-        return;
+    const touches: TouchPoint[] = [];
+    for (let i = 0; i < MAX_SLOTS; i += 1) {
+      if (slotActive[i].value === 1 && slotTouchId[i].value !== -1) {
+        touches.push({
+          id: String(slotTouchId[i].value),
+          x: slotX[i].value,
+          y: slotY[i].value,
+        });
       }
-
-      setRevealedTouches((prevTouches) =>
-        prevTouches.map((touch) => {
-          const updated = visibleTouches.find((item) => item.id === touch.id);
-          return updated ?? touch;
-        })
-      );
-      return;
     }
 
-    const currentIds = new Set(visibleTouches.map((touch) => touch.id));
-    const hasNewTouch = visibleTouches.some(
-      (touch) => !prevTouchIdsRef.current.has(touch.id)
+    const { assignments, numbers } = assignTeams(touches);
+    const nextRevealColors = Array.from({ length: MAX_SLOTS }, () => "");
+    const nextRevealLabels: (string | null)[] = Array.from(
+      { length: MAX_SLOTS },
+      () => null
     );
-    if (isTouchStart && hasNewTouch) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    prevTouchIdsRef.current = currentIds;
-    if (nextTouches.length === 0) {
-      prevTouchIdsRef.current = new Set();
+
+    for (let i = 0; i < MAX_SLOTS; i += 1) {
+      const touchId = slotTouchId[i].value;
+      if (slotActive[i].value !== 1 || touchId === -1) {
+        continue;
+      }
+      const id = String(touchId);
+      nextRevealColors[i] = assignments[id] ?? "";
+      const teamNumber = numbers[id];
+      nextRevealLabels[i] = teamNumber ? String(teamNumber) : null;
     }
 
-    const currentCount = visibleTouches.length;
-    const signature = visibleTouches
-      .map((touch) => touch.id)
-      .sort()
-      .join("|");
-    touchSignatureRef.current = signature;
-    if (currentCount !== stableCountRef.current) {
-      stableCountRef.current = currentCount;
-      resetReveal();
-      if (currentCount > 0) {
-        schedulePreRevealHaptics(HIGHLIGHT_DELAY_MS, 2000);
-        highlightTimer.current = setTimeout(() => {
-          if (stableCountRef.current === currentCount) {
-            const latestTouches = latestTouchesRef.current;
-            const { assignments, numbers } = assignTeams(latestTouches);
-            setTeamAssignments(assignments);
-            setTeamNumbers(numbers);
-            setIsRevealed(true);
-            setRevealedTouches(latestTouches);
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          }
-        }, HIGHLIGHT_DELAY_MS);
+    setSlotRevealColors(nextRevealColors);
+    setSlotRevealLabels(nextRevealLabels);
+    setIsRevealed(true);
+    preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
+    preRevealHapticsRef.current = [];
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
+
+  const handleFingerHaptic = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+  };
+
+  const clearMaxTouchHintTimer = () => {
+    if (maxTouchHintTimerRef.current) {
+      clearTimeout(maxTouchHintTimerRef.current);
+      maxTouchHintTimerRef.current = null;
+    }
+  };
+
+  const isPointInsideRect = (x: number, y: number, rect: TouchRect) => {
+    "worklet";
+    if (!rect.isReady) {
+      return false;
+    }
+    return (
+      x >= rect.x &&
+      x <= rect.x + rect.width &&
+      y >= rect.y &&
+      y <= rect.y + rect.height
+    );
+  };
+
+  const isTouchIgnored = (x: number, y: number) => {
+    "worklet";
+    return (
+      isPointInsideRect(x, y, toggleRectSv.value) ||
+      isPointInsideRect(x, y, backRectSv.value)
+    );
+  };
+
+  const findSlotByTouchId = (touchId: number) => {
+    "worklet";
+    for (let i = 0; i < MAX_SLOTS; i += 1) {
+      if (slotTouchId[i].value === touchId) {
+        return i;
       }
+    }
+    return -1;
+  };
+
+  const allocFreeSlot = (touchId: number) => {
+    "worklet";
+    for (let i = 0; i < MAX_SLOTS; i += 1) {
+      if (slotTouchId[i].value === -1) {
+        slotTouchId[i].value = touchId;
+        slotActive[i].value = 1;
+        return i;
+      }
+    }
+    return -1;
+  };
+
+  const countVisibleTouches = () => {
+    "worklet";
+    let count = 0;
+    for (let i = 0; i < MAX_SLOTS; i += 1) {
+      if (slotActive[i].value === 1 && slotTouchId[i].value !== -1) {
+        count += 1;
+      }
+    }
+    return count;
+  };
+
+  const startCountdown = (count: number) => {
+    "worklet";
+    cancelAnimation(revealProgress);
+    revealProgress.value = 0;
+    revealToken.value += 1;
+    const token = revealToken.value;
+
+    runOnJS(handleCountChange)(count);
+    if (count < 2) {
       return;
     }
+
+    revealProgress.value = withDelay(
+      HIGHLIGHT_DELAY_MS,
+      withTiming(1, { duration: 0 }, (finished) => {
+        if (finished && token === revealToken.value) {
+          isRevealedSv.value = 1;
+          runOnJS(handleReveal)();
+        }
+      })
+    );
+  };
+
+  const updateStableCount = (count: number) => {
+    "worklet";
+    if (isRevealedSv.value === 1) {
+      return;
+    }
+    if (count === stableCountSv.value) {
+      return;
+    }
+    stableCountSv.value = count;
+    startCountdown(count);
   };
 
   useEffect(() => {
     return () => {
-      if (highlightTimer.current) {
-        clearTimeout(highlightTimer.current);
-      }
-      if (maxTouchHintTimerRef.current) {
-        clearTimeout(maxTouchHintTimerRef.current);
-      }
+      clearMaxTouchHintTimer();
+      preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
+      preRevealHapticsRef.current = [];
     };
   }, []);
 
+  useEffect(() => {
+    isEnabledSv.value = selectedGroups ? 1 : 0;
+    resetAllSlots();
+  }, [selectedGroups]);
+
   const touchGesture = Gesture.Manual()
     .onTouchesDown((event) => {
-      const nextTouches = event.allTouches.map((touch) => ({
-        id: String(touch.id),
-        x: touch.absoluteX,
-        y: touch.absoluteY,
-      }));
-      scheduleOnRN(updateTouches, nextTouches, true, "down");
+      "worklet";
+      if (isEnabledSv.value === 0) {
+        return;
+      }
+      let didAddTouch = false;
+      for (const touch of event.changedTouches) {
+        const x = touch.absoluteX;
+        const y = touch.absoluteY;
+        const ignored = isTouchIgnored(x, y);
+        if (isRevealedSv.value === 1) {
+          const slot = findSlotByTouchId(touch.id);
+          if (slot !== -1) {
+            slotX[slot].value = x;
+            slotY[slot].value = y;
+          }
+          continue;
+        }
+        if (ignored) {
+          continue;
+        }
+        let slot = findSlotByTouchId(touch.id);
+        if (slot === -1) {
+          slot = allocFreeSlot(touch.id);
+          if (slot !== -1) {
+            didAddTouch = true;
+            slotOpacity[slot].value = 0;
+            slotScale[slot].value = 0.7;
+            slotOpacity[slot].value = withTiming(1, { duration: 120 });
+            slotScale[slot].value = withSpring(1, {
+              damping: 40,
+              stiffness: 5000,
+            });
+          }
+        }
+        if (slot !== -1) {
+          slotX[slot].value = x;
+          slotY[slot].value = y;
+          slotActive[slot].value = ignored ? 0 : 1;
+        }
+      }
+      if (didAddTouch) {
+        runOnJS(handleFingerHaptic)();
+      }
+      updateStableCount(countVisibleTouches());
     })
     .onTouchesMove((event) => {
-      const nextTouches = event.allTouches.map((touch) => ({
-        id: String(touch.id),
-        x: touch.absoluteX,
-        y: touch.absoluteY,
-      }));
-      scheduleOnRN(updateTouches, nextTouches, false, "move");
-    })
-    .onTouchesUp((event) => {
-      const nextTouches = event.allTouches.map((touch) => ({
-        id: String(touch.id),
-        x: touch.absoluteX,
-        y: touch.absoluteY,
-      }));
-      scheduleOnRN(updateTouches, nextTouches, false, "up");
-    })
-    .onTouchesCancelled((event) => {
-      const nextTouches = event.allTouches.map((touch) => ({
-        id: String(touch.id),
-        x: touch.absoluteX,
-        y: touch.absoluteY,
-      }));
-      scheduleOnRN(updateTouches, nextTouches, false, "cancel");
-      if (Platform.OS === "ios" && !Platform.isPad) {
-        scheduleOnRN(resetInteractionForOverflow);
-        scheduleOnRN(showOverflowAlert);
+      "worklet";
+      if (isEnabledSv.value === 0) {
+        return;
       }
+      let visibilityChanged = false;
+      for (const touch of event.changedTouches) {
+        const slot = findSlotByTouchId(touch.id);
+        if (slot === -1) {
+          continue;
+        }
+        const x = touch.absoluteX;
+        const y = touch.absoluteY;
+        slotX[slot].value = x;
+        slotY[slot].value = y;
+        if (isRevealedSv.value === 0) {
+          const ignored = isTouchIgnored(x, y);
+          const nextActive = ignored ? 0 : 1;
+          if (slotActive[slot].value !== nextActive) {
+            slotActive[slot].value = nextActive;
+            visibilityChanged = true;
+          }
+        }
+      }
+      if (visibilityChanged) {
+        updateStableCount(countVisibleTouches());
+      }
+    })
+    .onTouchesUp((event, stateManager) => {
+      "worklet";
+      if (isEnabledSv.value === 0) {
+        return;
+      }
+      for (const touch of event.changedTouches) {
+        const slot = findSlotByTouchId(touch.id);
+        if (slot === -1) {
+          continue;
+        }
+        if (isRevealedSv.value === 1) {
+          slotTouchId[slot].value = -1;
+        } else {
+          slotTouchId[slot].value = -1;
+          slotOpacity[slot].value = withTiming(0, { duration: 140 }, (done) => {
+            if (done) {
+              slotActive[slot].value = 0;
+              slotScale[slot].value = 1;
+            }
+          });
+        }
+      }
+      updateStableCount(countVisibleTouches());
+      if (event.numberOfTouches === 0) {
+        stateManager.end();
+      }
+    })
+    .onTouchesCancelled((event, stateManager) => {
+      "worklet";
+      if (isEnabledSv.value === 0) {
+        return;
+      }
+      for (let i = 0; i < MAX_SLOTS; i += 1) {
+        if (isRevealedSv.value === 1) {
+          slotTouchId[i].value = -1;
+        } else {
+          slotActive[i].value = 0;
+          slotOpacity[i].value = 0;
+          slotScale[i].value = 1;
+          slotTouchId[i].value = -1;
+        }
+      }
+      updateStableCount(0);
+      if (isIosPhone) {
+        runOnJS(resetInteractionForOverflow)();
+        runOnJS(showOverflowAlert)();
+      }
+      stateManager.end();
     });
 
   return (
@@ -364,7 +549,7 @@ export default function App() {
             className="absolute top-16 right-6 z-10 flex-row items-center gap-2 rounded-full"
             onLayout={() => {
               toggleRef.current?.measureInWindow((x, y, width, height) => {
-                setToggleRect({ x, y, width, height });
+                toggleRectSv.value = { x, y, width, height, isReady: true };
               });
             }}
           >
@@ -375,28 +560,23 @@ export default function App() {
         <SelectedPlayersLayer
           selectedGroups={selectedGroups}
           isDark={isDark}
-          touches={touches}
-          revealedTouches={revealedTouches}
-          frozenTouches={frozenTouches}
+          slotX={slotX}
+          slotY={slotY}
+          slotActive={slotActive}
+          slotOpacity={slotOpacity}
+          slotScale={slotScale}
+          slotRevealColors={slotRevealColors}
+          slotRevealLabels={slotRevealLabels}
           isRevealed={isRevealed}
-          teamAssignments={teamAssignments}
-          teamNumbers={teamNumbers}
           baseSize={BASE_CIRCLE_SIZE}
           revealSize={REVEAL_CIRCLE_SIZE}
           backRef={backRef}
           onBack={() => {
             setSelectedGroups(null);
-            setTouches([]);
-            resetReveal();
-            stableCountRef.current = 0;
-            touchSignatureRef.current = "";
-            if (highlightTimer.current) {
-              clearTimeout(highlightTimer.current);
-              highlightTimer.current = null;
-            }
+            resetAllSlots();
           }}
           onBackLayout={(rect) => {
-            setBackRect(rect);
+            backRectSv.value = { ...rect, isReady: true };
           }}
         />
 
@@ -416,14 +596,6 @@ export default function App() {
                       isDark={isDark}
                       isDisabled={false}
                       onPress={() => {
-                        setTouches([]);
-                        resetReveal();
-                        stableCountRef.current = 0;
-                        touchSignatureRef.current = "";
-                        if (highlightTimer.current) {
-                          clearTimeout(highlightTimer.current);
-                          highlightTimer.current = null;
-                        }
                         setSelectedGroups(count);
                       }}
                     />
