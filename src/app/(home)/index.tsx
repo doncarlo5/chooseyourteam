@@ -11,12 +11,12 @@ import Animated, {
   Easing,
   FadeInDown,
   makeMutable,
-  runOnJS,
   useSharedValue,
   withDelay,
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import { ThemeToggle } from "../../components/theme-toggle";
 import { useAppTheme } from "../../contexts/app-theme-context";
 import type { PlayerCardProps } from "../../helpers/types/home-screen";
@@ -126,13 +126,7 @@ export default function App() {
       return result;
     })();
     let colorPool = [...activeTeamColors];
-    const colorToNumber: Record<string, number> = baseOrder.reduce(
-      (acc, color, idx) => {
-        acc[color] = idx + 1;
-        return acc;
-      },
-      {} as Record<string, number>
-    );
+    const usedColors = new Set<string>();
 
     const shuffle = <T,>(values: T[]): T[] => {
       const result = [...values];
@@ -150,6 +144,20 @@ export default function App() {
       const poolIndex = index % activeTeamColors.length;
       const color = colorPool[poolIndex];
       assignments[touch.id] = color;
+      usedColors.add(color);
+    });
+
+    const compactOrder = baseOrder.filter((color) => usedColors.has(color));
+    const colorToNumber = compactOrder.reduce<Record<string, number>>(
+      (acc, color, idx) => {
+        acc[color] = idx + 1;
+        return acc;
+      },
+      {}
+    );
+
+    touchList.forEach((touch) => {
+      const color = assignments[touch.id];
       numbers[touch.id] = colorToNumber[color];
     });
 
@@ -369,7 +377,7 @@ export default function App() {
     revealToken.value += 1;
     const token = revealToken.value;
 
-    runOnJS(handleCountChange)(count);
+    scheduleOnRN(handleCountChange, count);
     if (count < 2) {
       return;
     }
@@ -379,7 +387,7 @@ export default function App() {
       withTiming(1, { duration: 0 }, (finished) => {
         if (finished && token === revealToken.value) {
           isRevealedSv.value = 1;
-          runOnJS(handleReveal)();
+          scheduleOnRN(handleReveal);
         }
       })
     );
@@ -460,8 +468,8 @@ export default function App() {
         }
       }
       if (didAddTouch) {
-        runOnJS(handleFingerHaptic)();
-        runOnJS(playBubble)();
+        scheduleOnRN(handleFingerHaptic);
+        scheduleOnRN(playBubble);
       }
       updateStableCount(countVisibleTouches());
     })
@@ -537,7 +545,7 @@ export default function App() {
       }
       updateStableCount(0);
       if (isIosPhone) {
-        runOnJS(resetAllSlots)();
+        scheduleOnRN(resetAllSlots);
       }
       stateManager.end();
     });
