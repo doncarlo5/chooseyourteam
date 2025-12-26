@@ -1,4 +1,5 @@
 import { AppText } from "@/src/components/app-text";
+import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import * as Haptics from "expo-haptics";
 import { StatusBar } from "expo-status-bar";
 import { Card, cn, PressableFeedback, useThemeColor } from "heroui-native";
@@ -31,6 +32,7 @@ const IOS_MAX_TOUCHES = 5;
 const MAX_SLOTS = 12;
 const OVERFLOW_ALERT_COOLDOWN_MS = 4000;
 const MAX_TOUCH_HINT_DURATION_MS = 1600;
+const BUBBLE_THROTTLE_MS = 80;
 
 type TouchRect = {
   x: number;
@@ -58,6 +60,11 @@ export default function App() {
     null
   );
   const lastOverflowAlertAtRef = useRef<number>(0);
+  const lastBubbleAtRef = useRef<number>(0);
+  const bubblePlayer = useAudioPlayer(
+    require("../../../assets/audio/bubble.wav"),
+    { keepAudioSessionActive: true, downloadFirst: true }
+  );
   const isEnabledSv = useSharedValue(0);
   const isRevealedSv = useSharedValue(0);
   const stableCountSv = useSharedValue(0);
@@ -112,8 +119,22 @@ export default function App() {
     if (activeTeamColors.length === 0) {
       return { assignments, numbers };
     }
+    const baseOrder = (() => {
+      const result = [...activeTeamColors];
+      for (let i = result.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+      }
+      return result;
+    })();
     let colorPool = [...activeTeamColors];
-    let colorToNumber: Record<string, number> = {};
+    const colorToNumber: Record<string, number> = baseOrder.reduce(
+      (acc, color, idx) => {
+        acc[color] = idx + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     const shuffle = <T,>(values: T[]): T[] => {
       const result = [...values];
@@ -127,13 +148,6 @@ export default function App() {
     touchList.forEach((touch, index) => {
       if (index % activeTeamColors.length === 0) {
         colorPool = shuffle(activeTeamColors);
-        colorToNumber = colorPool.reduce<Record<string, number>>(
-          (acc, color, idx) => {
-            acc[color] = idx + 1;
-            return acc;
-          },
-          {}
-        );
       }
       const poolIndex = index % activeTeamColors.length;
       const color = colorPool[poolIndex];
@@ -238,7 +252,7 @@ export default function App() {
   };
   const handleCountChange = (count: number) => {
     resetRevealState(false);
-    if (count > 0) {
+    if (count >= 2) {
       schedulePreRevealHaptics(HIGHLIGHT_DELAY_MS, 2000);
     } else {
       setShowMaxTouchHint(false);
@@ -290,6 +304,19 @@ export default function App() {
 
   const handleFingerHaptic = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+  };
+
+  const playBubble = () => {
+    const now = Date.now();
+    if (now - lastBubbleAtRef.current < BUBBLE_THROTTLE_MS) {
+      return;
+    }
+    lastBubbleAtRef.current = now;
+    if (!bubblePlayer.isLoaded) {
+      return;
+    }
+    bubblePlayer.seekTo(0).catch(() => {});
+    bubblePlayer.play();
   };
 
   const clearMaxTouchHintTimer = () => {
@@ -389,6 +416,13 @@ export default function App() {
   };
 
   useEffect(() => {
+    void setAudioModeAsync({
+      playsInSilentMode: false,
+      interruptionMode: "mixWithOthers",
+      allowsRecording: false,
+      shouldPlayInBackground: false,
+      shouldRouteThroughEarpiece: false,
+    });
     return () => {
       clearMaxTouchHintTimer();
       preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
@@ -445,6 +479,7 @@ export default function App() {
       }
       if (didAddTouch) {
         runOnJS(handleFingerHaptic)();
+        runOnJS(playBubble)();
       }
       updateStableCount(countVisibleTouches());
     })
