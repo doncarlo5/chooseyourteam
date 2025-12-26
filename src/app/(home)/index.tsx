@@ -13,6 +13,7 @@ import Animated, {
   makeMutable,
   useSharedValue,
   withDelay,
+  withRepeat,
   withSpring,
   withTiming,
 } from "react-native-reanimated";
@@ -32,6 +33,9 @@ const IOS_MAX_TOUCHES = 5;
 const MAX_SLOTS = 12;
 const MAX_TOUCH_HINT_DURATION_MS = 1600;
 const BUBBLE_THROTTLE_MS = 80;
+const SHAKE_DURATION_MS = 800;
+const SHAKE_STEP_MS = 30;
+const SHAKE_CYCLES = Math.max(1, Math.floor(SHAKE_DURATION_MS / SHAKE_STEP_MS));
 
 type TouchRect = {
   x: number;
@@ -68,6 +72,7 @@ export default function App() {
   const stableCountSv = useSharedValue(0);
   const revealProgress = useSharedValue(0);
   const revealToken = useSharedValue(0);
+  const shakePhase = useSharedValue(0.5);
   const toggleRectSv = useSharedValue<TouchRect>({
     x: 0,
     y: 0,
@@ -172,6 +177,8 @@ export default function App() {
     if (shouldCancelAnimation) {
       cancelAnimation(revealProgress);
       revealProgress.value = 0;
+      cancelAnimation(shakePhase);
+      shakePhase.value = 0.5;
     }
     preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
     preRevealHapticsRef.current = [];
@@ -374,6 +381,8 @@ export default function App() {
     "worklet";
     cancelAnimation(revealProgress);
     revealProgress.value = 0;
+    cancelAnimation(shakePhase);
+    shakePhase.value = 0.5;
     revealToken.value += 1;
     const token = revealToken.value;
 
@@ -381,6 +390,21 @@ export default function App() {
     if (count < 2) {
       return;
     }
+
+    const shakeDelay = Math.max(0, HIGHLIGHT_DELAY_MS - SHAKE_DURATION_MS);
+    shakePhase.value = withDelay(
+      shakeDelay,
+      withRepeat(
+        withTiming(1, { duration: SHAKE_STEP_MS }),
+        SHAKE_CYCLES,
+        true,
+        (finished) => {
+          if (finished) {
+            shakePhase.value = 0.8;
+          }
+        }
+      )
+    );
 
     revealProgress.value = withDelay(
       HIGHLIGHT_DELAY_MS,
@@ -589,6 +613,7 @@ export default function App() {
           slotActive={slotActive}
           slotOpacity={slotOpacity}
           slotScale={slotScale}
+          shakePhase={shakePhase}
           slotRevealColors={slotRevealColors}
           slotRevealLabels={slotRevealLabels}
           isRevealed={isRevealed}

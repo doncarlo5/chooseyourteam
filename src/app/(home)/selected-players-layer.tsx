@@ -13,6 +13,8 @@ import type {
   SelectedPlayersLayerProps,
 } from "../../helpers/types/home-screen";
 
+const SHAKE_AMPLITUDE = 10;
+
 const Dot = ({
   x,
   y,
@@ -25,6 +27,7 @@ const Dot = ({
   active,
   opacity,
   scale,
+  shakePhase,
 }: DotProps) => {
   const progress = useSharedValue(isRevealed ? 1 : 0);
   const size = useSharedValue(isRevealed ? revealSize : baseSize);
@@ -39,6 +42,7 @@ const Dot = ({
   const containerStyle = useAnimatedStyle(() => {
     const currentSize = size.value;
     const isVisible = active.value === 1;
+    const shakeOffset = (shakePhase.value - 0.5) * 2 * SHAKE_AMPLITUDE;
     return {
       position: "absolute",
       left: x.value - currentSize / 2,
@@ -48,7 +52,10 @@ const Dot = ({
       alignItems: "center",
       justifyContent: "center",
       opacity: isVisible ? opacity.value : 0,
-      transform: [{ scale: (isVisible ? 1 : 0.85) * scale.value }],
+      transform: [
+        { translateX: isVisible ? shakeOffset : 0 },
+        { scale: (isVisible ? 1 : 0.85) * scale.value },
+      ],
     };
   });
 
@@ -91,10 +98,7 @@ const Dot = ({
   });
 
   return (
-    <Animated.View
-      collapsable={false}
-      style={containerStyle}
-    >
+    <Animated.View collapsable={false} style={containerStyle}>
       <Animated.View style={ringStyle} />
       <Animated.View style={dotStyle} />
       {isRevealed && label ? (
@@ -114,6 +118,7 @@ export default function SelectedPlayersLayer({
   slotActive,
   slotOpacity,
   slotScale,
+  shakePhase,
   slotRevealColors,
   slotRevealLabels,
   isRevealed,
@@ -166,6 +171,7 @@ export default function SelectedPlayersLayer({
             active={active}
             opacity={slotOpacity[index]}
             scale={slotScale[index]}
+            shakePhase={shakePhase}
             baseColor={baseColor}
             revealColor={revealColor}
             isRevealed={isRevealed}

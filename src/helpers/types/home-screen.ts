@@ -16,6 +16,7 @@ export type DotProps = {
   active: SharedValue<number>;
   opacity: SharedValue<number>;
   scale: SharedValue<number>;
+  shakePhase: SharedValue<number>;
   baseColor: string;
   revealColor: string;
   isRevealed: boolean;
@@ -32,6 +33,7 @@ export type SelectedPlayersLayerProps = {
   slotActive: SharedValue<number>[];
   slotOpacity: SharedValue<number>[];
   slotScale: SharedValue<number>[];
+  shakePhase: SharedValue<number>;
   slotRevealColors: string[];
   slotRevealLabels: (string | null)[];
   isRevealed: boolean;
