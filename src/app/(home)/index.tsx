@@ -253,7 +253,7 @@ export default function App() {
   const handleCountChange = (count: number) => {
     resetRevealState(false);
     if (count >= 2) {
-      schedulePreRevealHaptics(HIGHLIGHT_DELAY_MS, 2000);
+      schedulePreRevealHaptics(HIGHLIGHT_DELAY_MS, 1000);
     } else {
       setShowMaxTouchHint(false);
       clearMaxTouchHintTimer();
@@ -303,7 +303,7 @@ export default function App() {
   };
 
   const handleFingerHaptic = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
   };
 
   const playBubble = () => {
