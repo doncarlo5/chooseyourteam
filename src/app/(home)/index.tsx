@@ -2,14 +2,12 @@ import { AppText } from "@/src/components/app-text";
 import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import * as Haptics from "expo-haptics";
 import { StatusBar } from "expo-status-bar";
-import { Card, cn, PressableFeedback, useThemeColor } from "heroui-native";
+import { cn } from "heroui-native";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Platform, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, {
+import {
   cancelAnimation,
-  Easing,
-  FadeInDown,
   makeMutable,
   useSharedValue,
   withDelay,
@@ -20,8 +18,8 @@ import Animated, {
 import { scheduleOnRN } from "react-native-worklets";
 import { ThemeToggle } from "../../components/theme-toggle";
 import { useAppTheme } from "../../contexts/app-theme-context";
-import type { PlayerCardProps } from "../../helpers/types/home-screen";
 import type { TouchPoint } from "../../helpers/types/touch-point";
+import { PlayerCard } from "./player-card";
 import SelectedPlayersLayer from "./selected-players-layer";
 
 const BASE_CIRCLE_SIZE = 100;
@@ -661,63 +659,5 @@ export default function App() {
         <StatusBar style={isDark ? "light" : "dark"} />
       </View>
     </GestureDetector>
-  );
-}
-
-function PlayerCard({
-  count,
-  index,
-  isDark,
-  isDisabled,
-  onPress,
-}: PlayerCardProps) {
-  const themeColorAccent = useThemeColor("accent");
-
-  return (
-    <Animated.View
-      entering={FadeInDown.duration(300)
-        .delay(index * 100)
-        .easing(Easing.out(Easing.ease))}
-      className="w-1/2 px-2 mb-4"
-      collapsable={false}
-    >
-      <PressableFeedback
-        onPress={onPress}
-        isDisabled={isDisabled}
-        feedbackVariant="ripple"
-        className="w-full rounded-3xl"
-        animation={{
-          ripple: {
-            backgroundColor: { value: themeColorAccent },
-            opacity: { value: [0, 0.2, 0] },
-            progress: { baseDuration: 600 },
-          },
-        }}
-      >
-        <Card
-          className={cn(
-            "p-0 rounded-3xl overflow-hidden shadow-sm shadow-black/10",
-            isDisabled && "opacity-50"
-          )}
-        >
-          <Card.Body className="h-10" />
-          <Card.Footer className="px-3 pb-4 flex-row items-end gap-4">
-            <View className="flex-1">
-              <Card.Title
-                className={cn(
-                  "text-5xl font-extrabold ",
-                  isDark ? "text-white" : "text-[#0B0B0B]"
-                )}
-              >
-                {count}
-              </Card.Title>
-              <Card.Description className="pl-0.5 leading-none text-muted">
-                teams
-              </Card.Description>
-            </View>
-          </Card.Footer>
-        </Card>
-      </PressableFeedback>
-    </Animated.View>
   );
 }
