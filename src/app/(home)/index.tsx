@@ -227,14 +227,17 @@ export default function App() {
     }
 
     const steps = [
-      { offset: 2200, style: Haptics.ImpactFeedbackStyle.Light },
-      { offset: 1900, style: Haptics.ImpactFeedbackStyle.Light },
-      { offset: 1600, style: Haptics.ImpactFeedbackStyle.Medium },
-      { offset: 1300, style: Haptics.ImpactFeedbackStyle.Medium },
-      { offset: 1000, style: Haptics.ImpactFeedbackStyle.Medium },
-      { offset: 700, style: Haptics.ImpactFeedbackStyle.Heavy },
-      { offset: 400, style: Haptics.ImpactFeedbackStyle.Heavy },
-      { offset: 200, style: Haptics.ImpactFeedbackStyle.Heavy },
+      { offset: 2600, style: Haptics.ImpactFeedbackStyle.Light },
+      { offset: 2300, style: Haptics.ImpactFeedbackStyle.Light },
+      { offset: 2000, style: Haptics.ImpactFeedbackStyle.Light },
+      { offset: 1600, style: Haptics.ImpactFeedbackStyle.Light },
+      { offset: 1400, style: Haptics.ImpactFeedbackStyle.Light },
+      { offset: 1200, style: Haptics.ImpactFeedbackStyle.Light },
+      { offset: 1000, style: Haptics.ImpactFeedbackStyle.Light },
+      { offset: 800, style: Haptics.ImpactFeedbackStyle.Light },
+      { offset: 240, style: Haptics.ImpactFeedbackStyle.Heavy },
+      { offset: 160, style: Haptics.ImpactFeedbackStyle.Heavy },
+      { offset: 80, style: Haptics.ImpactFeedbackStyle.Heavy },
     ];
 
     steps.forEach(({ offset, style }) => {
@@ -633,7 +636,7 @@ export default function App() {
           <View className="flex-1 justify-center px-8 gap-4">
             <View className="w-full">
               <AppText className="text-xl font-semibold text-foreground mb-2">
-                How many groups?
+                How many teams?
               </AppText>
               <View className="flex-row flex-wrap -mx-2">
                 {GROUP_OPTIONS.map((count, index) => {
@@ -709,7 +712,7 @@ function PlayerCard({
                 {count}
               </Card.Title>
               <Card.Description className="pl-0.5 leading-none text-muted">
-                groups
+                teams
               </Card.Description>
             </View>
           </Card.Footer>
