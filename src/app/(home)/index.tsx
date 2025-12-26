@@ -4,7 +4,7 @@ import * as Haptics from "expo-haptics";
 import { StatusBar } from "expo-status-bar";
 import { Card, cn, PressableFeedback, useThemeColor } from "heroui-native";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Platform, View } from "react-native";
+import { Platform, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   cancelAnimation,
@@ -30,7 +30,6 @@ const TEAM_COLORS = ["#F64D00", "#1F3A5F", "#2FBF71", "#F2C14E", "#00A3E0"];
 const GROUP_OPTIONS = [2, 3, 4, 5];
 const IOS_MAX_TOUCHES = 5;
 const MAX_SLOTS = 12;
-const OVERFLOW_ALERT_COOLDOWN_MS = 4000;
 const MAX_TOUCH_HINT_DURATION_MS = 1600;
 const BUBBLE_THROTTLE_MS = 80;
 
@@ -59,7 +58,6 @@ export default function App() {
   const maxTouchHintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
-  const lastOverflowAlertAtRef = useRef<number>(0);
   const lastBubbleAtRef = useRef<number>(0);
   const bubblePlayer = useAudioPlayer(
     require("../../../assets/audio/bubble.wav"),
@@ -183,22 +181,6 @@ export default function App() {
       slotScale[i].value = 1;
       slotTouchId[i].value = -1;
     }
-  };
-
-  const resetInteractionForOverflow = () => {
-    setShowMaxTouchHint(false);
-    resetAllSlots();
-  };
-
-  const showOverflowAlert = () => {
-    const now = Date.now();
-    if (now - lastOverflowAlertAtRef.current < OVERFLOW_ALERT_COOLDOWN_MS) {
-      return;
-    }
-    lastOverflowAlertAtRef.current = now;
-    Alert.alert(
-      "Too many fingers (max. 5 fingers). Lift one finger and try again."
-    );
   };
 
   const maybeShowMaxTouchHint = (count: number) => {
@@ -555,8 +537,7 @@ export default function App() {
       }
       updateStableCount(0);
       if (isIosPhone) {
-        runOnJS(resetInteractionForOverflow)();
-        runOnJS(showOverflowAlert)();
+        runOnJS(resetAllSlots)();
       }
       stateManager.end();
     });
