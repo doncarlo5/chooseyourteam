@@ -8,7 +8,7 @@ import { AppText } from "../../components/app-text";
 import { ThemeToggle } from "../../components/theme-toggle";
 import { useAppTheme } from "../../contexts/app-theme-context";
 import type { TouchRect } from "../../helpers/types/home-screen";
-import DialogMorePlayers from "./_components/dialog-more-players";
+// import DialogMorePlayers from "./_components/dialog-more-players";
 import { useSelectedPlayersLayer } from "./_components/selected-players-layer";
 import TeamsSelection from "./_components/teams-selection";
 
@@ -80,6 +80,7 @@ export default function App() {
             </AppText>
           </View>
         )}
+        {/* +5 button (feature coming soon)
         <View className="absolute top-16 right-6 z-10 items-center gap-2">
           <DialogMorePlayers
             selectedTeams={selectedTeams}
@@ -90,6 +91,7 @@ export default function App() {
             isTouching={isTouching}
           />
         </View>
+        */}
         {overlay}
         <StatusBar style={isDark ? "light" : "dark"} />
       </View>
