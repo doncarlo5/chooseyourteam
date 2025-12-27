@@ -107,7 +107,8 @@ export function useSelectedPlayersLayer(props: {
     []
   );
   const activeTeamColors = useMemo(
-    () => (props.selectedTeams ? TEAM_COLORS.slice(0, props.selectedTeams) : []),
+    () =>
+      props.selectedTeams ? TEAM_COLORS.slice(0, props.selectedTeams) : [],
     [props.selectedTeams]
   );
   const isIosPhone = Platform.OS === "ios" && !Platform.isPad;
@@ -215,10 +216,10 @@ export function useSelectedPlayersLayer(props: {
       { offset: 2100, style: Haptics.ImpactFeedbackStyle.Light },
       { offset: 1400, style: Haptics.ImpactFeedbackStyle.Soft },
       { offset: 1200, style: Haptics.ImpactFeedbackStyle.Soft },
-      { offset: 900, style: Haptics.ImpactFeedbackStyle.Heavy },
       { offset: 600, style: Haptics.ImpactFeedbackStyle.Heavy },
       { offset: 500, style: Haptics.ImpactFeedbackStyle.Heavy },
       { offset: 400, style: Haptics.ImpactFeedbackStyle.Heavy },
+      { offset: 200, style: Haptics.ImpactFeedbackStyle.Heavy },
     ];
 
     steps.forEach(({ offset, style }) => {

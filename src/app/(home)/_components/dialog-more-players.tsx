@@ -54,7 +54,12 @@ export default function DialogMorePlayers(props: {
       </Button>
       <Dialog.Portal>
         <DialogBlurBackdrop />
-        <Dialog.Content className="max-w-sm mx-auto">
+        <Dialog.Content
+          className={cn(
+            "max-w-sm mx-auto",
+            props.isDark ? "bg-[#0B0B0B]" : "bg-[#E4E4E4]"
+          )}
+        >
           <Dialog.Close className="self-end -mb-2 z-50" />
           <View className="mb-4 gap-1">
             <Dialog.Title>Pick a number</Dialog.Title>

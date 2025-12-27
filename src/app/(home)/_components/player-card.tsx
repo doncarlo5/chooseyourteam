@@ -37,6 +37,7 @@ export function PlayerCard({
         <Card
           className={cn(
             "p-0 rounded-3xl overflow-hidden shadow-sm shadow-black/10",
+            isDark ? "bg-[#0E1217]" : "bg-white",
             isDisabled && "opacity-50"
           )}
         >
