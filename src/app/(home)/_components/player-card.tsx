@@ -61,3 +61,5 @@ export function PlayerCard({
     </Animated.View>
   );
 }
+
+export default PlayerCard;

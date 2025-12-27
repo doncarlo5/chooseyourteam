@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import type { SharedValue } from "react-native-reanimated";
 
 export type TouchRect = {
@@ -25,19 +24,11 @@ export type DotProps = {
   opacity: SharedValue<number>;
   scale: SharedValue<number>;
   shakePhase: SharedValue<number>;
+  shakeAmplitude: number;
   baseColor: string;
   revealColor: string;
   isRevealed: boolean;
   baseSize: number;
   revealSize: number;
   label?: string;
-};
-
-export type SelectedPlayersLayerProps = {
-  selectedTeams: number | null;
-  isDark: boolean;
-  onBack: () => void;
-  toggleRectSv: SharedValue<TouchRect>;
-  plusButtonRectSv: SharedValue<TouchRect>;
-  children?: ReactNode;
 };

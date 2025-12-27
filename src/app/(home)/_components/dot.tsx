@@ -8,8 +8,6 @@ import Animated, {
 import { AppText } from "../../../components/app-text";
 import type { DotProps } from "../../../helpers/types/home-screen";
 
-const SHAKE_AMPLITUDE = 10;
-
 export default function Dot({
   x,
   y,
@@ -23,6 +21,7 @@ export default function Dot({
   opacity,
   scale,
   shakePhase,
+  shakeAmplitude,
 }: DotProps) {
   const progress = useSharedValue(isRevealed ? 1 : 0);
   const size = useSharedValue(isRevealed ? revealSize : baseSize);
@@ -37,7 +36,7 @@ export default function Dot({
   const containerStyle = useAnimatedStyle(() => {
     const currentSize = size.value;
     const isVisible = active.value === 1;
-    const shakeOffset = (shakePhase.value - 0.5) * 2 * SHAKE_AMPLITUDE;
+    const shakeOffset = (shakePhase.value - 0.5) * 2 * shakeAmplitude;
     return {
       position: "absolute",
       left: x.value - currentSize / 2,

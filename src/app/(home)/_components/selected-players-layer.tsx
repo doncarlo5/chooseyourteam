@@ -2,12 +2,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import * as Haptics from "expo-haptics";
 import { Button, cn } from "heroui-native";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Platform, View } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { Gesture } from "react-native-gesture-handler";
 import {
   cancelAnimation,
   makeMutable,
+  SharedValue,
   useSharedValue,
   withDelay,
   withRepeat,
@@ -15,10 +16,7 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
-import type {
-  SelectedPlayersLayerProps,
-  TouchRect,
-} from "../../../helpers/types/home-screen";
+import type { TouchRect } from "../../../helpers/types/home-screen";
 import type { TouchPoint } from "../../../helpers/types/touch-point";
 import Dot from "./dot";
 
@@ -33,15 +31,20 @@ const SHAKE_STEP_MS = 30;
 const SHAKE_CYCLES = Math.max(1, Math.floor(SHAKE_DURATION_MS / SHAKE_STEP_MS));
 const SHAKE_AMPLITUDE = 10;
 
-export default function SelectedPlayersLayer({
-  selectedTeams,
-  isDark,
-  onBack,
-  toggleRectSv,
-  plusButtonRectSv,
-  children,
-}: SelectedPlayersLayerProps) {
+export function useSelectedPlayersLayer(props: {
+  selectedTeams: number | null;
+  isDark: boolean;
+  onBack: () => void;
+  toggleRectSv: SharedValue<TouchRect>;
+  plusButtonRectSv: SharedValue<TouchRect>;
+}): {
+  touchGesture: ReturnType<typeof Gesture.Manual>;
+  overlay: ReactNode;
+  isRevealed: boolean;
+  isTouching: boolean;
+} {
   const [isRevealed, setIsRevealed] = useState(false);
+  const [isTouching, setIsTouching] = useState(false);
   const [slotRevealColors, setSlotRevealColors] = useState<string[]>(
     Array.from({ length: MAX_SLOTS }, () => "")
   );
@@ -92,8 +95,8 @@ export default function SelectedPlayersLayer({
     () => Array.from({ length: MAX_SLOTS }, () => makeMutable(-1)),
     []
   );
-  const activeTeamColors = selectedTeams
-    ? TEAM_COLORS.slice(0, selectedTeams)
+  const activeTeamColors = props.selectedTeams
+    ? TEAM_COLORS.slice(0, props.selectedTeams)
     : [];
   const isIosPhone = Platform.OS === "ios" && !Platform.isPad;
 
@@ -167,6 +170,7 @@ export default function SelectedPlayersLayer({
 
   const resetAllSlots = () => {
     resetRevealState();
+    setIsTouching(false);
     stableCountSv.value = 0;
     revealToken.value += 1;
     for (let i = 0; i < MAX_SLOTS; i += 1) {
@@ -215,6 +219,7 @@ export default function SelectedPlayersLayer({
 
   const handleCountChange = (count: number) => {
     resetRevealState(false);
+    setIsTouching(count > 0);
     if (count >= 2) {
       schedulePreRevealHaptics(HIGHLIGHT_DELAY_MS, 1000);
     }
@@ -294,9 +299,9 @@ export default function SelectedPlayersLayer({
   const isTouchIgnored = (x: number, y: number) => {
     "worklet";
     return (
-      isPointInsideRect(x, y, toggleRectSv.value) ||
+      isPointInsideRect(x, y, props.toggleRectSv.value) ||
       isPointInsideRect(x, y, backRectSv.value) ||
-      isPointInsideRect(x, y, plusButtonRectSv.value)
+      isPointInsideRect(x, y, props.plusButtonRectSv.value)
     );
   };
 
@@ -386,7 +391,7 @@ export default function SelectedPlayersLayer({
   };
 
   const handleBack = () => {
-    onBack();
+    props.onBack();
     resetAllSlots();
   };
 
@@ -405,10 +410,10 @@ export default function SelectedPlayersLayer({
   }, []);
 
   useEffect(() => {
-    isEnabledSv.value = selectedTeams ? 1 : 0;
+    isEnabledSv.value = props.selectedTeams ? 1 : 0;
     resetAllSlots();
-    if (!selectedTeams) {
-      plusButtonRectSv.value = {
+    if (!props.selectedTeams) {
+      props.plusButtonRectSv.value = {
         x: 0,
         y: 0,
         width: 0,
@@ -423,7 +428,7 @@ export default function SelectedPlayersLayer({
         isReady: false,
       };
     }
-  }, [selectedTeams, plusButtonRectSv, backRectSv, isEnabledSv]);
+  }, [props.selectedTeams, props.plusButtonRectSv, backRectSv, isEnabledSv]);
 
   const touchGesture = Gesture.Manual()
     .onTouchesDown((event) => {
@@ -550,61 +555,59 @@ export default function SelectedPlayersLayer({
       stateManager.end();
     });
 
-  return (
-    <GestureDetector gesture={touchGesture}>
-      <View className="flex-1">
-        {children}
-        {selectedTeams ? (
-          <>
-            <Button
-              size="md"
-              className={cn(
-                "absolute top-16 left-6 z-10 rounded-full",
-                isDark ? "bg-[#E4E4E4]/50" : "bg-[#0B0B0B]/50"
-              )}
-              onPress={handleBack}
-              onLayout={() => {
-                backRef.current?.measureInWindow((x, y, width, height) => {
-                  backRectSv.value = { x, y, width, height, isReady: true };
-                });
-              }}
-              ref={backRef}
-              isIconOnly
-            >
-              <Button.Label>
-                <Ionicons
-                  name="close"
-                  size={24}
-                  color={isDark ? "#0b0b0b" : "white"}
-                />
-              </Button.Label>
-            </Button>
+  const overlay = props.selectedTeams ? (
+    <>
+      <Button
+        size="md"
+        className={cn(
+          "absolute top-16 left-6 z-10 rounded-full",
+          props.isDark ? "bg-[#E4E4E4]/50" : "bg-[#0B0B0B]/50"
+        )}
+        onPress={handleBack}
+        onLayout={() => {
+          backRef.current?.measureInWindow((x, y, width, height) => {
+            backRectSv.value = { x, y, width, height, isReady: true };
+          });
+        }}
+        ref={backRef}
+        isIconOnly
+      >
+        <Button.Label>
+          <Ionicons
+            name="close"
+            size={24}
+            color={props.isDark ? "#0b0b0b" : "white"}
+          />
+        </Button.Label>
+      </Button>
 
-            {slotActive.map((active, index) => {
-              const revealColor =
-                slotRevealColors[index] || (isDark ? "#E4E4E4" : "#0B0B0B");
-              const label = slotRevealLabels[index];
-              return (
-                <Dot
-                  key={index}
-                  x={slotX[index]}
-                  y={slotY[index]}
-                  active={active}
-                  opacity={slotOpacity[index]}
-                  scale={slotScale[index]}
-                  shakePhase={shakePhase}
-                  baseColor={isDark ? "#E4E4E4" : "#0B0B0B"}
-                  revealColor={revealColor}
-                  isRevealed={isRevealed}
-                  baseSize={BASE_CIRCLE_SIZE}
-                  revealSize={REVEAL_CIRCLE_SIZE}
-                  label={isRevealed && label ? label : undefined}
-                />
-              );
-            })}
-          </>
-        ) : null}
-      </View>
-    </GestureDetector>
-  );
+      {slotActive.map((active, index) => {
+        const revealColor =
+          slotRevealColors[index] || (props.isDark ? "#E4E4E4" : "#0B0B0B");
+        const label = slotRevealLabels[index];
+        return (
+          <Dot
+            key={index}
+            x={slotX[index]}
+            y={slotY[index]}
+            active={active}
+            opacity={slotOpacity[index]}
+            scale={slotScale[index]}
+            shakePhase={shakePhase}
+            shakeAmplitude={SHAKE_AMPLITUDE}
+            baseColor={props.isDark ? "#E4E4E4" : "#0B0B0B"}
+            revealColor={revealColor}
+            isRevealed={isRevealed}
+            baseSize={BASE_CIRCLE_SIZE}
+            revealSize={REVEAL_CIRCLE_SIZE}
+            label={isRevealed && label ? label : undefined}
+          />
+        );
+      })}
+    </>
+  ) : null;
+
+  return { touchGesture, overlay, isRevealed, isTouching };
 }
+
+export default useSelectedPlayersLayer;

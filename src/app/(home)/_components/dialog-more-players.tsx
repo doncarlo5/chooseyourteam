@@ -6,21 +6,18 @@ import { DialogBlurBackdrop } from "../../../components/dialog-blur-backdrop";
 import type { TouchRect } from "../../../helpers/types/home-screen";
 import { PlayerCard } from "./player-card";
 
-export default function DialogMorePlayers({
-  selectedTeams,
-  isDark,
-  setTotalPlayers,
-  plusButtonRectSv,
-}: {
+export default function DialogMorePlayers(props: {
   selectedTeams: number | null;
   isDark: boolean;
   setTotalPlayers: Dispatch<SetStateAction<number>>;
   plusButtonRectSv: SharedValue<TouchRect>;
+  isRevealed: boolean;
+  isTouching: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const plusButtonRef = useRef<View>(null);
 
-  if (!selectedTeams) return null;
+  if (!props.selectedTeams || props.isRevealed || props.isTouching) return null;
 
   return (
     <Dialog isOpen={isOpen} onOpenChange={setIsOpen}>
@@ -28,11 +25,11 @@ export default function DialogMorePlayers({
         size="md"
         className={cn(
           "rounded-full size-12 items-center justify-center px-0",
-          isDark ? "bg-[#E4E4E4]/50" : "bg-[#0B0B0B]/50"
+          props.isDark ? "bg-[#E4E4E4]/50" : "bg-[#0B0B0B]/50"
         )}
         onLayout={() => {
           plusButtonRef.current?.measureInWindow((x, y, width, height) => {
-            plusButtonRectSv.value = {
+            props.plusButtonRectSv.value = {
               x,
               y,
               width,
@@ -49,7 +46,7 @@ export default function DialogMorePlayers({
         <Button.Label
           className={cn(
             "text-base font-semibold",
-            isDark ? "text-[#0B0B0B]" : "text-white"
+            props.isDark ? "text-[#0B0B0B]" : "text-white"
           )}
         >
           +5
@@ -69,11 +66,11 @@ export default function DialogMorePlayers({
                   key={value}
                   count={value}
                   index={idx}
-                  isDark={isDark}
+                  isDark={props.isDark}
                   isDisabled={false}
                   label="players"
                   onPress={() => {
-                    setTotalPlayers(value);
+                    props.setTotalPlayers(value);
                     setIsOpen(false);
                   }}
                 />
