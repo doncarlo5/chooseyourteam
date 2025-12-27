@@ -7,8 +7,8 @@ with clear progress, locked carry-over, and a vertical scroll between rounds.
 
 ## UX Requirements (from request)
 
-- Show a persistent "+5" trigger after 5 touches (same UI as the close button).
-- The "+5" trigger stays visible on both round screens.
+- Always show a persistent "+5" trigger (same UI as the close button).
+- The "+5" trigger stays visible on both round screens and before any touches.
 - The "+5" trigger opens a dialog for choosing total players (5–10).
 - Multi-round flow must be "fair + obvious":
   - Progress indicator: "Round 1 of 2" (and Round 2).
@@ -57,8 +57,7 @@ with clear progress, locked carry-over, and a vertical scroll between rounds.
 ## Proposed UX Flow
 
 1. User places up to 5 fingers.
-2. When 5 fingers are detected, show persistent "+5" trigger
-   (same UI as the close button).
+2. The "+5" trigger is visible at all times, regardless of touch count.
 3. Tapping the "+5" trigger opens a dialog to select total player count (5–10).
 4. If total players <= 5, keep single round behavior (no vertical scroll).
 5. If total players > 5:
@@ -85,8 +84,7 @@ with clear progress, locked carry-over, and a vertical scroll between rounds.
 
 - Use existing dialog pattern with `Dialog` + `DialogBlurBackdrop`.
 - Content includes `@react-native-picker/picker` to select total players 5–10.
-- Place trigger on the persistent "+5" button when 5 touches have been seen
-  at least once during the current session.
+- Place trigger on the persistent "+5" button immediately (no touch prerequisite).
 - Ensure dialog can be reopened if user wants to change total players.
 
 ## Vertical Screen Plan
