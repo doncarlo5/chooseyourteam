@@ -16,7 +16,7 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
-import type { TouchRect } from "../../../helpers/types/home-screen";
+import type { FrozenDot, TouchRect } from "../../../helpers/types/home-screen";
 import type { TouchPoint } from "../../../helpers/types/touch-point";
 import Dot from "./dot";
 
@@ -37,14 +37,22 @@ export function useSelectedPlayersLayer(props: {
   onBack: () => void;
   toggleRectSv: SharedValue<TouchRect>;
   plusButtonRectSv: SharedValue<TouchRect>;
+  onRevealSnapshot?: (dots: FrozenDot[]) => void;
+  isTouchEnabled?: boolean;
+  isScrollGestureActive?: boolean;
+  expectedTouchCount?: number;
+  resetKey?: number;
 }): {
   touchGesture: ReturnType<typeof Gesture.Manual>;
   overlay: ReactNode;
+  backButton: ReactNode;
   isRevealed: boolean;
   isTouching: boolean;
+  touchCount: number;
 } {
   const [isRevealed, setIsRevealed] = useState(false);
   const [isTouching, setIsTouching] = useState(false);
+  const [touchCount, setTouchCount] = useState(0);
   const [slotRevealColors, setSlotRevealColors] = useState<string[]>(
     Array.from({ length: MAX_SLOTS }, () => "")
   );
@@ -171,6 +179,7 @@ export function useSelectedPlayersLayer(props: {
   const resetAllSlots = () => {
     resetRevealState();
     setIsTouching(false);
+    setTouchCount(0);
     stableCountSv.value = 0;
     revealToken.value += 1;
     for (let i = 0; i < MAX_SLOTS; i += 1) {
@@ -220,7 +229,9 @@ export function useSelectedPlayersLayer(props: {
   const handleCountChange = (count: number) => {
     resetRevealState(false);
     setIsTouching(count > 0);
-    if (count >= 2) {
+    setTouchCount(count);
+    const expectedCount = props.expectedTouchCount ?? 2;
+    if (count === expectedCount && count >= 2) {
       schedulePreRevealHaptics(HIGHLIGHT_DELAY_MS, 1000);
     }
   };
@@ -263,6 +274,25 @@ export function useSelectedPlayersLayer(props: {
     setIsRevealed(true);
     preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
     preRevealHapticsRef.current = [];
+    if (props.onRevealSnapshot) {
+      const snapshot: FrozenDot[] = [];
+      for (let i = 0; i < MAX_SLOTS; i += 1) {
+        if (slotActive[i].value !== 1 || slotTouchId[i].value === -1) {
+          continue;
+        }
+        const color = nextRevealColors[i];
+        if (!color) {
+          continue;
+        }
+        snapshot.push({
+          x: slotX[i].value,
+          y: slotY[i].value,
+          color,
+          label: nextRevealLabels[i] ?? undefined,
+        });
+      }
+      props.onRevealSnapshot(snapshot);
+    }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
@@ -347,8 +377,9 @@ export function useSelectedPlayersLayer(props: {
     revealToken.value += 1;
     const token = revealToken.value;
 
+    const expectedCount = props.expectedTouchCount ?? 2;
     scheduleOnRN(handleCountChange, count);
-    if (count < 2) {
+    if (count < 2 || count !== expectedCount) {
       return;
     }
 
@@ -383,6 +414,11 @@ export function useSelectedPlayersLayer(props: {
     if (isRevealedSv.value === 1) {
       return;
     }
+    const expectedCount = props.expectedTouchCount ?? 2;
+    if (count > expectedCount) {
+      scheduleOnRN(handleCountChange, count);
+      return;
+    }
     if (count === stableCountSv.value) {
       return;
     }
@@ -410,7 +446,18 @@ export function useSelectedPlayersLayer(props: {
   }, []);
 
   useEffect(() => {
-    isEnabledSv.value = props.selectedTeams ? 1 : 0;
+    const isTouchEnabled = props.isTouchEnabled ?? true;
+    const isScrollGestureActive = props.isScrollGestureActive ?? false;
+    isEnabledSv.value =
+      props.selectedTeams && isTouchEnabled && !isScrollGestureActive ? 1 : 0;
+  }, [
+    props.selectedTeams,
+    props.isTouchEnabled,
+    props.isScrollGestureActive,
+    isEnabledSv,
+  ]);
+
+  useEffect(() => {
     resetAllSlots();
     if (!props.selectedTeams) {
       props.plusButtonRectSv.value = {
@@ -428,7 +475,19 @@ export function useSelectedPlayersLayer(props: {
         isReady: false,
       };
     }
-  }, [props.selectedTeams, props.plusButtonRectSv, backRectSv, isEnabledSv]);
+  }, [props.selectedTeams, props.plusButtonRectSv, backRectSv]);
+
+  useEffect(() => {
+    if (props.resetKey !== undefined) {
+      resetAllSlots();
+    }
+  }, [props.resetKey]);
+
+  useEffect(() => {
+    if (props.isScrollGestureActive) {
+      resetAllSlots();
+    }
+  }, [props.isScrollGestureActive]);
 
   const touchGesture = Gesture.Manual()
     .onTouchesDown((event) => {
@@ -555,32 +614,34 @@ export function useSelectedPlayersLayer(props: {
       stateManager.end();
     });
 
+  const backButton = props.selectedTeams ? (
+    <Button
+      size="md"
+      className={cn(
+        "absolute top-16 left-6 z-10 rounded-full",
+        props.isDark ? "bg-[#E4E4E4]/50" : "bg-[#0B0B0B]/50"
+      )}
+      onPress={handleBack}
+      onLayout={() => {
+        backRef.current?.measureInWindow((x, y, width, height) => {
+          backRectSv.value = { x, y, width, height, isReady: true };
+        });
+      }}
+      ref={backRef}
+      isIconOnly
+    >
+      <Button.Label>
+        <Ionicons
+          name="close"
+          size={24}
+          color={props.isDark ? "#0b0b0b" : "white"}
+        />
+      </Button.Label>
+    </Button>
+  ) : null;
+
   const overlay = props.selectedTeams ? (
     <>
-      <Button
-        size="md"
-        className={cn(
-          "absolute top-16 left-6 z-10 rounded-full",
-          props.isDark ? "bg-[#E4E4E4]/50" : "bg-[#0B0B0B]/50"
-        )}
-        onPress={handleBack}
-        onLayout={() => {
-          backRef.current?.measureInWindow((x, y, width, height) => {
-            backRectSv.value = { x, y, width, height, isReady: true };
-          });
-        }}
-        ref={backRef}
-        isIconOnly
-      >
-        <Button.Label>
-          <Ionicons
-            name="close"
-            size={24}
-            color={props.isDark ? "#0b0b0b" : "white"}
-          />
-        </Button.Label>
-      </Button>
-
       {slotActive.map((active, index) => {
         const revealColor =
           slotRevealColors[index] || (props.isDark ? "#E4E4E4" : "#0B0B0B");
@@ -607,7 +668,14 @@ export function useSelectedPlayersLayer(props: {
     </>
   ) : null;
 
-  return { touchGesture, overlay, isRevealed, isTouching };
+  return {
+    touchGesture,
+    overlay,
+    backButton,
+    isRevealed,
+    isTouching,
+    touchCount,
+  };
 }
 
 export default useSelectedPlayersLayer;

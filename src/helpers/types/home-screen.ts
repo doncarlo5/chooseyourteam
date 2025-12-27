@@ -32,3 +32,10 @@ export type DotProps = {
   revealSize: number;
   label?: string;
 };
+
+export type FrozenDot = {
+  x: number;
+  y: number;
+  color: string;
+  label?: string;
+};

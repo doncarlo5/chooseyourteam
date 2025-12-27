@@ -13,28 +13,28 @@ const StyleAnimatedView = withUniwind(Animated.View);
 export type PaginationIndicatorProps = {
   index: number;
   label: string;
-  scrollY: SharedValue<number>;
+  scrollX: SharedValue<number>;
   itemSize: number;
 };
 
 export function PaginationIndicator({
   index,
-  scrollY,
+  scrollX,
   itemSize,
   label,
 }: PaginationIndicatorProps) {
   const rBarStyle = useAnimatedStyle(() => {
     return {
       opacity: interpolate(
-        scrollY.get() / itemSize,
+        scrollX.get() / itemSize,
         [index - 2, index - 1, index, index + 1, index + 2],
         [0.2, 0.5, 1, 0.5, 0.2],
         Extrapolation.CLAMP,
       ),
       transform: [
         {
-          scaleX: interpolate(
-            scrollY.get() / itemSize,
+          scaleY: interpolate(
+            scrollX.get() / itemSize,
             [index - 2, index - 1, index, index + 1, index + 2],
             [1, 1.4, 2, 1.4, 1],
             Extrapolation.CLAMP,
@@ -47,7 +47,7 @@ export function PaginationIndicator({
   const rLabelStyle = useAnimatedStyle(() => {
     return {
       opacity: interpolate(
-        scrollY.get() / itemSize,
+        scrollX.get() / itemSize,
         [index - 0.5, index, index + 0.5],
         [0, 1, 0],
         Extrapolation.CLAMP,
@@ -55,7 +55,7 @@ export function PaginationIndicator({
       transform: [
         {
           translateX: interpolate(
-            scrollY.get() / itemSize,
+            scrollX.get() / itemSize,
             [index - 2, index - 1, index, index + 1, index + 2],
             [1, 1.4, 2, 1.4, 1],
             Extrapolation.CLAMP,
@@ -66,17 +66,17 @@ export function PaginationIndicator({
   });
 
   return (
-    <View className="flex-row items-center">
+    <View className="flex-row items-center h-8 my-1">
       <StyleAnimatedView
-        className="w-3 h-[2px] bg-foreground"
+        className="w-[2px] h-3 bg-foreground"
         style={[
           {
-            transformOrigin: ["0%", "50%", 0],
+            transformOrigin: ["50%", "100%", 0],
           },
           rBarStyle,
         ]}
       />
-      <StyleAnimatedView className="absolute left-8" style={rLabelStyle}>
+      <StyleAnimatedView className="absolute left-4" style={rLabelStyle}>
         <AppText className="text-foreground text-lg font-normal">
           {label}
         </AppText>

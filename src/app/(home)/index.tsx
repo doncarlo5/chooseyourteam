@@ -1,22 +1,45 @@
+import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { cn } from "heroui-native";
-import { useState } from "react";
-import { View } from "react-native";
+import { useEffect, useRef, useState, type ElementRef } from "react";
+import { View, useWindowDimensions } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
-import { useSharedValue } from "react-native-reanimated";
+import Animated, {
+  Easing,
+  runOnJS,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
 import { AppText } from "../../components/app-text";
+import { PaginationIndicator } from "../../components/component-presentation/pagination-indicator";
 import { ThemeToggle } from "../../components/theme-toggle";
 import { useAppTheme } from "../../contexts/app-theme-context";
-import type { TouchRect } from "../../helpers/types/home-screen";
-// import DialogMorePlayers from "./_components/dialog-more-players";
+import type { FrozenDot, TouchRect } from "../../helpers/types/home-screen";
+import DialogMorePlayers from "./_components/dialog-more-players";
+import FrozenDotsLayer from "./_components/frozen-dots-layer";
+import RoundScreen from "./_components/round-screen";
 import { useSelectedPlayersLayer } from "./_components/selected-players-layer";
 import TeamsSelection from "./_components/teams-selection";
 
 export default function App() {
   const { isDark } = useAppTheme();
+  const { width } = useWindowDimensions();
 
   const [selectedTeams, setSelectedTeams] = useState<number | null>(null);
   const [totalPlayers, setTotalPlayers] = useState(5);
+  const [currentRound, setCurrentRound] = useState(0);
+  const [roundOneSnapshot, setRoundOneSnapshot] = useState<FrozenDot[]>([]);
+  const [isRoundOneFrozen, setIsRoundOneFrozen] = useState(false);
+  const [roundTwoSnapshot, setRoundTwoSnapshot] = useState<FrozenDot[]>([]);
+  const [isRoundTwoFrozen, setIsRoundTwoFrozen] = useState(false);
+  const [round2Started, setRound2Started] = useState(false);
+  const [roundResetKey, setRoundResetKey] = useState(0);
+  const [isRoundTwoVisible, setIsRoundTwoVisible] = useState(false);
+  const [isRoundScrolling, setIsRoundScrolling] = useState(false);
+  const [hasShownSwipeHint, setHasShownSwipeHint] = useState(false);
 
   const toggleRectSv = useSharedValue<TouchRect>({
     x: 0,
@@ -32,17 +55,113 @@ export default function App() {
     height: 0,
     isReady: false,
   });
-  const { touchGesture, overlay, isRevealed, isTouching } =
-    useSelectedPlayersLayer({
-      selectedTeams,
-      isDark,
-      toggleRectSv,
-      plusButtonRectSv,
-      onBack: () => {
-        setSelectedTeams(null);
-        setTotalPlayers(5);
-      },
-    });
+  const roundScrollX = useSharedValue(0);
+  const roundScrollRef = useRef<ElementRef<typeof Animated.ScrollView>>(null);
+  const roundScrollHandler = useAnimatedScrollHandler((event) => {
+    roundScrollX.value = event.contentOffset.x;
+    if (isMultiRound) {
+      const isSecond = event.contentOffset.x >= width * 0.5;
+      runOnJS(setIsRoundTwoVisible)(isSecond);
+    }
+  });
+  const arrowBounce = useSharedValue(0);
+  const roundOneFrozenStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: -roundScrollX.value }],
+    opacity: roundScrollX.value <= width * 0.5 ? 1 : 0,
+  }));
+  const roundTwoFrozenStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: width - roundScrollX.value }],
+    opacity: roundScrollX.value >= width * 0.5 ? 1 : 0,
+  }));
+  const arrowStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: arrowBounce.value }],
+  }));
+  const isMultiRound = totalPlayers > 5;
+  const firstRoundCount = Math.min(5, totalPlayers);
+  const secondRoundCount = Math.max(0, totalPlayers - 5);
+  const expectedTouchCount = isMultiRound
+    ? currentRound === 0
+      ? firstRoundCount
+      : secondRoundCount
+    : undefined;
+  const canTouch =
+    !isMultiRound ||
+    (currentRound === 0 ? !isRoundOneFrozen : !isRoundTwoFrozen);
+  const touchEnabled = canTouch && !isRoundScrolling;
+  const {
+    touchGesture,
+    overlay,
+    backButton,
+    isRevealed,
+    isTouching,
+    touchCount,
+  } = useSelectedPlayersLayer({
+    selectedTeams,
+    isDark,
+    toggleRectSv,
+    plusButtonRectSv,
+    onRevealSnapshot: (dots) => {
+      if (!isMultiRound) {
+        return;
+      }
+      if (currentRound === 0 && !isRoundOneFrozen) {
+        setRoundOneSnapshot(dots);
+        setIsRoundOneFrozen(true);
+      }
+      if (currentRound === 1 && !isRoundTwoFrozen) {
+        setRoundTwoSnapshot(dots);
+        setIsRoundTwoFrozen(true);
+      }
+    },
+    isTouchEnabled: touchEnabled,
+    isScrollGestureActive: isRoundScrolling,
+      expectedTouchCount,
+    resetKey: roundResetKey,
+    onBack: () => {
+      setSelectedTeams(null);
+      setTotalPlayers(5);
+      setCurrentRound(0);
+      setRoundOneSnapshot([]);
+      setIsRoundOneFrozen(false);
+      setRoundTwoSnapshot([]);
+      setIsRoundTwoFrozen(false);
+      setRound2Started(false);
+      setRoundResetKey((prev) => prev + 1);
+      setIsRoundTwoVisible(false);
+      roundScrollX.value = 0;
+      roundScrollRef.current?.scrollTo({ x: 0, animated: false });
+    },
+  });
+
+  useEffect(() => {
+    setCurrentRound(0);
+    setRoundOneSnapshot([]);
+    setIsRoundOneFrozen(false);
+    setRoundTwoSnapshot([]);
+    setIsRoundTwoFrozen(false);
+    setRound2Started(false);
+    setRoundResetKey((prev) => prev + 1);
+    setIsRoundTwoVisible(false);
+    setIsRoundScrolling(false);
+    setHasShownSwipeHint(false);
+    roundScrollX.value = 0;
+    roundScrollRef.current?.scrollTo({ x: 0, animated: false });
+  }, [selectedTeams, totalPlayers]);
+  useEffect(() => {
+    if (isRoundTwoVisible) {
+      setHasShownSwipeHint(true);
+    }
+  }, [isRoundTwoVisible]);
+  useEffect(() => {
+    arrowBounce.value = withRepeat(
+      withTiming(8, {
+        duration: 800,
+        easing: Easing.inOut(Easing.quad),
+      }),
+      -1,
+      true
+    );
+  }, [arrowBounce]);
 
   if (!selectedTeams) {
     return (
@@ -65,34 +184,134 @@ export default function App() {
     );
   }
 
+  const roundLabels = ["Round 1", "Round 2"];
+  const showLiveOverlay =
+    !isMultiRound ||
+    (currentRound === 0
+      ? !isRoundOneFrozen || roundOneSnapshot.length === 0
+      : !isRoundTwoFrozen || roundTwoSnapshot.length === 0);
+  const hideOverlayDuringSwipe =
+    isMultiRound && currentRound === 0 && isRoundTwoVisible;
+  const showPlusButton =
+    currentRound === 0 &&
+    !isRoundTwoVisible &&
+    !isRevealed &&
+    !isRoundOneFrozen &&
+    !isRoundTwoFrozen;
+
   return (
     <GestureDetector gesture={touchGesture}>
       <View className={cn("flex-1", isDark ? "bg-[#0B0B0B]" : "bg-[#E4E4E4]")}>
-        {totalPlayers > 5 && (
-          <View className="absolute inset-0 items-center justify-center pointer-events-none">
-            <AppText
-              className={cn(
-                "text-6xl font-semibold",
-                isDark ? "text-white/20" : "text-black/20"
-              )}
-            >
-              {totalPlayers} players
-            </AppText>
+        <View className="absolute top-16 right-6 z-10 items-center gap-2">
+          {showPlusButton ? (
+            <DialogMorePlayers
+              selectedTeams={selectedTeams}
+              isDark={isDark}
+              setTotalPlayers={setTotalPlayers}
+              plusButtonRectSv={plusButtonRectSv}
+              isRevealed={isRevealed}
+              isTouching={isTouching}
+            />
+          ) : null}
+        </View>
+        {isMultiRound && (
+          <Animated.ScrollView
+            ref={roundScrollRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            scrollEnabled={
+              isRevealed || !isTouching || isRoundOneFrozen || isRoundTwoFrozen
+            }
+            onScroll={roundScrollHandler}
+            scrollEventThrottle={16}
+            onScrollBeginDrag={() => setIsRoundScrolling(true)}
+            onScrollEndDrag={(event) => {
+              if (!event.nativeEvent.velocity?.x) {
+                setIsRoundScrolling(false);
+              }
+            }}
+            onMomentumScrollEnd={(event) => {
+              const nextRound = Math.round(
+                event.nativeEvent.contentOffset.x / width
+              );
+              setCurrentRound(nextRound);
+              if (nextRound === 1 && !round2Started) {
+                setRound2Started(true);
+                setRoundResetKey((prev) => prev + 1);
+              }
+              setIsRoundScrolling(false);
+            }}
+          >
+            <View style={{ width }}>
+              <RoundScreen
+                isDark={isDark}
+                fingersCount={firstRoundCount}
+                touchCount={touchCount}
+                isActive={currentRound === 0}
+                isFrozen={isRoundOneFrozen}
+              />
+            </View>
+            <View style={{ width }}>
+              <RoundScreen
+                isDark={isDark}
+                fingersCount={secondRoundCount}
+                touchCount={touchCount}
+                isActive={currentRound === 1}
+                isFrozen={isRoundTwoFrozen}
+              />
+            </View>
+          </Animated.ScrollView>
+        )}
+        {isMultiRound && (
+          <View className="absolute left-6" style={{ bottom: 40 }}>
+            <View className="flex-row items-center gap-1">
+              {roundLabels.map((label, index) => (
+                <PaginationIndicator
+                  key={label}
+                  index={index}
+                  label={label}
+                  scrollX={roundScrollX}
+                  itemSize={width}
+                />
+              ))}
+            </View>
           </View>
         )}
-        {/* +5 button (feature coming soon)
-        <View className="absolute top-16 right-6 z-10 items-center gap-2">
-          <DialogMorePlayers
-            selectedTeams={selectedTeams}
-            isDark={isDark}
-            setTotalPlayers={setTotalPlayers}
-            plusButtonRectSv={plusButtonRectSv}
-            isRevealed={isRevealed}
-            isTouching={isTouching}
-          />
-        </View>
-        */}
-        {overlay}
+        {isMultiRound && isRoundOneFrozen ? (
+          <Animated.View
+            className="absolute inset-0"
+            style={roundOneFrozenStyle}
+            pointerEvents="none"
+          >
+            <FrozenDotsLayer dots={roundOneSnapshot} />
+          </Animated.View>
+        ) : null}
+        {isMultiRound && isRoundTwoFrozen ? (
+          <Animated.View
+            className="absolute inset-0"
+            style={roundTwoFrozenStyle}
+            pointerEvents="none"
+          >
+            <FrozenDotsLayer dots={roundTwoSnapshot} />
+          </Animated.View>
+        ) : null}
+        {isMultiRound &&
+        currentRound === 0 &&
+        isRoundOneFrozen &&
+        !hasShownSwipeHint ? (
+          <View className="absolute right-8 inset-y-0 items-center justify-center">
+            <Animated.View style={arrowStyle}>
+              <Ionicons
+                name="chevron-forward-outline"
+                size={22}
+                color={isDark ? "#FFFFFF" : "#0B0B0B"}
+              />
+            </Animated.View>
+          </View>
+        ) : null}
+        {showLiveOverlay && !hideOverlayDuringSwipe ? overlay : null}
+        {backButton}
         <StatusBar style={isDark ? "light" : "dark"} />
       </View>
     </GestureDetector>

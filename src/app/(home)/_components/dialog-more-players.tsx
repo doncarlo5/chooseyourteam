@@ -1,6 +1,3 @@
-/*
-Feature coming soon: +5 players dialog.
-
 import { Button, Dialog, cn } from "heroui-native";
 import { useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { View } from "react-native";
@@ -84,9 +81,4 @@ export default function DialogMorePlayers(props: {
       </Dialog.Portal>
     </Dialog>
   );
-}
-*/
-
-export default function DialogMorePlayers() {
-  return null;
 }

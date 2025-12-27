@@ -212,7 +212,7 @@ export const UsageVariantFlatList = ({
               key={index}
               index={index}
               label={item.label}
-              scrollY={scrollY}
+              scrollX={scrollY}
               itemSize={height}
             />
           ))}
