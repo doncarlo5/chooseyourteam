@@ -9,6 +9,7 @@ export function PlayerCard({
   isDark,
   isDisabled,
   onPress,
+  label = "teams",
 }: PlayerCardProps) {
   const themeColorAccent = useThemeColor("accent");
 
@@ -51,7 +52,7 @@ export function PlayerCard({
                 {count}
               </Card.Title>
               <Card.Description className="pl-0.5 leading-none text-muted">
-                teams
+                {label}
               </Card.Description>
             </View>
           </Card.Footer>

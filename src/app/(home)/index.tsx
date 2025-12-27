@@ -3,6 +3,7 @@ import { cn } from "heroui-native";
 import { useState } from "react";
 import { View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
+import { AppText } from "../../components/app-text";
 import { ThemeToggle } from "../../components/theme-toggle";
 import { useAppTheme } from "../../contexts/app-theme-context";
 import type { TouchRect } from "../../helpers/types/home-screen";
@@ -40,6 +41,18 @@ export default function App() {
       }}
     >
       <View className={cn("flex-1", isDark ? "bg-[#0B0B0B]" : "bg-[#E4E4E4]")}>
+        {selectedTeams ? (
+          <View className="absolute inset-0 items-center justify-center pointer-events-none">
+            <AppText
+              className={cn(
+                "text-6xl font-semibold",
+                isDark ? "text-white/20" : "text-black/20"
+              )}
+            >
+              {totalPlayers} players
+            </AppText>
+          </View>
+        ) : null}
         <View className="absolute top-16 right-6 z-10 items-center gap-2">
           <ThemeToggle
             selectedTeams={selectedTeams}
@@ -48,7 +61,6 @@ export default function App() {
           <DialogMorePlayers
             selectedTeams={selectedTeams}
             isDark={isDark}
-            totalPlayers={totalPlayers}
             setTotalPlayers={setTotalPlayers}
             plusButtonRectSv={plusButtonRectSv}
           />

@@ -15,6 +15,7 @@ export type PlayerCardProps = {
   isDark: boolean;
   isDisabled: boolean;
   onPress: () => void;
+  label?: string;
 };
 
 export type DotProps = {
