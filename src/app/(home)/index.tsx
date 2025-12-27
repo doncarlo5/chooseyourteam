@@ -27,9 +27,7 @@ const REVEAL_CIRCLE_SIZE = BASE_CIRCLE_SIZE * 1.5;
 const HIGHLIGHT_DELAY_MS = 3000;
 const TEAM_COLORS = ["#F64D00", "#1F3A5F", "#2FBF71", "#F2C14E", "#00A3E0"];
 const GROUP_OPTIONS = [2, 3, 4, 5];
-const IOS_MAX_TOUCHES = 5;
 const MAX_SLOTS = 12;
-const MAX_TOUCH_HINT_DURATION_MS = 1600;
 const BUBBLE_THROTTLE_MS = 80;
 const SHAKE_DURATION_MS = 800;
 const SHAKE_STEP_MS = 30;
@@ -53,13 +51,9 @@ export default function App() {
   const [slotRevealLabels, setSlotRevealLabels] = useState<(string | null)[]>(
     Array.from({ length: MAX_SLOTS }, () => null)
   );
-  const [showMaxTouchHint, setShowMaxTouchHint] = useState(false);
   const preRevealHapticsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const toggleRef = useRef<View>(null);
   const backRef = useRef<View>(null);
-  const maxTouchHintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  );
   const lastBubbleAtRef = useRef<number>(0);
   const bubblePlayer = useAudioPlayer(
     require("../../../assets/audio/bubble.wav"),
@@ -184,8 +178,6 @@ export default function App() {
 
   const resetAllSlots = () => {
     resetRevealState();
-    setShowMaxTouchHint(false);
-    clearMaxTouchHintTimer();
     stableCountSv.value = 0;
     revealToken.value += 1;
     for (let i = 0; i < MAX_SLOTS; i += 1) {
@@ -194,23 +186,6 @@ export default function App() {
       slotScale[i].value = 1;
       slotTouchId[i].value = -1;
     }
-  };
-
-  const maybeShowMaxTouchHint = (count: number) => {
-    if (Platform.OS !== "ios" || Platform.isPad) {
-      return;
-    }
-    if (count !== IOS_MAX_TOUCHES) {
-      return;
-    }
-    setShowMaxTouchHint(true);
-    if (maxTouchHintTimerRef.current) {
-      clearTimeout(maxTouchHintTimerRef.current);
-    }
-    maxTouchHintTimerRef.current = setTimeout(() => {
-      setShowMaxTouchHint(false);
-      maxTouchHintTimerRef.current = null;
-    }, MAX_TOUCH_HINT_DURATION_MS);
   };
 
   const schedulePreRevealHaptics = (
@@ -252,11 +227,7 @@ export default function App() {
     resetRevealState(false);
     if (count >= 2) {
       schedulePreRevealHaptics(HIGHLIGHT_DELAY_MS, 1000);
-    } else {
-      setShowMaxTouchHint(false);
-      clearMaxTouchHintTimer();
     }
-    maybeShowMaxTouchHint(count);
   };
 
   const handleReveal = () => {
@@ -315,13 +286,6 @@ export default function App() {
     }
     bubblePlayer.seekTo(0).catch(() => {});
     bubblePlayer.play();
-  };
-
-  const clearMaxTouchHintTimer = () => {
-    if (maxTouchHintTimerRef.current) {
-      clearTimeout(maxTouchHintTimerRef.current);
-      maxTouchHintTimerRef.current = null;
-    }
   };
 
   const isPointInsideRect = (x: number, y: number, rect: TouchRect) => {
@@ -439,7 +403,6 @@ export default function App() {
       shouldRouteThroughEarpiece: false,
     });
     return () => {
-      clearMaxTouchHintTimer();
       preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
       preRevealHapticsRef.current = [];
     };
@@ -578,20 +541,6 @@ export default function App() {
   return (
     <GestureDetector gesture={touchGesture}>
       <View className={cn("flex-1", isDark ? "bg-[#0B0B0B]" : "bg-[#E4E4E4]")}>
-        {selectedGroups && showMaxTouchHint ? (
-          <View className="absolute top-6 left-0 right-0 z-20 items-center pointer-events-none">
-            <View
-              className={cn(
-                "px-4 py-2 rounded-full",
-                isDark ? "bg-white/10" : "bg-black/10"
-              )}
-            >
-              <AppText className={cn(isDark ? "text-white" : "text-black")}>
-                Max 5 fingers on this device
-              </AppText>
-            </View>
-          </View>
-        ) : null}
         {!selectedGroups && (
           <View
             ref={toggleRef}
