@@ -137,7 +137,10 @@ export default function Layout() {
           options={{ title: "TextField" }}
         />
         <Stack.Screen name="components/toast" options={{ title: "Toast" }} />
-        <Stack.Screen name="theme-picker" options={{ headerTitle: "Themes" }} />
+        <Stack.Screen
+          name="components/theme-picker"
+          options={{ headerTitle: "Themes" }}
+        />
         <Stack.Screen name="themes/index" options={{ headerTitle: "Themes" }} />
         <Stack.Screen
           name="showcases"

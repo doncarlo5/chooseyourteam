@@ -1,6 +1,13 @@
-import type { RefObject } from "react";
-import type { View } from "react-native";
+import type { ReactNode } from "react";
 import type { SharedValue } from "react-native-reanimated";
+
+export type TouchRect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  isReady: boolean;
+};
 
 export type PlayerCardProps = {
   count: number;
@@ -26,25 +33,10 @@ export type DotProps = {
 };
 
 export type SelectedPlayersLayerProps = {
-  selectedGroups: number | null;
+  selectedTeams: number | null;
   isDark: boolean;
-  slotX: SharedValue<number>[];
-  slotY: SharedValue<number>[];
-  slotActive: SharedValue<number>[];
-  slotOpacity: SharedValue<number>[];
-  slotScale: SharedValue<number>[];
-  shakePhase: SharedValue<number>;
-  slotRevealColors: string[];
-  slotRevealLabels: (string | null)[];
-  isRevealed: boolean;
-  baseSize: number;
-  revealSize: number;
   onBack: () => void;
-  backRef: RefObject<View | null>;
-  onBackLayout: (rect: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  }) => void;
+  toggleRectSv: SharedValue<TouchRect>;
+  plusButtonRectSv: SharedValue<TouchRect>;
+  children?: ReactNode;
 };

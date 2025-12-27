@@ -1,7 +1,7 @@
-import { View } from "react-native";
+import { AppText } from "@/src/components/app-text";
+import { ThemeSelectorBar } from "@/src/components/theme-selector";
 import { useThemeColor } from "heroui-native";
-import { AppText } from "../../components/app-text";
-import { ThemeSelectorBar } from "../../components/theme-selector";
+import { View } from "react-native";
 
 export default function ThemePicker() {
   const themeColorBackground = useThemeColor("background");

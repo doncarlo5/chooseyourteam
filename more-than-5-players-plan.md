@@ -102,12 +102,12 @@ with clear progress, locked carry-over, and a vertical scroll between rounds.
 
 ## Implementation Steps
 
-1. **Refactor state in** `src/app/(home)/index.tsx`
+1. **Add the always-visible "+5" button + dialog**
+   - Place the persistent "+5" trigger (same UI as the close button).
+   - Wire it to open the total-players picker dialog (5–10).
+2. **Refactor state in** `src/app/(home)/index.tsx`
    - Add `totalPlayers`, `roundIndex`, `roundCount`.
    - Convert reveal state to per-round arrays.
-2. **Add dialog**
-   - Create a small dialog component near the hint area that wraps a
-     `Picker` and stores `totalPlayers`.
 3. **Update touch logic**
    - Keep max-touch detection at 5.
    - After round 1 reveal completes, if `totalPlayers > 5`, advance to round 2.
