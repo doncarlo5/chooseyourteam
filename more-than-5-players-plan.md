@@ -29,6 +29,30 @@ with clear progress, locked carry-over, and a vertical scroll between rounds.
   - `src/components/select/select-blur-backdrop.tsx`
 - Dialog example with blur backdrop:
   `src/app/(home)/components/dialog.tsx` (see `BlurBackdropDialogContent`)
+- Full-screen vertical paging example (snap + viewability):
+  `src/components/component-presentation/usage-variant-flatlist.tsx`
+- Progress indicator example:
+  `src/components/component-presentation/pagination-indicator.tsx`
+
+## Other Useful Components to Reuse
+
+- `src/components/app-text.tsx` for consistent typography in the round headers,
+  instructions, and dialog labels.
+- `src/components/dialog-blur-backdrop.tsx` for the dialog backdrop (already
+  used in the dialog examples).
+- `src/components/animated-blur-view.tsx` if we need custom blur animation for
+  the "+5" dialog presentation.
+- `src/components/component-presentation/usage-variants-select/close-button.tsx`
+  for a reference of close-button size, hitSlop, and icon-only styling.
+- `src/components/component-presentation/usage-variants-select/trigger-button.tsx`
+  for the "+5" floating trigger button sizing/position reference.
+- `src/components/screen-scroll-view.tsx` for vertical paging and safe-area
+  padding defaults (if it fits the full-screen pager).
+- `src/components/component-presentation/usage-variant-flatlist.tsx` if we want
+  proper vertical paging with `snapToInterval`, `pagingEnabled`, and viewability
+  callbacks per round.
+- `src/components/component-presentation/pagination-indicator.tsx` if we want a
+  subtle "Round 1/2" indicator tied to vertical scroll position.
 
 ## Proposed UX Flow
 
