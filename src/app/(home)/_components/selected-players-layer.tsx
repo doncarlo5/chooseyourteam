@@ -41,6 +41,7 @@ export function useSelectedPlayersLayer(props: {
   isTouchEnabled?: boolean;
   isScrollGestureActive?: boolean;
   expectedTouchCount?: number;
+  allowOverExpected?: boolean;
   resetKey?: number;
 }): {
   touchGesture: ReturnType<typeof Gesture.Manual>;
@@ -62,6 +63,7 @@ export function useSelectedPlayersLayer(props: {
   const preRevealHapticsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const backRef = useRef<View>(null);
   const lastBubbleAtRef = useRef<number>(0);
+  const teamOrderRef = useRef<string[] | null>(null);
   const bubblePlayer = useAudioPlayer(
     require("../../../../assets/audio/bubble.wav"),
     { keepAudioSessionActive: true, downloadFirst: true }
@@ -69,6 +71,7 @@ export function useSelectedPlayersLayer(props: {
   const isEnabledSv = useSharedValue(0);
   const isRevealedSv = useSharedValue(0);
   const stableCountSv = useSharedValue(0);
+  const countTokenSv = useSharedValue(0);
   const revealProgress = useSharedValue(0);
   const revealToken = useSharedValue(0);
   const shakePhase = useSharedValue(0.5);
@@ -103,10 +106,24 @@ export function useSelectedPlayersLayer(props: {
     () => Array.from({ length: MAX_SLOTS }, () => makeMutable(-1)),
     []
   );
-  const activeTeamColors = props.selectedTeams
-    ? TEAM_COLORS.slice(0, props.selectedTeams)
-    : [];
+  const activeTeamColors = useMemo(
+    () => (props.selectedTeams ? TEAM_COLORS.slice(0, props.selectedTeams) : []),
+    [props.selectedTeams]
+  );
   const isIosPhone = Platform.OS === "ios" && !Platform.isPad;
+
+  useEffect(() => {
+    if (!props.selectedTeams) {
+      teamOrderRef.current = null;
+      return;
+    }
+    const nextOrder = TEAM_COLORS.slice(0, props.selectedTeams);
+    for (let i = nextOrder.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [nextOrder[i], nextOrder[j]] = [nextOrder[j], nextOrder[i]];
+    }
+    teamOrderRef.current = nextOrder;
+  }, [props.selectedTeams]);
 
   const assignTeams = (touchList: TouchPoint[]) => {
     const assignments: Record<string, string> = {};
@@ -114,16 +131,7 @@ export function useSelectedPlayersLayer(props: {
     if (activeTeamColors.length === 0) {
       return { assignments, numbers };
     }
-    const baseOrder = (() => {
-      const result = [...activeTeamColors];
-      for (let i = result.length - 1; i > 0; i -= 1) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [result[i], result[j]] = [result[j], result[i]];
-      }
-      return result;
-    })();
     let colorPool = [...activeTeamColors];
-    const usedColors = new Set<string>();
 
     const shuffle = <T,>(values: T[]): T[] => {
       const result = [...values];
@@ -141,11 +149,10 @@ export function useSelectedPlayersLayer(props: {
       const poolIndex = index % activeTeamColors.length;
       const color = colorPool[poolIndex];
       assignments[touch.id] = color;
-      usedColors.add(color);
     });
 
-    const compactOrder = baseOrder.filter((color) => usedColors.has(color));
-    const colorToNumber = compactOrder.reduce<Record<string, number>>(
+    const baseOrder = teamOrderRef.current ?? activeTeamColors;
+    const colorToNumber = baseOrder.reduce<Record<string, number>>(
       (acc, color, idx) => {
         acc[color] = idx + 1;
         return acc;
@@ -202,17 +209,16 @@ export function useSelectedPlayersLayer(props: {
     }
 
     const steps = [
-      { offset: 2600, style: Haptics.ImpactFeedbackStyle.Light },
-      { offset: 2300, style: Haptics.ImpactFeedbackStyle.Light },
-      { offset: 2000, style: Haptics.ImpactFeedbackStyle.Light },
-      { offset: 1600, style: Haptics.ImpactFeedbackStyle.Light },
-      { offset: 1400, style: Haptics.ImpactFeedbackStyle.Light },
-      { offset: 1200, style: Haptics.ImpactFeedbackStyle.Light },
-      { offset: 1000, style: Haptics.ImpactFeedbackStyle.Light },
-      { offset: 800, style: Haptics.ImpactFeedbackStyle.Light },
-      { offset: 240, style: Haptics.ImpactFeedbackStyle.Heavy },
-      { offset: 160, style: Haptics.ImpactFeedbackStyle.Heavy },
-      { offset: 80, style: Haptics.ImpactFeedbackStyle.Heavy },
+      { offset: 3000, style: Haptics.ImpactFeedbackStyle.Soft },
+      { offset: 2800, style: Haptics.ImpactFeedbackStyle.Light },
+      { offset: 2200, style: Haptics.ImpactFeedbackStyle.Soft },
+      { offset: 2100, style: Haptics.ImpactFeedbackStyle.Light },
+      { offset: 1400, style: Haptics.ImpactFeedbackStyle.Soft },
+      { offset: 1200, style: Haptics.ImpactFeedbackStyle.Soft },
+      { offset: 900, style: Haptics.ImpactFeedbackStyle.Heavy },
+      { offset: 600, style: Haptics.ImpactFeedbackStyle.Heavy },
+      { offset: 500, style: Haptics.ImpactFeedbackStyle.Heavy },
+      { offset: 400, style: Haptics.ImpactFeedbackStyle.Heavy },
     ];
 
     steps.forEach(({ offset, style }) => {
@@ -226,12 +232,19 @@ export function useSelectedPlayersLayer(props: {
     });
   };
 
-  const handleCountChange = (count: number) => {
-    resetRevealState(false);
+  const handleCountChange = (count: number, token?: number) => {
+    if (token !== undefined && token !== countTokenSv.value) {
+      return;
+    }
+    const expectedCount = props.expectedTouchCount ?? 2;
+    const allowOverExpected = props.allowOverExpected ?? false;
+    const meetsExpected = allowOverExpected
+      ? count >= expectedCount
+      : count === expectedCount;
+    resetRevealState(!meetsExpected);
     setIsTouching(count > 0);
     setTouchCount(count);
-    const expectedCount = props.expectedTouchCount ?? 2;
-    if (count === expectedCount && count >= 2) {
+    if (meetsExpected && count >= 1) {
       schedulePreRevealHaptics(HIGHLIGHT_DELAY_MS, 1000);
     }
   };
@@ -378,8 +391,12 @@ export function useSelectedPlayersLayer(props: {
     const token = revealToken.value;
 
     const expectedCount = props.expectedTouchCount ?? 2;
-    scheduleOnRN(handleCountChange, count);
-    if (count < 2 || count !== expectedCount) {
+    const allowOverExpected = props.allowOverExpected ?? false;
+    scheduleOnRN(handleCountChange, count, countTokenSv.value);
+    const meetsExpected = allowOverExpected
+      ? count >= expectedCount
+      : count === expectedCount;
+    if (count < 1 || !meetsExpected) {
       return;
     }
 
@@ -415,14 +432,18 @@ export function useSelectedPlayersLayer(props: {
       return;
     }
     const expectedCount = props.expectedTouchCount ?? 2;
-    if (count > expectedCount) {
-      scheduleOnRN(handleCountChange, count);
+    const allowOverExpected = props.allowOverExpected ?? false;
+    if (!allowOverExpected && count > expectedCount) {
+      stableCountSv.value = count;
+      countTokenSv.value += 1;
+      scheduleOnRN(handleCountChange, count, countTokenSv.value);
       return;
     }
     if (count === stableCountSv.value) {
       return;
     }
     stableCountSv.value = count;
+    countTokenSv.value += 1;
     startCountdown(count);
   };
 

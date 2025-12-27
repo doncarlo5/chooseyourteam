@@ -6,6 +6,8 @@ import { View, useWindowDimensions } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Easing,
+  Extrapolation,
+  interpolate,
   runOnJS,
   useAnimatedScrollHandler,
   useAnimatedStyle,
@@ -67,11 +69,21 @@ export default function App() {
   const arrowBounce = useSharedValue(0);
   const roundOneFrozenStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: -roundScrollX.value }],
-    opacity: roundScrollX.value <= width * 0.5 ? 1 : 0,
+    opacity: interpolate(
+      roundScrollX.value,
+      [0, width * 0.5, width],
+      [1, 0.5, 0],
+      Extrapolation.CLAMP
+    ),
   }));
   const roundTwoFrozenStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: width - roundScrollX.value }],
-    opacity: roundScrollX.value >= width * 0.5 ? 1 : 0,
+    opacity: interpolate(
+      roundScrollX.value,
+      [0, width * 0.5, width],
+      [0, 0.5, 1],
+      Extrapolation.CLAMP
+    ),
   }));
   const arrowStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: arrowBounce.value }],
@@ -113,10 +125,11 @@ export default function App() {
         setIsRoundTwoFrozen(true);
       }
     },
-    isTouchEnabled: touchEnabled,
-    isScrollGestureActive: isRoundScrolling,
+      isTouchEnabled: touchEnabled,
+      isScrollGestureActive: isRoundScrolling,
       expectedTouchCount,
-    resetKey: roundResetKey,
+      allowOverExpected: !isMultiRound,
+      resetKey: roundResetKey,
     onBack: () => {
       setSelectedTeams(null);
       setTotalPlayers(5);
@@ -221,7 +234,8 @@ export default function App() {
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             scrollEnabled={
-              isRevealed || !isTouching || isRoundOneFrozen || isRoundTwoFrozen
+              (currentRound !== 1 || isRoundTwoFrozen || isRevealed) &&
+              (isRevealed || !isTouching || isRoundOneFrozen || isRoundTwoFrozen)
             }
             onScroll={roundScrollHandler}
             scrollEventThrottle={16}
@@ -250,6 +264,7 @@ export default function App() {
                 touchCount={touchCount}
                 isActive={currentRound === 0}
                 isFrozen={isRoundOneFrozen}
+                allowOverExpected={false}
               />
             </View>
             <View style={{ width }}>
@@ -259,6 +274,7 @@ export default function App() {
                 touchCount={touchCount}
                 isActive={currentRound === 1}
                 isFrozen={isRoundTwoFrozen}
+                allowOverExpected={false}
               />
             </View>
           </Animated.ScrollView>

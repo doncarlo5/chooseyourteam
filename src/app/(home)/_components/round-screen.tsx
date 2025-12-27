@@ -8,13 +8,17 @@ export default function RoundScreen(props: {
   touchCount: number;
   isActive: boolean;
   isFrozen: boolean;
+  allowOverExpected: boolean;
 }) {
   const waitingLabel = "Waiting for";
   const numberLabel = String(props.fingersCount);
   const fingersLabel = props.fingersCount === 1 ? "finger" : "fingers";
   const shouldShowLabel =
     !props.isFrozen &&
-    (!props.isActive || props.touchCount < props.fingersCount);
+    (!props.isActive ||
+      (props.allowOverExpected
+        ? props.touchCount < props.fingersCount
+        : props.touchCount !== props.fingersCount));
 
   return (
     <View className="flex-1 items-center justify-center px-8">
