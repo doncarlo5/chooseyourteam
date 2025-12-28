@@ -15,11 +15,11 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-import { AppText } from "../../components/app-text";
 import { PaginationIndicator } from "../../components/component-presentation/pagination-indicator";
 import { ThemeToggle } from "../../components/theme-toggle";
 import { useAppTheme } from "../../contexts/app-theme-context";
 import type { FrozenDot, TouchRect } from "../../helpers/types/home-screen";
+import AppReviewButton from "./_components/app-review-button";
 import DialogMorePlayers from "./_components/dialog-more-players";
 import FrozenDotsLayer from "./_components/frozen-dots-layer";
 import RoundScreen from "./_components/round-screen";
@@ -125,11 +125,11 @@ export default function App() {
         setIsRoundTwoFrozen(true);
       }
     },
-      isTouchEnabled: touchEnabled,
-      isScrollGestureActive: isRoundScrolling,
-      expectedTouchCount,
-      allowOverExpected: !isMultiRound,
-      resetKey: roundResetKey,
+    isTouchEnabled: touchEnabled,
+    isScrollGestureActive: isRoundScrolling,
+    expectedTouchCount,
+    allowOverExpected: !isMultiRound,
+    resetKey: roundResetKey,
     onBack: () => {
       setSelectedTeams(null);
       setTotalPlayers(5);
@@ -160,6 +160,7 @@ export default function App() {
     roundScrollX.value = 0;
     roundScrollRef.current?.scrollTo({ x: 0, animated: false });
   }, [selectedTeams, totalPlayers]);
+
   useEffect(() => {
     if (isRoundTwoVisible) {
       setHasShownSwipeHint(true);
@@ -191,6 +192,7 @@ export default function App() {
           setSelectedTeams={setSelectedTeams}
           isDark={isDark}
         />
+        <AppReviewButton isDark={isDark} />
 
         <StatusBar style={isDark ? "light" : "dark"} />
       </View>
@@ -235,7 +237,10 @@ export default function App() {
             showsHorizontalScrollIndicator={false}
             scrollEnabled={
               (currentRound !== 1 || isRoundTwoFrozen || isRevealed) &&
-              (isRevealed || !isTouching || isRoundOneFrozen || isRoundTwoFrozen)
+              (isRevealed ||
+                !isTouching ||
+                isRoundOneFrozen ||
+                isRoundTwoFrozen)
             }
             onScroll={roundScrollHandler}
             scrollEventThrottle={16}

@@ -9,7 +9,9 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "appStoreId": "6756816697",
       "bundleIdentifier": "com.doncarlos.chooseyourteam",
+      "appStoreUrl": "https://apps.apple.com/app/id6756816697",
       "icon": {
         "dark": "./assets/images/ios-dark.png",
         "light": "./assets/images/ios-light.png",
