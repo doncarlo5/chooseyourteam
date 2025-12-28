@@ -24,6 +24,8 @@ export function PlayerCard({
       <PressableFeedback
         onPress={onPress}
         isDisabled={isDisabled}
+        accessibilityRole="button"
+        accessibilityLabel={`Select ${count} ${label}`}
         feedbackVariant="ripple"
         className="w-full rounded-3xl"
         animation={{

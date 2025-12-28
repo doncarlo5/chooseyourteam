@@ -643,6 +643,9 @@ export function useSelectedPlayersLayer(props: {
         "absolute top-16 left-6 z-10 rounded-full",
         props.isDark ? "bg-[#E4E4E4]/50" : "bg-[#0B0B0B]/50"
       )}
+      accessibilityRole="button"
+      accessibilityLabel="Close"
+      accessibilityHint="Returns to team selection"
       onPress={handleBack}
       onLayout={() => {
         backRef.current?.measureInWindow((x, y, width, height) => {

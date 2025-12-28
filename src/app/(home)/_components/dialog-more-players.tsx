@@ -27,6 +27,9 @@ export default function DialogMorePlayers(props: {
           "rounded-full size-12 items-center justify-center px-0",
           props.isDark ? "bg-[#E4E4E4]/50" : "bg-[#0B0B0B]/50"
         )}
+        accessibilityRole="button"
+        accessibilityLabel="Add more players"
+        accessibilityHint="Opens the player count picker"
         onLayout={() => {
           plusButtonRef.current?.measureInWindow((x, y, width, height) => {
             props.plusButtonRectSv.value = {
