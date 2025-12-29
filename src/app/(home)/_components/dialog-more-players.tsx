@@ -8,7 +8,6 @@ import { PlayerCard } from "./player-card";
 
 export default function DialogMorePlayers(props: {
   selectedTeams: number | null;
-  isDark: boolean;
   setTotalPlayers: Dispatch<SetStateAction<number>>;
   plusButtonRectSv: SharedValue<TouchRect>;
   isRevealed: boolean;
@@ -23,10 +22,7 @@ export default function DialogMorePlayers(props: {
     <Dialog isOpen={isOpen} onOpenChange={setIsOpen}>
       <Button
         size="md"
-        className={cn(
-          "rounded-full size-12 items-center justify-center px-0",
-          props.isDark ? "bg-[#E4E4E4]/50" : "bg-[#0B0B0B]/50"
-        )}
+        className={cn("rounded-full size-12 items-center justify-center px-0 bg-[#0B0B0B]/50")}
         accessibilityRole="button"
         accessibilityLabel="Add more players"
         accessibilityHint="Opens the player count picker"
@@ -47,10 +43,7 @@ export default function DialogMorePlayers(props: {
         }}
       >
         <Button.Label
-          className={cn(
-            "text-base font-semibold",
-            props.isDark ? "text-[#0B0B0B]" : "text-white"
-          )}
+          className={cn("text-base font-semibold text-white")}
         >
           +5
         </Button.Label>
@@ -58,10 +51,7 @@ export default function DialogMorePlayers(props: {
       <Dialog.Portal>
         <DialogBlurBackdrop />
         <Dialog.Content
-          className={cn(
-            "max-w-sm mx-auto",
-            props.isDark ? "bg-[#0B0B0B]" : "bg-[#E4E4E4]"
-          )}
+          className={cn("max-w-sm mx-auto bg-[#E4E4E4]")}
         >
           <Dialog.Close className="self-end -mb-2 z-50" />
           <View className="mb-4 gap-1">
@@ -74,7 +64,6 @@ export default function DialogMorePlayers(props: {
                   key={value}
                   count={value}
                   index={idx}
-                  isDark={props.isDark}
                   isDisabled={false}
                   label="players"
                   onPress={() => {

@@ -9,7 +9,8 @@ import { Linking, Platform, View } from "react-native";
 const RATE_OPEN_COUNT_KEY = "rate_open_count_v1";
 const RATE_HAS_OPENED_RATING_PAGE_KEY = "rate_has_opened_rating_page_v1";
 
-export default function AppReviewButton(props: { isDark: boolean }) {
+export default function AppReviewButton(props: {}) {
+  void props;
   const [storeReviewUrl, setStoreReviewUrl] = useState<string | null>(null);
   const [openCount, setOpenCount] = useState(0);
   const [hasOpenedRatingPage, setHasOpenedRatingPage] = useState(false);
@@ -96,10 +97,7 @@ export default function AppReviewButton(props: { isDark: boolean }) {
     <View className="absolute bottom-10 inset-x-0 items-center">
       <Button
         size="md"
-        className={cn(
-          "rounded-full px-5",
-          props.isDark ? "bg-[#E4E4E4]/20" : "bg-[#0B0B0B]/20"
-        )}
+        className={cn("rounded-full px-5 bg-[#0B0B0B]/20")}
         accessibilityRole="button"
         accessibilityLabel="Rate this app"
         accessibilityHint="Opens the App Store review page"
@@ -119,19 +117,10 @@ export default function AppReviewButton(props: { isDark: boolean }) {
           className={cn("text-sm font-semibold flex-row items-center gap-10")}
         >
           <View className="flex-row items-center gap-2">
-            <AppText
-              className={cn(
-                "text-sm font-semibold",
-                props.isDark ? "text-white" : "text-[#0B0B0B]"
-              )}
-            >
+            <AppText className={cn("text-sm font-semibold text-[#0B0B0B]")}>
               Give a review
             </AppText>
-            <FontAwesome6
-              name="smile"
-              size={16}
-              color={props.isDark ? "white" : "#0B0B0B"}
-            />
+            <FontAwesome6 name="smile" size={16} color="#0B0B0B" />
           </View>
         </Button.Label>
       </Button>

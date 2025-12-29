@@ -11,7 +11,6 @@ export type TouchRect = {
 export type PlayerCardProps = {
   count: number;
   index: number;
-  isDark: boolean;
   isDisabled: boolean;
   onPress: () => void;
   label?: string;

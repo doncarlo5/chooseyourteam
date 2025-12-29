@@ -16,8 +16,6 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { PaginationIndicator } from "../../components/component-presentation/pagination-indicator";
-import { ThemeToggle } from "../../components/theme-toggle";
-import { useAppTheme } from "../../contexts/app-theme-context";
 import type { FrozenDot, TouchRect } from "../../helpers/types/home-screen";
 import AppReviewButton from "./_components/app-review-button";
 import DialogMorePlayers from "./_components/dialog-more-players";
@@ -27,7 +25,6 @@ import { useSelectedPlayersLayer } from "./_components/selected-players-layer";
 import TeamsSelection from "./_components/teams-selection";
 
 export default function App() {
-  const { isDark } = useAppTheme();
   const { width } = useWindowDimensions();
 
   const [selectedTeams, setSelectedTeams] = useState<number | null>(null);
@@ -109,7 +106,6 @@ export default function App() {
     touchCount,
   } = useSelectedPlayersLayer({
     selectedTeams,
-    isDark,
     toggleRectSv,
     plusButtonRectSv,
     onRevealSnapshot: (dots) => {
@@ -179,22 +175,14 @@ export default function App() {
 
   if (!selectedTeams) {
     return (
-      <View className={cn("flex-1", isDark ? "bg-[#0B0B0B]" : "bg-[#E4E4E4]")}>
-        <View className="absolute top-16 right-6 z-10 items-center gap-2">
-          <ThemeToggle
-            selectedTeams={selectedTeams}
-            toggleRectSv={toggleRectSv}
-          />
-        </View>
-
+      <View className={cn("flex-1 bg-[#E4E4E4]")}>
         <TeamsSelection
           selectedTeams={selectedTeams}
           setSelectedTeams={setSelectedTeams}
-          isDark={isDark}
         />
-        <AppReviewButton isDark={isDark} />
+        <AppReviewButton />
 
-        <StatusBar style={isDark ? "light" : "dark"} />
+        <StatusBar style="dark" />
       </View>
     );
   }
@@ -216,12 +204,11 @@ export default function App() {
 
   return (
     <GestureDetector gesture={touchGesture}>
-      <View className={cn("flex-1", isDark ? "bg-[#0B0B0B]" : "bg-[#E4E4E4]")}>
+      <View className={cn("flex-1 bg-[#E4E4E4]")}>
         <View className="absolute top-16 right-6 z-10 items-center gap-2">
           {showPlusButton ? (
             <DialogMorePlayers
               selectedTeams={selectedTeams}
-              isDark={isDark}
               setTotalPlayers={setTotalPlayers}
               plusButtonRectSv={plusButtonRectSv}
               isRevealed={isRevealed}
@@ -264,7 +251,6 @@ export default function App() {
           >
             <View style={{ width }}>
               <RoundScreen
-                isDark={isDark}
                 fingersCount={firstRoundCount}
                 touchCount={touchCount}
                 isActive={currentRound === 0}
@@ -274,7 +260,6 @@ export default function App() {
             </View>
             <View style={{ width }}>
               <RoundScreen
-                isDark={isDark}
                 fingersCount={secondRoundCount}
                 touchCount={touchCount}
                 isActive={currentRound === 1}
@@ -326,14 +311,14 @@ export default function App() {
               <Ionicons
                 name="chevron-forward-outline"
                 size={22}
-                color={isDark ? "#FFFFFF" : "#0B0B0B"}
+                color="#0B0B0B"
               />
             </Animated.View>
           </View>
         ) : null}
         {showLiveOverlay && !hideOverlayDuringSwipe ? overlay : null}
         {backButton}
-        <StatusBar style={isDark ? "light" : "dark"} />
+        <StatusBar style="dark" />
       </View>
     </GestureDetector>
   );

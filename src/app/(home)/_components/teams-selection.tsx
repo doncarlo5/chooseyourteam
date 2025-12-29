@@ -7,7 +7,6 @@ const GROUP_OPTIONS = [2, 3, 4, 5];
 export default function TeamsSelection(props: {
   selectedTeams: number | null;
   setSelectedTeams: (teams: number) => void;
-  isDark: boolean;
 }) {
   if (props.selectedTeams) return null;
 
@@ -24,7 +23,6 @@ export default function TeamsSelection(props: {
                 key={count}
                 count={count}
                 index={index}
-                isDark={props.isDark}
                 isDisabled={false}
                 onPress={() => {
                   props.setSelectedTeams(count);

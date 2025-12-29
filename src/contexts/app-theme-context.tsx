@@ -5,7 +5,6 @@ import React, {
   useEffect,
   useMemo,
 } from "react";
-import { useColorScheme } from "react-native";
 import { Uniwind, useUniwind } from "uniwind";
 
 type ThemeName =
@@ -36,9 +35,6 @@ export const AppThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { theme } = useUniwind();
-  const colorScheme = useColorScheme();
-  const preferredBrandTheme =
-    colorScheme === "dark" ? "brand-dark" : "brand-light";
 
   const isLight = useMemo(() => {
     return theme === "light" || theme.endsWith("-light");
@@ -53,45 +49,14 @@ export const AppThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   useEffect(() => {
-    if (theme !== "brand-light" && theme !== "brand-dark") {
-      Uniwind.setTheme(preferredBrandTheme);
-    }
-  }, [preferredBrandTheme, theme]);
-
-  const toggleTheme = useCallback(() => {
-    switch (theme) {
-      case "light":
-        Uniwind.setTheme("dark");
-        break;
-      case "dark":
-        Uniwind.setTheme("light");
-        break;
-      case "lavender-light":
-        Uniwind.setTheme("lavender-dark");
-        break;
-      case "lavender-dark":
-        Uniwind.setTheme("lavender-light");
-        break;
-      case "mint-light":
-        Uniwind.setTheme("mint-dark");
-        break;
-      case "mint-dark":
-        Uniwind.setTheme("mint-light");
-        break;
-      case "sky-light":
-        Uniwind.setTheme("sky-dark");
-        break;
-      case "sky-dark":
-        Uniwind.setTheme("sky-light");
-        break;
-      case "brand-light":
-        Uniwind.setTheme("brand-dark");
-        break;
-      case "brand-dark":
-        Uniwind.setTheme("brand-light");
-        break;
+    if (theme !== "brand-light") {
+      Uniwind.setTheme("brand-light");
     }
   }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    Uniwind.setTheme("brand-light");
+  }, []);
 
   const value = useMemo(
     () => ({

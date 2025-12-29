@@ -33,7 +33,6 @@ const SHAKE_AMPLITUDE = 10;
 
 export function useSelectedPlayersLayer(props: {
   selectedTeams: number | null;
-  isDark: boolean;
   onBack: () => void;
   toggleRectSv: SharedValue<TouchRect>;
   plusButtonRectSv: SharedValue<TouchRect>;
@@ -640,8 +639,7 @@ export function useSelectedPlayersLayer(props: {
     <Button
       size="md"
       className={cn(
-        "absolute top-16 left-6 z-10 rounded-full",
-        props.isDark ? "bg-[#E4E4E4]/50" : "bg-[#0B0B0B]/50"
+        "absolute top-16 left-6 z-10 rounded-full bg-[#0B0B0B]/50"
       )}
       accessibilityRole="button"
       accessibilityLabel="Close"
@@ -656,11 +654,7 @@ export function useSelectedPlayersLayer(props: {
       isIconOnly
     >
       <Button.Label>
-        <Ionicons
-          name="close"
-          size={24}
-          color={props.isDark ? "#0b0b0b" : "white"}
-        />
+        <Ionicons name="close" size={24} color="white" />
       </Button.Label>
     </Button>
   ) : null;
@@ -668,8 +662,7 @@ export function useSelectedPlayersLayer(props: {
   const overlay = props.selectedTeams ? (
     <>
       {slotActive.map((active, index) => {
-        const revealColor =
-          slotRevealColors[index] || (props.isDark ? "#E4E4E4" : "#0B0B0B");
+        const revealColor = slotRevealColors[index] || "#0B0B0B";
         const label = slotRevealLabels[index];
         return (
           <Dot
@@ -681,7 +674,7 @@ export function useSelectedPlayersLayer(props: {
             scale={slotScale[index]}
             shakePhase={shakePhase}
             shakeAmplitude={SHAKE_AMPLITUDE}
-            baseColor={props.isDark ? "#E4E4E4" : "#0B0B0B"}
+            baseColor="#0B0B0B"
             revealColor={revealColor}
             isRevealed={isRevealed}
             baseSize={BASE_CIRCLE_SIZE}

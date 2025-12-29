@@ -3,7 +3,6 @@ import { View } from "react-native";
 import { AppText } from "../../../components/app-text";
 
 export default function RoundScreen(props: {
-  isDark: boolean;
   fingersCount: number;
   touchCount: number;
   isActive: boolean;
@@ -26,26 +25,19 @@ export default function RoundScreen(props: {
         {shouldShowLabel ? (
           <View className="items-center">
             <AppText
-              className={cn(
-                "text-3xl font-semibold text-center leading-none",
-                props.isDark ? "text-white/20" : "text-black/20"
-              )}
+              className={cn("text-3xl font-semibold text-center leading-none text-black/20")}
             >
               {waitingLabel}
             </AppText>
             <AppText
               className={cn(
-                "text-6xl font-semibold text-center leading-none mt-3",
-                props.isDark ? "text-white/25" : "text-black/25"
+                "text-6xl font-semibold text-center leading-none mt-3 text-black/25"
               )}
             >
               {numberLabel}
             </AppText>
             <AppText
-              className={cn(
-                "text-3xl font-semibold text-center leading-none",
-                props.isDark ? "text-white/20" : "text-black/20"
-              )}
+              className={cn("text-3xl font-semibold text-center leading-none text-black/20")}
             >
               {fingersLabel}
             </AppText>
