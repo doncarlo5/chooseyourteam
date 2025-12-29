@@ -31,9 +31,9 @@ const AppThemeContext = createContext<AppThemeContextType | undefined>(
   undefined,
 );
 
-export const AppThemeProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const AppThemeProvider: React.FC<{ children: React.ReactNode }> = (
+  props
+) => {
   const { theme } = useUniwind();
 
   const isLight = useMemo(() => {
@@ -71,7 +71,7 @@ export const AppThemeProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <AppThemeContext.Provider value={value}>
-      {children}
+      {props.children}
     </AppThemeContext.Provider>
   );
 };
