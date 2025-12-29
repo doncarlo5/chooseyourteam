@@ -127,7 +127,11 @@ export default function AppReviewButton(props: { isDark: boolean }) {
             >
               Give a review
             </AppText>
-            <FontAwesome6 name="smile" size={16} color="white" />
+            <FontAwesome6
+              name="smile"
+              size={16}
+              color={props.isDark ? "white" : "#0B0B0B"}
+            />
           </View>
         </Button.Label>
       </Button>
