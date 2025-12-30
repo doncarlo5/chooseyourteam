@@ -94,9 +94,11 @@ export default function Home(props: {}) {
       ? firstRoundCount
       : secondRoundCount
     : undefined;
-  const canTouch =
-    !isMultiRound ||
-    (currentRound === 0 ? !isRoundOneFrozen : !isRoundTwoFrozen);
+  const canTouch = !isMultiRound
+    ? !isRoundOneFrozen
+    : currentRound === 0
+      ? !isRoundOneFrozen
+      : !isRoundTwoFrozen;
   const touchEnabled = canTouch && !isRoundScrolling;
   const {
     touchGesture,
@@ -111,6 +113,8 @@ export default function Home(props: {}) {
     plusButtonRectSv,
     onRevealSnapshot: (dots) => {
       if (!isMultiRound) {
+        setRoundOneSnapshot(dots);
+        setIsRoundOneFrozen(true);
         return;
       }
       if (currentRound === 0 && !isRoundOneFrozen) {
@@ -176,7 +180,7 @@ export default function Home(props: {}) {
 
   if (!selectedTeams) {
     return (
-      <View className={cn("flex-1 bg-[#E4E4E4]")}>
+      <View className={cn("flex-1")} style={{ backgroundColor: "transparent" }}>
         <TeamsSelection
           selectedTeams={selectedTeams}
           setSelectedTeams={setSelectedTeams}
@@ -189,11 +193,11 @@ export default function Home(props: {}) {
   }
 
   const roundLabels = ["Round 1", "Round 2"];
-  const showLiveOverlay =
-    !isMultiRound ||
-    (currentRound === 0
+  const showLiveOverlay = !isMultiRound
+    ? !isRoundOneFrozen || roundOneSnapshot.length === 0
+    : currentRound === 0
       ? !isRoundOneFrozen || roundOneSnapshot.length === 0
-      : !isRoundTwoFrozen || roundTwoSnapshot.length === 0);
+      : !isRoundTwoFrozen || roundTwoSnapshot.length === 0;
   const hideOverlayDuringSwipe =
     isMultiRound && currentRound === 0 && isRoundTwoVisible;
   const showPlusButton =
@@ -205,7 +209,7 @@ export default function Home(props: {}) {
 
   return (
     <GestureDetector gesture={touchGesture}>
-      <View className={cn("flex-1 bg-[#E4E4E4]")}>
+      <View className={cn("flex-1")} style={{ backgroundColor: "transparent" }}>
         <View className="absolute top-16 right-6 z-10 items-center gap-2">
           {showPlusButton ? (
             <DialogMorePlayers
@@ -293,6 +297,11 @@ export default function Home(props: {}) {
           >
             <FrozenDotsLayer dots={roundOneSnapshot} />
           </Animated.View>
+        ) : null}
+        {!isMultiRound && isRoundOneFrozen ? (
+          <View className="absolute inset-0" pointerEvents="none">
+            <FrozenDotsLayer dots={roundOneSnapshot} />
+          </View>
         ) : null}
         {isMultiRound && isRoundTwoFrozen ? (
           <Animated.View

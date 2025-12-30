@@ -1,11 +1,13 @@
+import { AnimatedBlurView } from "@/src/components/animated-blur-view";
 import type { FrozenDot, TouchRect } from "@/src/helpers/types/home-screen";
 import type { TouchPoint } from "@/src/helpers/types/touch-point";
+import { H, Step, styleChargeBomb } from "@/src/screens/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import * as Haptics from "expo-haptics";
 import { Button, cn } from "heroui-native";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Platform, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import {
   cancelAnimation,
@@ -20,10 +22,10 @@ import {
 import { scheduleOnRN } from "react-native-worklets";
 import Dot from "./dot";
 
-const BASE_CIRCLE_SIZE = 100;
-const REVEAL_CIRCLE_SIZE = BASE_CIRCLE_SIZE * 1.5;
+const BASE_CIRCLE_SIZE = 120;
+const REVEAL_CIRCLE_SIZE = 150;
 const HIGHLIGHT_DELAY_MS = 3000;
-const TEAM_COLORS = ["#F64D00", "#1F3A5F", "#2FBF71", "#F2C14E", "#00A3E0"];
+const TEAM_COLORS = ["#E901D2", "#7013F2", "#FAD400", "#F35B00", "#FB0057"];
 const MAX_SLOTS = 12;
 const BUBBLE_THROTTLE_MS = 80;
 const SHAKE_DURATION_MS = 800;
@@ -64,7 +66,7 @@ export function useSelectedPlayersLayer(props: {
   const lastBubbleAtRef = useRef<number>(0);
   const teamOrderRef = useRef<string[] | null>(null);
   const bubblePlayer = useAudioPlayer(
-    require("../../../../../assets/audio/bubble.wav"),
+    require("../../../assets/audio/bubble.wav"),
     { keepAudioSessionActive: true, downloadFirst: true }
   );
   const isEnabledSv = useSharedValue(0);
@@ -74,6 +76,7 @@ export function useSelectedPlayersLayer(props: {
   const revealProgress = useSharedValue(0);
   const revealToken = useSharedValue(0);
   const shakePhase = useSharedValue(0.5);
+  const backBlurIntensity = useSharedValue(40);
   const backRectSv = useSharedValue<TouchRect>({
     x: 0,
     y: 0,
@@ -168,6 +171,11 @@ export function useSelectedPlayersLayer(props: {
     return { assignments, numbers };
   };
 
+  const clearPreRevealHaptics = () => {
+    preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
+    preRevealHapticsRef.current = [];
+  };
+
   const resetRevealState = (shouldCancelAnimation = true) => {
     setIsRevealed(false);
     setSlotRevealColors(Array.from({ length: MAX_SLOTS }, () => ""));
@@ -179,8 +187,7 @@ export function useSelectedPlayersLayer(props: {
       cancelAnimation(shakePhase);
       shakePhase.value = 0.5;
     }
-    preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
-    preRevealHapticsRef.current = [];
+    clearPreRevealHaptics();
   };
 
   const resetAllSlots = () => {
@@ -201,35 +208,19 @@ export function useSelectedPlayersLayer(props: {
     totalDelayMs: number,
     startAfterMs: number
   ) => {
-    preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
-    preRevealHapticsRef.current = [];
+    const scheduleSteps = (totalMs: number, steps: Step[], startAfter = 0) => {
+      clearPreRevealHaptics();
 
-    if (totalDelayMs <= startAfterMs) {
-      return;
-    }
-
-    const steps = [
-      { offset: 3000, style: Haptics.ImpactFeedbackStyle.Soft },
-      { offset: 2800, style: Haptics.ImpactFeedbackStyle.Light },
-      { offset: 2200, style: Haptics.ImpactFeedbackStyle.Soft },
-      { offset: 2100, style: Haptics.ImpactFeedbackStyle.Light },
-      { offset: 1400, style: Haptics.ImpactFeedbackStyle.Soft },
-      { offset: 1200, style: Haptics.ImpactFeedbackStyle.Soft },
-      { offset: 600, style: Haptics.ImpactFeedbackStyle.Heavy },
-      { offset: 500, style: Haptics.ImpactFeedbackStyle.Heavy },
-      { offset: 400, style: Haptics.ImpactFeedbackStyle.Heavy },
-      { offset: 200, style: Haptics.ImpactFeedbackStyle.Heavy },
-    ];
-
-    steps.forEach(({ offset, style }) => {
-      const timeout = totalDelayMs - offset;
-      if (timeout > startAfterMs) {
-        const timerId = setTimeout(() => {
-          Haptics.impactAsync(style);
-        }, timeout);
+      steps.forEach((step) => {
+        if (step.t < startAfter || step.t > totalMs) {
+          return;
+        }
+        const timerId = setTimeout(() => void step.fn(), step.t);
         preRevealHapticsRef.current.push(timerId);
-      }
-    });
+      });
+    };
+
+    scheduleSteps(totalDelayMs, styleChargeBomb(totalDelayMs), startAfterMs);
   };
 
   const handleCountChange = (count: number, token?: number) => {
@@ -245,7 +236,7 @@ export function useSelectedPlayersLayer(props: {
     setIsTouching(count > 0);
     setTouchCount(count);
     if (meetsExpected && count >= 1) {
-      schedulePreRevealHaptics(HIGHLIGHT_DELAY_MS, 1000);
+      schedulePreRevealHaptics(HIGHLIGHT_DELAY_MS, 0);
     }
   };
 
@@ -285,8 +276,7 @@ export function useSelectedPlayersLayer(props: {
     setSlotRevealColors(nextRevealColors);
     setSlotRevealLabels(nextRevealLabels);
     setIsRevealed(true);
-    preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
-    preRevealHapticsRef.current = [];
+    clearPreRevealHaptics();
     if (props.onRevealSnapshot) {
       const snapshot: FrozenDot[] = [];
       for (let i = 0; i < MAX_SLOTS; i += 1) {
@@ -306,13 +296,17 @@ export function useSelectedPlayersLayer(props: {
       }
       props.onRevealSnapshot(snapshot);
     }
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    H.boom();
   };
 
-  const handleFingerHaptic = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
+  const handleFingerHaptic = (beforeCount: number, afterCount: number) => {
+    if (beforeCount === 0 && afterCount > 0) {
+      H.touchDown();
+    } else {
+      // keep tiny feedback on extra fingers (optional)
+      void Haptics.selectionAsync();
+    }
   };
-
   const playBubble = () => {
     const now = Date.now();
     if (now - lastBubbleAtRef.current < BUBBLE_THROTTLE_MS) {
@@ -461,8 +455,7 @@ export function useSelectedPlayersLayer(props: {
       shouldRouteThroughEarpiece: false,
     });
     return () => {
-      preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
-      preRevealHapticsRef.current = [];
+      clearPreRevealHaptics();
     };
   }, []);
 
@@ -513,9 +506,10 @@ export function useSelectedPlayersLayer(props: {
   const touchGesture = Gesture.Manual()
     .onTouchesDown((event) => {
       "worklet";
-      if (isEnabledSv.value === 0) {
-        return;
-      }
+      if (isEnabledSv.value === 0) return;
+
+      const beforeCount = countVisibleTouches();
+
       let didAddTouch = false;
       for (const touch of event.changedTouches) {
         const x = touch.absoluteX;
@@ -552,11 +546,15 @@ export function useSelectedPlayersLayer(props: {
           slotActive[slot].value = ignored ? 0 : 1;
         }
       }
+
+      const afterCount = countVisibleTouches();
+
       if (didAddTouch) {
-        scheduleOnRN(handleFingerHaptic);
+        scheduleOnRN(handleFingerHaptic, beforeCount, afterCount);
         scheduleOnRN(playBubble);
       }
-      updateStableCount(countVisibleTouches());
+
+      updateStableCount(afterCount);
     })
     .onTouchesMove((event) => {
       "worklet";
@@ -639,8 +637,18 @@ export function useSelectedPlayersLayer(props: {
     <Button
       size="md"
       className={cn(
-        "absolute top-16 left-6 z-10 rounded-full bg-[#0B0B0B]/50"
+        "absolute top-16 left-6 z-10 rounded-full overflow-hidden",
+        "bg-white/10 border-2 border-white/30"
       )}
+      animation={{
+        scale: {
+          timingConfig: { duration: 120 },
+        },
+        highlight: {
+          backgroundColor: { value: "transparent" },
+          opacity: { value: [0, 0] },
+        },
+      }}
       accessibilityRole="button"
       accessibilityLabel="Close"
       accessibilityHint="Returns to team selection"
@@ -653,6 +661,16 @@ export function useSelectedPlayersLayer(props: {
       ref={backRef}
       isIconOnly
     >
+      <AnimatedBlurView
+        blurIntensity={backBlurIntensity}
+        tint="light"
+        style={StyleSheet.absoluteFill}
+      />
+      <View
+        pointerEvents="none"
+        style={StyleSheet.absoluteFill}
+        className="bg-white/15"
+      />
       <Button.Label>
         <Ionicons name="close" size={24} color="white" />
       </Button.Label>
@@ -674,7 +692,7 @@ export function useSelectedPlayersLayer(props: {
             scale={slotScale[index]}
             shakePhase={shakePhase}
             shakeAmplitude={SHAKE_AMPLITUDE}
-            baseColor="#0B0B0B"
+            baseColor="#FFFFFF"
             revealColor={revealColor}
             isRevealed={isRevealed}
             baseSize={BASE_CIRCLE_SIZE}

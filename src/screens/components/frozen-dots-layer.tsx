@@ -1,8 +1,11 @@
 import { AppText } from "@/src/components/app-text";
 import type { FrozenDot } from "@/src/helpers/types/home-screen";
+import { Canvas, Path } from "@shopify/react-native-skia";
 import { View } from "react-native";
+import { buildShapePath, getShapeForLabel } from "../utils/dot-shapes";
 
 const REVEAL_CIRCLE_SIZE = 150;
+const REVEAL_FILL_COLOR = "#0B0B0B";
 
 export default function FrozenDotsLayer(props: { dots: FrozenDot[] }) {
   const ringThickness = Math.max(2, REVEAL_CIRCLE_SIZE * 0.08);
@@ -23,24 +26,34 @@ export default function FrozenDotsLayer(props: { dots: FrozenDot[] }) {
             justifyContent: "center",
           }}
         >
-          <View
+          <Canvas
+            pointerEvents="none"
             style={{
               position: "absolute",
               width: REVEAL_CIRCLE_SIZE,
               height: REVEAL_CIRCLE_SIZE,
-              borderRadius: REVEAL_CIRCLE_SIZE / 2,
-              borderWidth: ringThickness,
-              borderColor: dot.color,
-              backgroundColor: "transparent",
             }}
-          />
+          >
+            <Path
+              path={buildShapePath(
+                REVEAL_CIRCLE_SIZE,
+                getShapeForLabel(dot.label),
+                ringThickness
+              )}
+              style="stroke"
+              strokeWidth={ringThickness}
+              strokeJoin="round"
+              strokeCap="round"
+              color={dot.color}
+            />
+          </Canvas>
           <View
             style={{
               position: "absolute",
               width: innerSize,
               height: innerSize,
               borderRadius: innerSize / 2,
-              backgroundColor: dot.color,
+              backgroundColor: REVEAL_FILL_COLOR,
             }}
           />
           {dot.label ? (
