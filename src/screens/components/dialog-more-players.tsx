@@ -72,27 +72,49 @@ export default function DialogMorePlayers(props: {
       </Button>
       <Dialog.Portal>
         <DialogBlurBackdrop />
-        <Dialog.Content className={cn("max-w-sm mx-auto bg-[#E4E4E4]")}>
-          <Dialog.Close className="self-end -mb-2 z-50" />
-          <View className="mb-4 gap-1">
-            <Dialog.Title>Pick a number</Dialog.Title>
-          </View>
-          <View className="flex-row flex-wrap -mx-2">
-            {Array.from({ length: 5 }, (_, index) => index + 6).map(
-              (value, idx) => (
-                <PlayerCard
-                  key={value}
-                  count={value}
-                  index={idx}
-                  isDisabled={false}
-                  label="players"
-                  onPress={() => {
-                    props.setTotalPlayers(value);
-                    setIsOpen(false);
-                  }}
-                />
-              )
-            )}
+        <Dialog.Content
+          className={cn(
+            "max-w-sm mx-auto overflow-hidden rounded-3xl",
+            "bg-white/10 shadow-sm shadow-black/10"
+          )}
+        >
+          <AnimatedBlurView
+            blurIntensity={blurIntensity}
+            tint="light"
+            style={StyleSheet.absoluteFill}
+          />
+          <View
+            pointerEvents="none"
+            style={StyleSheet.absoluteFill}
+            className="bg-white/15"
+          />
+          <View
+            pointerEvents="none"
+            style={StyleSheet.absoluteFill}
+            className="rounded-3xl border-2 border-white/35"
+          />
+          <View className="p-4">
+            <Dialog.Close className="self-end -mb-2 z-50" />
+            <View className="mb-4 gap-1">
+              <Dialog.Title>Pick a number</Dialog.Title>
+            </View>
+            <View className="flex-row flex-wrap -mx-2">
+              {Array.from({ length: 5 }, (_, index) => index + 6).map(
+                (value, idx) => (
+                  <PlayerCard
+                    key={value}
+                    count={value}
+                    index={idx}
+                    isDisabled={false}
+                    label="players"
+                    onPress={() => {
+                      props.setTotalPlayers(value);
+                      setIsOpen(false);
+                    }}
+                  />
+                )
+              )}
+            </View>
           </View>
         </Dialog.Content>
       </Dialog.Portal>

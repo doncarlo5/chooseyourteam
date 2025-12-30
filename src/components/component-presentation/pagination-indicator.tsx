@@ -2,62 +2,43 @@ import { View } from "react-native";
 import Animated, {
   Extrapolation,
   interpolate,
+  interpolateColor,
   type SharedValue,
   useAnimatedStyle,
 } from "react-native-reanimated";
 import { withUniwind } from "uniwind";
-import { AppText } from "../app-text";
 
 const StyleAnimatedView = withUniwind(Animated.View);
 
-export type PaginationIndicatorProps = {
+const DOT_SIZE = 8;
+const DOT_ACTIVE_SCALE = 1.45;
+const DOT_INACTIVE_COLOR = "#B9B9B9";
+const DOT_ACTIVE_COLOR = "#D6D6D6";
+
+export function PaginationIndicator(props: {
   index: number;
-  label: string;
   scrollX: SharedValue<number>;
   itemSize: number;
-};
-
-export function PaginationIndicator({
-  index,
-  scrollX,
-  itemSize,
-  label,
-}: PaginationIndicatorProps) {
-  const rBarStyle = useAnimatedStyle(() => {
+}) {
+  const rDotStyle = useAnimatedStyle(() => {
     return {
       opacity: interpolate(
-        scrollX.get() / itemSize,
-        [index - 2, index - 1, index, index + 1, index + 2],
+        props.scrollX.get() / props.itemSize,
+        [props.index - 2, props.index - 1, props.index, props.index + 1, props.index + 2],
         [0.2, 0.5, 1, 0.5, 0.2],
         Extrapolation.CLAMP,
       ),
-      transform: [
-        {
-          scaleY: interpolate(
-            scrollX.get() / itemSize,
-            [index - 2, index - 1, index, index + 1, index + 2],
-            [1, 1.4, 2, 1.4, 1],
-            Extrapolation.CLAMP,
-          ),
-        },
-      ],
-    };
-  });
-
-  const rLabelStyle = useAnimatedStyle(() => {
-    return {
-      opacity: interpolate(
-        scrollX.get() / itemSize,
-        [index - 0.5, index, index + 0.5],
-        [0, 1, 0],
-        Extrapolation.CLAMP,
+      backgroundColor: interpolateColor(
+        props.scrollX.get() / props.itemSize,
+        [props.index - 1, props.index, props.index + 1],
+        [DOT_INACTIVE_COLOR, DOT_ACTIVE_COLOR, DOT_INACTIVE_COLOR],
       ),
       transform: [
         {
-          translateX: interpolate(
-            scrollX.get() / itemSize,
-            [index - 2, index - 1, index, index + 1, index + 2],
-            [1, 1.4, 2, 1.4, 1],
+          scale: interpolate(
+            props.scrollX.get() / props.itemSize,
+            [props.index - 2, props.index - 1, props.index, props.index + 1, props.index + 2],
+            [1, 1.15, DOT_ACTIVE_SCALE, 1.15, 1],
             Extrapolation.CLAMP,
           ),
         },
@@ -68,19 +49,17 @@ export function PaginationIndicator({
   return (
     <View className="flex-row items-center h-8 my-1">
       <StyleAnimatedView
-        className="w-[2px] h-3 bg-foreground"
+        className="bg-foreground"
         style={[
           {
-            transformOrigin: ["50%", "100%", 0],
+            width: DOT_SIZE,
+            height: DOT_SIZE,
+            borderRadius: DOT_SIZE / 2,
+            transformOrigin: ["50%", "50%", 0],
           },
-          rBarStyle,
+          rDotStyle,
         ]}
       />
-      <StyleAnimatedView className="absolute left-4" style={rLabelStyle}>
-        <AppText className="text-foreground text-lg font-normal">
-          {label}
-        </AppText>
-      </StyleAnimatedView>
     </View>
   );
 }

@@ -83,9 +83,34 @@ export default function Home(props: {}) {
       Extrapolation.CLAMP
     ),
   }));
-  const arrowStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: arrowBounce.value }],
-  }));
+  const arrowStyle = useAnimatedStyle(() => {
+    const roundFade = interpolate(
+      roundScrollX.value,
+      [0, width * 0.5, width],
+      [1, 0.5, 0],
+      Extrapolation.CLAMP
+    );
+    return {
+      transform: [
+        { translateX: interpolate(arrowBounce.value, [0, 1], [0, 12]) },
+      ],
+      opacity: roundFade,
+    };
+  });
+  const arrowLeftStyle = useAnimatedStyle(() => {
+    const roundFade = interpolate(
+      roundScrollX.value,
+      [0, width * 0.5, width],
+      [0, 0.5, 1],
+      Extrapolation.CLAMP
+    );
+    return {
+      transform: [
+        { translateX: interpolate(arrowBounce.value, [0, 1], [0, -12]) },
+      ],
+      opacity: roundFade,
+    };
+  });
   const isMultiRound = totalPlayers > 5;
   const firstRoundCount = Math.min(5, totalPlayers);
   const secondRoundCount = Math.max(0, totalPlayers - 5);
@@ -169,8 +194,8 @@ export default function Home(props: {}) {
   }, [isRoundTwoVisible]);
   useEffect(() => {
     arrowBounce.value = withRepeat(
-      withTiming(8, {
-        duration: 800,
+      withTiming(1, {
+        duration: 700,
         easing: Easing.inOut(Easing.quad),
       }),
       -1,
@@ -192,7 +217,6 @@ export default function Home(props: {}) {
     );
   }
 
-  const roundLabels = ["Round 1", "Round 2"];
   const showLiveOverlay = !isMultiRound
     ? !isRoundOneFrozen || roundOneSnapshot.length === 0
     : currentRound === 0
@@ -275,13 +299,15 @@ export default function Home(props: {}) {
           </Animated.ScrollView>
         )}
         {isMultiRound && (
-          <View className="absolute left-6" style={{ bottom: 40 }}>
-            <View className="flex-row items-center gap-1">
-              {roundLabels.map((label, index) => (
+          <View
+            className="absolute left-0 right-0 items-center"
+            style={{ bottom: 40 }}
+          >
+            <View className="flex-row items-center gap-2">
+              {Array.from({ length: 2 }, (_, index) => (
                 <PaginationIndicator
-                  key={label}
+                  key={index}
                   index={index}
-                  label={label}
                   scrollX={roundScrollX}
                   itemSize={width}
                 />
@@ -320,7 +346,18 @@ export default function Home(props: {}) {
             <Animated.View style={arrowStyle}>
               <Ionicons
                 name="chevron-forward-outline"
-                size={22}
+                size={34}
+                color="#0B0B0B"
+              />
+            </Animated.View>
+          </View>
+        ) : null}
+        {isMultiRound && currentRound === 1 && isRoundTwoFrozen ? (
+          <View className="absolute left-8 inset-y-0 items-center justify-center">
+            <Animated.View style={arrowLeftStyle}>
+              <Ionicons
+                name="chevron-back-outline"
+                size={34}
                 color="#0B0B0B"
               />
             </Animated.View>

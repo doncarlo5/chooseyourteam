@@ -638,7 +638,7 @@ export function useSelectedPlayersLayer(props: {
       size="md"
       className={cn(
         "absolute top-16 left-6 z-10 rounded-full overflow-hidden",
-        "bg-white/10 border-2 border-white/30"
+        "bg-white/5 border-2 border-white/15"
       )}
       animation={{
         scale: {
@@ -669,10 +669,10 @@ export function useSelectedPlayersLayer(props: {
       <View
         pointerEvents="none"
         style={StyleSheet.absoluteFill}
-        className="bg-white/15"
+        className="bg-white/10"
       />
       <Button.Label>
-        <Ionicons name="close" size={24} color="white" />
+        <Ionicons name="close" size={24} color="rgba(255, 255, 255, 0.7)" />
       </Button.Label>
     </Button>
   ) : null;
