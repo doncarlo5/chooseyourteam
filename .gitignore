@@ -72,3 +72,8 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example-src
+
+# Expo
+.expo
+dist/
+web-build/
