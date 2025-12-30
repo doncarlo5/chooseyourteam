@@ -18,7 +18,7 @@ export default function TeamsSelection(props: {
           className={cn("text-2xl tracking-tight text-foreground mb-2")}
           style={{ fontFamily: "SpaceMono" }}
         >
-          How many teams?
+          Number of teams
         </AppText>
         <View className="flex-row flex-wrap -mx-2">
           {GROUP_OPTIONS.map((count, index) => {

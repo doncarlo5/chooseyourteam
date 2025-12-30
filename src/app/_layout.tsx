@@ -70,6 +70,7 @@ export default function Layout() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
+    SpaceMono: require("../../assets/fonts/SpaceMono-Regular.ttf"),
   });
 
   if (!fonts) {

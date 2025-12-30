@@ -1,6 +1,7 @@
 import { AnimatedBlurView } from "@/src/components/animated-blur-view";
 import type { FrozenDot, TouchRect } from "@/src/helpers/types/home-screen";
 import type { TouchPoint } from "@/src/helpers/types/touch-point";
+import { H, Step, styleChargeBomb } from "@/src/screens/utils/helper";
 import { Ionicons } from "@expo/vector-icons";
 import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import * as Haptics from "expo-haptics";
@@ -170,6 +171,11 @@ export function useSelectedPlayersLayer(props: {
     return { assignments, numbers };
   };
 
+  const clearPreRevealHaptics = () => {
+    preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
+    preRevealHapticsRef.current = [];
+  };
+
   const resetRevealState = (shouldCancelAnimation = true) => {
     setIsRevealed(false);
     setSlotRevealColors(Array.from({ length: MAX_SLOTS }, () => ""));
@@ -181,8 +187,7 @@ export function useSelectedPlayersLayer(props: {
       cancelAnimation(shakePhase);
       shakePhase.value = 0.5;
     }
-    preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
-    preRevealHapticsRef.current = [];
+    clearPreRevealHaptics();
   };
 
   const resetAllSlots = () => {
@@ -203,35 +208,19 @@ export function useSelectedPlayersLayer(props: {
     totalDelayMs: number,
     startAfterMs: number
   ) => {
-    preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
-    preRevealHapticsRef.current = [];
+    const scheduleSteps = (totalMs: number, steps: Step[], startAfter = 0) => {
+      clearPreRevealHaptics();
 
-    if (totalDelayMs <= startAfterMs) {
-      return;
-    }
-
-    const steps = [
-      { offset: 3000, style: Haptics.ImpactFeedbackStyle.Soft },
-      { offset: 2800, style: Haptics.ImpactFeedbackStyle.Light },
-      { offset: 2200, style: Haptics.ImpactFeedbackStyle.Soft },
-      { offset: 2100, style: Haptics.ImpactFeedbackStyle.Light },
-      { offset: 1400, style: Haptics.ImpactFeedbackStyle.Soft },
-      { offset: 1200, style: Haptics.ImpactFeedbackStyle.Soft },
-      { offset: 600, style: Haptics.ImpactFeedbackStyle.Heavy },
-      { offset: 500, style: Haptics.ImpactFeedbackStyle.Heavy },
-      { offset: 400, style: Haptics.ImpactFeedbackStyle.Heavy },
-      { offset: 200, style: Haptics.ImpactFeedbackStyle.Heavy },
-    ];
-
-    steps.forEach(({ offset, style }) => {
-      const timeout = totalDelayMs - offset;
-      if (timeout > startAfterMs) {
-        const timerId = setTimeout(() => {
-          Haptics.impactAsync(style);
-        }, timeout);
+      steps.forEach((step) => {
+        if (step.t < startAfter || step.t > totalMs) {
+          return;
+        }
+        const timerId = setTimeout(() => void step.fn(), step.t);
         preRevealHapticsRef.current.push(timerId);
-      }
-    });
+      });
+    };
+
+    scheduleSteps(totalDelayMs, styleChargeBomb(totalDelayMs), startAfterMs);
   };
 
   const handleCountChange = (count: number, token?: number) => {
@@ -247,7 +236,7 @@ export function useSelectedPlayersLayer(props: {
     setIsTouching(count > 0);
     setTouchCount(count);
     if (meetsExpected && count >= 1) {
-      schedulePreRevealHaptics(HIGHLIGHT_DELAY_MS, 1000);
+      schedulePreRevealHaptics(HIGHLIGHT_DELAY_MS, 0);
     }
   };
 
@@ -287,8 +276,7 @@ export function useSelectedPlayersLayer(props: {
     setSlotRevealColors(nextRevealColors);
     setSlotRevealLabels(nextRevealLabels);
     setIsRevealed(true);
-    preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
-    preRevealHapticsRef.current = [];
+    clearPreRevealHaptics();
     if (props.onRevealSnapshot) {
       const snapshot: FrozenDot[] = [];
       for (let i = 0; i < MAX_SLOTS; i += 1) {
@@ -308,13 +296,17 @@ export function useSelectedPlayersLayer(props: {
       }
       props.onRevealSnapshot(snapshot);
     }
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    H.boom();
   };
 
-  const handleFingerHaptic = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
+  const handleFingerHaptic = (beforeCount: number, afterCount: number) => {
+    if (beforeCount === 0 && afterCount > 0) {
+      H.touchDown();
+    } else {
+      // keep tiny feedback on extra fingers (optional)
+      void Haptics.selectionAsync();
+    }
   };
-
   const playBubble = () => {
     const now = Date.now();
     if (now - lastBubbleAtRef.current < BUBBLE_THROTTLE_MS) {
@@ -463,8 +455,7 @@ export function useSelectedPlayersLayer(props: {
       shouldRouteThroughEarpiece: false,
     });
     return () => {
-      preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
-      preRevealHapticsRef.current = [];
+      clearPreRevealHaptics();
     };
   }, []);
 
@@ -515,9 +506,10 @@ export function useSelectedPlayersLayer(props: {
   const touchGesture = Gesture.Manual()
     .onTouchesDown((event) => {
       "worklet";
-      if (isEnabledSv.value === 0) {
-        return;
-      }
+      if (isEnabledSv.value === 0) return;
+
+      const beforeCount = countVisibleTouches();
+
       let didAddTouch = false;
       for (const touch of event.changedTouches) {
         const x = touch.absoluteX;
@@ -554,11 +546,15 @@ export function useSelectedPlayersLayer(props: {
           slotActive[slot].value = ignored ? 0 : 1;
         }
       }
+
+      const afterCount = countVisibleTouches();
+
       if (didAddTouch) {
-        scheduleOnRN(handleFingerHaptic);
+        scheduleOnRN(handleFingerHaptic, beforeCount, afterCount);
         scheduleOnRN(playBubble);
       }
-      updateStableCount(countVisibleTouches());
+
+      updateStableCount(afterCount);
     })
     .onTouchesMove((event) => {
       "worklet";

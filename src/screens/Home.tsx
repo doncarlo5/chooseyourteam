@@ -94,9 +94,11 @@ export default function Home(props: {}) {
       ? firstRoundCount
       : secondRoundCount
     : undefined;
-  const canTouch =
-    !isMultiRound ||
-    (currentRound === 0 ? !isRoundOneFrozen : !isRoundTwoFrozen);
+  const canTouch = !isMultiRound
+    ? !isRoundOneFrozen
+    : currentRound === 0
+      ? !isRoundOneFrozen
+      : !isRoundTwoFrozen;
   const touchEnabled = canTouch && !isRoundScrolling;
   const {
     touchGesture,
@@ -111,6 +113,8 @@ export default function Home(props: {}) {
     plusButtonRectSv,
     onRevealSnapshot: (dots) => {
       if (!isMultiRound) {
+        setRoundOneSnapshot(dots);
+        setIsRoundOneFrozen(true);
         return;
       }
       if (currentRound === 0 && !isRoundOneFrozen) {
@@ -189,11 +193,11 @@ export default function Home(props: {}) {
   }
 
   const roundLabels = ["Round 1", "Round 2"];
-  const showLiveOverlay =
-    !isMultiRound ||
-    (currentRound === 0
+  const showLiveOverlay = !isMultiRound
+    ? !isRoundOneFrozen || roundOneSnapshot.length === 0
+    : currentRound === 0
       ? !isRoundOneFrozen || roundOneSnapshot.length === 0
-      : !isRoundTwoFrozen || roundTwoSnapshot.length === 0);
+      : !isRoundTwoFrozen || roundTwoSnapshot.length === 0;
   const hideOverlayDuringSwipe =
     isMultiRound && currentRound === 0 && isRoundTwoVisible;
   const showPlusButton =
@@ -293,6 +297,11 @@ export default function Home(props: {}) {
           >
             <FrozenDotsLayer dots={roundOneSnapshot} />
           </Animated.View>
+        ) : null}
+        {!isMultiRound && isRoundOneFrozen ? (
+          <View className="absolute inset-0" pointerEvents="none">
+            <FrozenDotsLayer dots={roundOneSnapshot} />
+          </View>
         ) : null}
         {isMultiRound && isRoundTwoFrozen ? (
           <Animated.View

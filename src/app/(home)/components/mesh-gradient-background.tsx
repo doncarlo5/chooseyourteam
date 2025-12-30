@@ -157,7 +157,7 @@ export default function MeshGradientBackground(props: {
   ];
   const vertexAlpha = props.vertexAlpha ?? 0.92;
   const darkenTop = props.darkenTop ?? true;
-  const blurSigma = props.blurSigma ?? 16;
+  const blurSigma = props.blurSigma ?? 10;
   const blurMode = props.blurMode ?? "mirror";
   const meshOverscan = props.meshOverscan ?? Math.ceil(blurSigma * 2);
   const useBandFade = props.useBandFade ?? false;
