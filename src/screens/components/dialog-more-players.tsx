@@ -22,7 +22,9 @@ export default function DialogMorePlayers(props: {
     <Dialog isOpen={isOpen} onOpenChange={setIsOpen}>
       <Button
         size="md"
-        className={cn("rounded-full size-12 items-center justify-center px-0 bg-[#0B0B0B]/50")}
+        className={cn(
+          "rounded-full size-12 items-center justify-center px-0 bg-[#0B0B0B]/50"
+        )}
         accessibilityRole="button"
         accessibilityLabel="Add more players"
         accessibilityHint="Opens the player count picker"
@@ -42,17 +44,13 @@ export default function DialogMorePlayers(props: {
           setIsOpen(true);
         }}
       >
-        <Button.Label
-          className={cn("text-base font-semibold text-white")}
-        >
+        <Button.Label className={cn("text-base font-semibold text-white")}>
           +5
         </Button.Label>
       </Button>
       <Dialog.Portal>
         <DialogBlurBackdrop />
-        <Dialog.Content
-          className={cn("max-w-sm mx-auto bg-[#E4E4E4]")}
-        >
+        <Dialog.Content className={cn("max-w-sm mx-auto bg-[#E4E4E4]")}>
           <Dialog.Close className="self-end -mb-2 z-50" />
           <View className="mb-4 gap-1">
             <Dialog.Title>Pick a number</Dialog.Title>

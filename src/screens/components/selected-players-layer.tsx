@@ -64,7 +64,7 @@ export function useSelectedPlayersLayer(props: {
   const lastBubbleAtRef = useRef<number>(0);
   const teamOrderRef = useRef<string[] | null>(null);
   const bubblePlayer = useAudioPlayer(
-    require("../../../../../assets/audio/bubble.wav"),
+    require("../../../assets/audio/bubble.wav"),
     { keepAudioSessionActive: true, downloadFirst: true }
   );
   const isEnabledSv = useSharedValue(0);
@@ -638,9 +638,7 @@ export function useSelectedPlayersLayer(props: {
   const backButton = props.selectedTeams ? (
     <Button
       size="md"
-      className={cn(
-        "absolute top-16 left-6 z-10 rounded-full bg-[#0B0B0B]/50"
-      )}
+      className={cn("absolute top-16 left-6 z-10 rounded-full bg-[#0B0B0B]/50")}
       accessibilityRole="button"
       accessibilityLabel="Close"
       accessibilityHint="Returns to team selection"

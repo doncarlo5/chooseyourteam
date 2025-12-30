@@ -176,7 +176,7 @@ export default function Home(props: {}) {
 
   if (!selectedTeams) {
     return (
-      <View className={cn("flex-1 bg-[#E4E4E4]")}>
+      <View className={cn("flex-1")} style={{ backgroundColor: "transparent" }}>
         <TeamsSelection
           selectedTeams={selectedTeams}
           setSelectedTeams={setSelectedTeams}
@@ -205,7 +205,7 @@ export default function Home(props: {}) {
 
   return (
     <GestureDetector gesture={touchGesture}>
-      <View className={cn("flex-1 bg-[#E4E4E4]")}>
+      <View className={cn("flex-1")} style={{ backgroundColor: "transparent" }}>
         <View className="absolute top-16 right-6 z-10 items-center gap-2">
           {showPlusButton ? (
             <DialogMorePlayers

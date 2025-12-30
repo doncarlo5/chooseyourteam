@@ -8,7 +8,7 @@ import {
 import { Slot } from "expo-router";
 import { HeroUINativeProvider } from "heroui-native";
 import { useCallback } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   KeyboardAvoidingView,
@@ -20,6 +20,7 @@ import {
 } from "react-native-reanimated";
 import "../../global.css";
 import { AppThemeProvider } from "../contexts/app-theme-context";
+import MeshGradientBackground from "./(home)/components/mesh-gradient-background";
 
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
@@ -42,7 +43,7 @@ function AppContent() {
         {children}
       </KeyboardAvoidingView>
     ),
-    [],
+    []
   );
 
   return (
@@ -54,7 +55,10 @@ function AppContent() {
           },
         }}
       >
-        <Slot />
+        <View style={{ flex: 1, backgroundColor: "transparent" }}>
+          <MeshGradientBackground />
+          <Slot />
+        </View>
       </HeroUINativeProvider>
     </AppThemeProvider>
   );

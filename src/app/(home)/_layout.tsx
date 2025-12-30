@@ -29,7 +29,7 @@ export default function Layout() {
   }, [reducedMotion]);
 
   return (
-    <View className="flex-1 bg-background">
+    <View className="flex-1" style={{ backgroundColor: "transparent" }}>
       <Stack
         screenOptions={{
           headerTitleAlign: "center",
@@ -50,7 +50,7 @@ export default function Layout() {
           gestureDirection: "horizontal",
           fullScreenGestureEnabled: isLiquidGlassAvailable() ? false : true,
           contentStyle: {
-            backgroundColor: themeColorBackground,
+            backgroundColor: "transparent",
           },
         }}
       >
