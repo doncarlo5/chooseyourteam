@@ -1,4 +1,5 @@
 import { AppText } from "@/src/components/app-text";
+import { cn } from "heroui-native";
 import { View } from "react-native";
 import { PlayerCard } from "./player-card";
 
@@ -13,7 +14,10 @@ export default function TeamsSelection(props: {
   return (
     <View className="flex-1 justify-center px-8 gap-4">
       <View className="w-full">
-        <AppText className="text-xl font-semibold text-foreground mb-2">
+        <AppText
+          className={cn("text-2xl tracking-tight text-foreground mb-2")}
+          style={{ fontFamily: "SpaceMono" }}
+        >
           How many teams?
         </AppText>
         <View className="flex-row flex-wrap -mx-2">

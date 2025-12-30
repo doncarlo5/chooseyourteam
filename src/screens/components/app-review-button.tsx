@@ -117,10 +117,15 @@ export default function AppReviewButton(props: {}) {
           className={cn("text-sm font-semibold flex-row items-center gap-10")}
         >
           <View className="flex-row items-center gap-2">
-            <AppText className={cn("text-sm font-semibold text-[#0B0B0B]")}>
+            <AppText className={cn("text-sm font-semibold text-white/80")}>
               Give a review
             </AppText>
-            <FontAwesome6 name="smile" size={16} color="#0B0B0B" />
+            <FontAwesome6
+              name="smile"
+              size={16}
+              color="#FFFFFF"
+              opacity={0.8}
+            />
           </View>
         </Button.Label>
       </Button>

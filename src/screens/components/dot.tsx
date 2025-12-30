@@ -1,12 +1,21 @@
 import { AppText } from "@/src/components/app-text";
 import type { DotProps } from "@/src/helpers/types/home-screen";
 import { useEffect } from "react";
+import { StyleSheet } from "react-native";
 import Animated, {
   interpolateColor,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import {
+  Canvas,
+  Circle,
+  Group,
+  RadialGradient,
+  vec,
+} from "@shopify/react-native-skia";
 
 export default function Dot(props: DotProps) {
   const progress = useSharedValue(props.isRevealed ? 1 : 0);
@@ -78,11 +87,41 @@ export default function Dot(props: DotProps) {
     };
   });
 
+  const revealOpacity = useDerivedValue(() => progress.value);
+  const glassOpacity = useDerivedValue(() => 1 - progress.value);
+  const dotRadius = useDerivedValue(() => size.value * 0.365);
+  const center = useDerivedValue(() => size.value / 2);
+  const highlightCenter = useDerivedValue(() =>
+    vec(size.value * 0.32, size.value * 0.24)
+  );
+  const highlightRadius = useDerivedValue(() => size.value * 0.45);
+  const shadowCenter = useDerivedValue(() =>
+    vec(size.value * 0.72, size.value * 0.76)
+  );
+  const shadowRadius = useDerivedValue(() => size.value * 0.65);
   if (!props.isRevealed || !props.label) {
     return (
       <Animated.View collapsable={false} style={containerStyle}>
         <Animated.View style={ringStyle} />
         <Animated.View style={dotStyle} />
+        <Canvas pointerEvents="none" style={StyleSheet.absoluteFill}>
+          <Group opacity={glassOpacity}>
+            <Circle cx={center} cy={center} r={dotRadius}>
+              <RadialGradient
+                c={shadowCenter}
+                r={shadowRadius}
+                colors={["rgba(0,0,0,0.18)", "rgba(0,0,0,0)"]}
+              />
+            </Circle>
+            <Circle cx={center} cy={center} r={dotRadius}>
+              <RadialGradient
+                c={highlightCenter}
+                r={highlightRadius}
+                colors={["rgba(255,255,255,0.35)", "rgba(255,255,255,0)"]}
+              />
+            </Circle>
+          </Group>
+        </Canvas>
       </Animated.View>
     );
   }
@@ -91,6 +130,24 @@ export default function Dot(props: DotProps) {
     <Animated.View collapsable={false} style={containerStyle}>
       <Animated.View style={ringStyle} />
       <Animated.View style={dotStyle} />
+      <Canvas pointerEvents="none" style={StyleSheet.absoluteFill}>
+        <Group opacity={revealOpacity}>
+          <Circle cx={center} cy={center} r={dotRadius}>
+            <RadialGradient
+              c={shadowCenter}
+              r={shadowRadius}
+              colors={["rgba(0,0,0,0.35)", "rgba(0,0,0,0)"]}
+            />
+          </Circle>
+          <Circle cx={center} cy={center} r={dotRadius}>
+            <RadialGradient
+              c={highlightCenter}
+              r={highlightRadius}
+              colors={["rgba(255,255,255,0.45)", "rgba(255,255,255,0)"]}
+            />
+          </Circle>
+        </Group>
+      </Canvas>
       <AppText className="text-7xl font-extrabold font-mono text-white text-center mt-3">
         {props.label}
       </AppText>

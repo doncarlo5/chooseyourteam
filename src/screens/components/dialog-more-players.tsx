@@ -1,9 +1,10 @@
+import { AnimatedBlurView } from "@/src/components/animated-blur-view";
 import { DialogBlurBackdrop } from "@/src/components/dialog-blur-backdrop";
 import type { TouchRect } from "@/src/helpers/types/home-screen";
 import { Button, Dialog, cn } from "heroui-native";
 import { useRef, useState, type Dispatch, type SetStateAction } from "react";
-import { View } from "react-native";
-import type { SharedValue } from "react-native-reanimated";
+import { StyleSheet, View } from "react-native";
+import { useSharedValue, type SharedValue } from "react-native-reanimated";
 import { PlayerCard } from "./player-card";
 
 export default function DialogMorePlayers(props: {
@@ -15,6 +16,7 @@ export default function DialogMorePlayers(props: {
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const plusButtonRef = useRef<View>(null);
+  const blurIntensity = useSharedValue(40);
 
   if (!props.selectedTeams || props.isRevealed || props.isTouching) return null;
 
@@ -23,8 +25,18 @@ export default function DialogMorePlayers(props: {
       <Button
         size="md"
         className={cn(
-          "rounded-full size-12 items-center justify-center px-0 bg-[#0B0B0B]/50"
+          "rounded-full size-12 items-center justify-center px-0 overflow-hidden",
+          "bg-white/10 border-2 border-white/30"
         )}
+        animation={{
+          scale: {
+            timingConfig: { duration: 120 },
+          },
+          highlight: {
+            backgroundColor: { value: "transparent" },
+            opacity: { value: [0, 0] },
+          },
+        }}
         accessibilityRole="button"
         accessibilityLabel="Add more players"
         accessibilityHint="Opens the player count picker"
@@ -44,6 +56,16 @@ export default function DialogMorePlayers(props: {
           setIsOpen(true);
         }}
       >
+        <AnimatedBlurView
+          blurIntensity={blurIntensity}
+          tint="light"
+          style={StyleSheet.absoluteFill}
+        />
+        <View
+          pointerEvents="none"
+          style={StyleSheet.absoluteFill}
+          className="bg-white/15"
+        />
         <Button.Label className={cn("text-base font-semibold text-white")}>
           +5
         </Button.Label>

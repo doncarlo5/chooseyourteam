@@ -1,3 +1,4 @@
+import { AnimatedBlurView } from "@/src/components/animated-blur-view";
 import type { FrozenDot, TouchRect } from "@/src/helpers/types/home-screen";
 import type { TouchPoint } from "@/src/helpers/types/touch-point";
 import { Ionicons } from "@expo/vector-icons";
@@ -5,7 +6,7 @@ import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import * as Haptics from "expo-haptics";
 import { Button, cn } from "heroui-native";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Platform, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import {
   cancelAnimation,
@@ -20,10 +21,10 @@ import {
 import { scheduleOnRN } from "react-native-worklets";
 import Dot from "./dot";
 
-const BASE_CIRCLE_SIZE = 100;
-const REVEAL_CIRCLE_SIZE = BASE_CIRCLE_SIZE * 1.5;
+const BASE_CIRCLE_SIZE = 120;
+const REVEAL_CIRCLE_SIZE = 150;
 const HIGHLIGHT_DELAY_MS = 3000;
-const TEAM_COLORS = ["#F64D00", "#1F3A5F", "#2FBF71", "#F2C14E", "#00A3E0"];
+const TEAM_COLORS = ["#E901D2", "#7013F2", "#FAD400", "#F35B00", "#FB0057"];
 const MAX_SLOTS = 12;
 const BUBBLE_THROTTLE_MS = 80;
 const SHAKE_DURATION_MS = 800;
@@ -74,6 +75,7 @@ export function useSelectedPlayersLayer(props: {
   const revealProgress = useSharedValue(0);
   const revealToken = useSharedValue(0);
   const shakePhase = useSharedValue(0.5);
+  const backBlurIntensity = useSharedValue(40);
   const backRectSv = useSharedValue<TouchRect>({
     x: 0,
     y: 0,
@@ -638,7 +640,19 @@ export function useSelectedPlayersLayer(props: {
   const backButton = props.selectedTeams ? (
     <Button
       size="md"
-      className={cn("absolute top-16 left-6 z-10 rounded-full bg-[#0B0B0B]/50")}
+      className={cn(
+        "absolute top-16 left-6 z-10 rounded-full overflow-hidden",
+        "bg-white/10 border-2 border-white/30"
+      )}
+      animation={{
+        scale: {
+          timingConfig: { duration: 120 },
+        },
+        highlight: {
+          backgroundColor: { value: "transparent" },
+          opacity: { value: [0, 0] },
+        },
+      }}
       accessibilityRole="button"
       accessibilityLabel="Close"
       accessibilityHint="Returns to team selection"
@@ -651,6 +665,16 @@ export function useSelectedPlayersLayer(props: {
       ref={backRef}
       isIconOnly
     >
+      <AnimatedBlurView
+        blurIntensity={backBlurIntensity}
+        tint="light"
+        style={StyleSheet.absoluteFill}
+      />
+      <View
+        pointerEvents="none"
+        style={StyleSheet.absoluteFill}
+        className="bg-white/15"
+      />
       <Button.Label>
         <Ionicons name="close" size={24} color="white" />
       </Button.Label>
@@ -672,7 +696,7 @@ export function useSelectedPlayersLayer(props: {
             scale={slotScale[index]}
             shakePhase={shakePhase}
             shakeAmplitude={SHAKE_AMPLITUDE}
-            baseColor="#0B0B0B"
+            baseColor="#FFFFFF"
             revealColor={revealColor}
             isRevealed={isRevealed}
             baseSize={BASE_CIRCLE_SIZE}
