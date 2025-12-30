@@ -1,3 +1,5 @@
+import type { FrozenDot, TouchRect } from "@/src/helpers/types/home-screen";
+import type { TouchPoint } from "@/src/helpers/types/touch-point";
 import { Ionicons } from "@expo/vector-icons";
 import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import * as Haptics from "expo-haptics";
@@ -16,8 +18,6 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
-import type { FrozenDot, TouchRect } from "../../../helpers/types/home-screen";
-import type { TouchPoint } from "../../../helpers/types/touch-point";
 import Dot from "./dot";
 
 const BASE_CIRCLE_SIZE = 100;
@@ -64,7 +64,7 @@ export function useSelectedPlayersLayer(props: {
   const lastBubbleAtRef = useRef<number>(0);
   const teamOrderRef = useRef<string[] | null>(null);
   const bubblePlayer = useAudioPlayer(
-    require("../../../../assets/audio/bubble.wav"),
+    require("../../../../../assets/audio/bubble.wav"),
     { keepAudioSessionActive: true, downloadFirst: true }
   );
   const isEnabledSv = useSharedValue(0);

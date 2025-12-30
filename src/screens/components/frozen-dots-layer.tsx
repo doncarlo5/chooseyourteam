@@ -1,6 +1,6 @@
+import { AppText } from "@/src/components/app-text";
+import type { FrozenDot } from "@/src/helpers/types/home-screen";
 import { View } from "react-native";
-import { AppText } from "../../../components/app-text";
-import type { FrozenDot } from "../../../helpers/types/home-screen";
 
 const REVEAL_CIRCLE_SIZE = 150;
 

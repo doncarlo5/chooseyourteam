@@ -1,3 +1,5 @@
+import { AppText } from "@/src/components/app-text";
+import type { DotProps } from "@/src/helpers/types/home-screen";
 import { useEffect } from "react";
 import Animated, {
   interpolateColor,
@@ -5,50 +7,35 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { AppText } from "../../../components/app-text";
-import type { DotProps } from "../../../helpers/types/home-screen";
 
-export default function Dot({
-  x,
-  y,
-  baseColor,
-  revealColor,
-  isRevealed,
-  baseSize,
-  revealSize,
-  label,
-  active,
-  opacity,
-  scale,
-  shakePhase,
-  shakeAmplitude,
-}: DotProps) {
-  const progress = useSharedValue(isRevealed ? 1 : 0);
-  const size = useSharedValue(isRevealed ? revealSize : baseSize);
+export default function Dot(props: DotProps) {
+  const progress = useSharedValue(props.isRevealed ? 1 : 0);
+  const size = useSharedValue(props.isRevealed ? props.revealSize : props.baseSize);
 
   useEffect(() => {
-    progress.value = withTiming(isRevealed ? 1 : 0, { duration: 200 });
-    size.value = withTiming(isRevealed ? revealSize : baseSize, {
+    progress.value = withTiming(props.isRevealed ? 1 : 0, { duration: 200 });
+    size.value = withTiming(props.isRevealed ? props.revealSize : props.baseSize, {
       duration: 200,
     });
-  }, [isRevealed, baseSize, revealSize, progress, size]);
+  }, [props.isRevealed, props.baseSize, props.revealSize, progress, size]);
 
   const containerStyle = useAnimatedStyle(() => {
     const currentSize = size.value;
-    const isVisible = active.value === 1;
-    const shakeOffset = (shakePhase.value - 0.5) * 2 * shakeAmplitude;
+    const isVisible = props.active.value === 1;
+    const shakeOffset =
+      (props.shakePhase.value - 0.5) * 2 * props.shakeAmplitude;
     return {
       position: "absolute",
-      left: x.value - currentSize / 2,
-      top: y.value - currentSize / 2,
+      left: props.x.value - currentSize / 2,
+      top: props.y.value - currentSize / 2,
       width: currentSize,
       height: currentSize,
       alignItems: "center",
       justifyContent: "center",
-      opacity: isVisible ? opacity.value : 0,
+      opacity: isVisible ? props.opacity.value : 0,
       transform: [
         { translateX: isVisible ? shakeOffset : 0 },
-        { scale: (isVisible ? 1 : 0.85) * scale.value },
+        { scale: (isVisible ? 1 : 0.85) * props.scale.value },
       ],
     };
   });
@@ -67,7 +54,7 @@ export default function Dot({
       borderColor: interpolateColor(
         progress.value,
         [0, 1],
-        [baseColor, revealColor]
+        [props.baseColor, props.revealColor]
       ),
       backgroundColor: "transparent",
     };
@@ -86,12 +73,12 @@ export default function Dot({
       backgroundColor: interpolateColor(
         progress.value,
         [0, 1],
-        [baseColor, revealColor]
+        [props.baseColor, props.revealColor]
       ),
     };
   });
 
-  if (!isRevealed || !label) {
+  if (!props.isRevealed || !props.label) {
     return (
       <Animated.View collapsable={false} style={containerStyle}>
         <Animated.View style={ringStyle} />
@@ -105,7 +92,7 @@ export default function Dot({
       <Animated.View style={ringStyle} />
       <Animated.View style={dotStyle} />
       <AppText className="text-7xl font-extrabold font-mono text-white text-center mt-3">
-        {label}
+        {props.label}
       </AppText>
     </Animated.View>
   );

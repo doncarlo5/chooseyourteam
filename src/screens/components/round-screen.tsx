@@ -1,6 +1,6 @@
+import { AppText } from "@/src/components/app-text";
 import { cn } from "heroui-native";
 import { View } from "react-native";
-import { AppText } from "../../../components/app-text";
 
 export default function RoundScreen(props: {
   fingersCount: number;

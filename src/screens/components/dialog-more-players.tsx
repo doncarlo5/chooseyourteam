@@ -1,9 +1,9 @@
+import { DialogBlurBackdrop } from "@/src/components/dialog-blur-backdrop";
+import type { TouchRect } from "@/src/helpers/types/home-screen";
 import { Button, Dialog, cn } from "heroui-native";
 import { useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { View } from "react-native";
 import type { SharedValue } from "react-native-reanimated";
-import { DialogBlurBackdrop } from "../../../components/dialog-blur-backdrop";
-import type { TouchRect } from "../../../helpers/types/home-screen";
 import { PlayerCard } from "./player-card";
 
 export default function DialogMorePlayers(props: {

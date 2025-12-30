@@ -1,5 +1,5 @@
+import { AppText } from "@/src/components/app-text";
 import { View } from "react-native";
-import { AppText } from "../../../components/app-text";
 import { PlayerCard } from "./player-card";
 
 const GROUP_OPTIONS = [2, 3, 4, 5];
