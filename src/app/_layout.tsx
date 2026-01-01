@@ -71,6 +71,7 @@ export default function Layout() {
     Inter_600SemiBold,
     Inter_700Bold,
     SpaceMono: require("../../assets/fonts/SpaceMono-Regular.ttf"),
+    QuickSandRegular: require("../../assets/fonts/Quicksand-Regular.ttf"),
   });
 
   if (!fonts) {

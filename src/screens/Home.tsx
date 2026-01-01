@@ -298,6 +298,17 @@ export default function Home(props: {}) {
             </View>
           </Animated.ScrollView>
         )}
+        {!isMultiRound ? (
+          <View className="absolute inset-0" pointerEvents="none">
+            <RoundScreen
+              fingersCount={totalPlayers}
+              touchCount={touchCount}
+              isActive={true}
+              isFrozen={isRoundOneFrozen}
+              allowOverExpected={true}
+            />
+          </View>
+        ) : null}
         {isMultiRound && (
           <View
             className="absolute left-0 right-0 items-center"
