@@ -1,6 +1,7 @@
 import { AnimatedBlurView } from "@/src/components/animated-blur-view";
 import { DialogBlurBackdrop } from "@/src/components/dialog-blur-backdrop";
 import type { TouchRect } from "@/src/helpers/types/home-screen";
+import { AntDesign } from "@expo/vector-icons";
 import { Button, Dialog, cn } from "heroui-native";
 import { useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { StyleSheet, View } from "react-native";
@@ -25,12 +26,12 @@ export default function DialogMorePlayers(props: {
       <Button
         size="md"
         className={cn(
-          "rounded-full size-12 items-center justify-center px-0 overflow-hidden",
-          "bg-white/10 border-2 border-white/30"
+          "border border-white/60 rounded-full size-12 items-center justify-center px-0 overflow-hidden bg-gray-100/40 active:bg-gray-100/80 active:text-white"
         )}
         animation={{
           scale: {
-            timingConfig: { duration: 120 },
+            value: 1.03,
+            timingConfig: { duration: 170 },
           },
           highlight: {
             backgroundColor: { value: "transparent" },
@@ -66,7 +67,7 @@ export default function DialogMorePlayers(props: {
           style={StyleSheet.absoluteFill}
           className="bg-white/15"
         />
-        <Button.Label className={cn("text-base font-semibold text-white")}>
+        <Button.Label className={cn("text-base font-semibold")}>
           +5
         </Button.Label>
       </Button>
@@ -75,7 +76,7 @@ export default function DialogMorePlayers(props: {
         <Dialog.Content
           className={cn(
             "max-w-sm mx-auto overflow-hidden rounded-3xl",
-            "bg-white/10 shadow-sm shadow-black/10"
+            "bg-white/10 shadow-sm border border-white/35"
           )}
         >
           <AnimatedBlurView
@@ -88,13 +89,41 @@ export default function DialogMorePlayers(props: {
             style={StyleSheet.absoluteFill}
             className="bg-white/15"
           />
-          <View
-            pointerEvents="none"
-            style={StyleSheet.absoluteFill}
-            className="rounded-3xl border-2 border-white/35"
-          />
+          <View pointerEvents="none" style={StyleSheet.absoluteFill} />
           <View className="p-4">
-            <Dialog.Close className="self-end -mb-2 z-50" />
+            <Dialog.Close asChild>
+              <Button
+                size="md"
+                className={cn(
+                  "self-end -mb-2 z-50 border border-white/60 rounded-full size-10 items-center justify-center px-0 overflow-hidden bg-gray-100/40 active:bg-gray-100/80 active:text-white"
+                )}
+                animation={{
+                  scale: {
+                    value: 1.03,
+                    timingConfig: { duration: 170 },
+                  },
+                  highlight: {
+                    backgroundColor: { value: "transparent" },
+                    opacity: { value: [0, 0] },
+                  },
+                }}
+                isIconOnly
+              >
+                <AnimatedBlurView
+                  blurIntensity={blurIntensity}
+                  tint="light"
+                  style={StyleSheet.absoluteFill}
+                />
+                <View
+                  pointerEvents="none"
+                  style={StyleSheet.absoluteFill}
+                  className="bg-white/15"
+                />
+                <Button.Label className="">
+                  <AntDesign name="close" size={20} color="rgba(0,0,0,0.8)" />
+                </Button.Label>
+              </Button>
+            </Dialog.Close>
             <View className="mb-4 gap-1">
               <Dialog.Title>Pick a number</Dialog.Title>
             </View>

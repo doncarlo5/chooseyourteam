@@ -2,7 +2,7 @@ import { AnimatedBlurView } from "@/src/components/animated-blur-view";
 import type { FrozenDot, TouchRect } from "@/src/helpers/types/home-screen";
 import type { TouchPoint } from "@/src/helpers/types/touch-point";
 import { H, Step, styleChargeBomb } from "@/src/screens/utils/helper";
-import { Ionicons } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import * as Haptics from "expo-haptics";
 import { Button, cn } from "heroui-native";
@@ -608,6 +608,7 @@ export function useSelectedPlayersLayer(props: {
       }
       updateStableCount(countVisibleTouches());
       if (event.numberOfTouches === 0) {
+        scheduleOnRN(resetAllSlots);
         stateManager.end();
       }
     })
@@ -637,12 +638,12 @@ export function useSelectedPlayersLayer(props: {
     <Button
       size="md"
       className={cn(
-        "absolute top-16 left-6 z-10 rounded-full overflow-hidden",
-        "bg-white/5 border-2 border-white/15"
+        "absolute top-16 left-6 z-10 border border-white/60 rounded-full size-12 items-center justify-center px-0 overflow-hidden bg-gray-100/40 active:bg-gray-100/80 active:text-white"
       )}
       animation={{
         scale: {
-          timingConfig: { duration: 120 },
+          value: 1.03,
+          timingConfig: { duration: 170 },
         },
         highlight: {
           backgroundColor: { value: "transparent" },
@@ -669,10 +670,10 @@ export function useSelectedPlayersLayer(props: {
       <View
         pointerEvents="none"
         style={StyleSheet.absoluteFill}
-        className="bg-white/10"
+        className="bg-white/15"
       />
-      <Button.Label>
-        <Ionicons name="close" size={24} color="rgba(255, 255, 255, 0.7)" />
+      <Button.Label className="">
+        <AntDesign name="close" size={20} color="rgba(0,0,0,0.8)" />
       </Button.Label>
     </Button>
   ) : null;

@@ -1,6 +1,6 @@
 import { AnimatedBlurView } from "@/src/components/animated-blur-view";
 import type { PlayerCardProps } from "@/src/helpers/types/home-screen";
-import { Card, PressableFeedback, cn, useThemeColor } from "heroui-native";
+import { Card, PressableFeedback, cn } from "heroui-native";
 import { StyleSheet, View } from "react-native";
 import Animated, {
   Easing,
@@ -9,7 +9,6 @@ import Animated, {
 } from "react-native-reanimated";
 
 export function PlayerCard(props: PlayerCardProps) {
-  const themeColorAccent = useThemeColor("accent");
   const label = props.label ?? "teams";
   const blurIntensity = useSharedValue(40);
 
@@ -26,16 +25,16 @@ export function PlayerCard(props: PlayerCardProps) {
         isDisabled={props.isDisabled}
         accessibilityRole="button"
         accessibilityLabel={`Select ${props.count} ${label}`}
-        feedbackVariant="ripple"
-        className="w-full rounded-3xl"
+        feedbackVariant="highlight"
+        className="w-full rounded-3xl active:bg-white/40"
         animation={{
           scale: {
-            timingConfig: { duration: 120 },
+            value: 1.03,
+            timingConfig: { duration: 170 },
           },
-          ripple: {
-            backgroundColor: { value: themeColorAccent },
-            opacity: { value: [0, 0.2, 0] },
-            progress: { baseDuration: 600 },
+          highlight: {
+            backgroundColor: { value: "transparent" },
+            opacity: { value: [0, 0] },
           },
         }}
       >
