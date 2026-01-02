@@ -4,18 +4,19 @@ import type { TouchPoint } from "@/src/helpers/types/touch-point";
 import { H, Step, styleChargeBomb } from "@/src/screens/utils/helper";
 import { AntDesign } from "@expo/vector-icons";
 import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
-import * as Haptics from "expo-haptics";
 import { Button, cn } from "heroui-native";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import {
   cancelAnimation,
+  Easing,
   makeMutable,
+  runOnUI,
   SharedValue,
   useSharedValue,
   withDelay,
-  withRepeat,
+  withSequence,
   withSpring,
   withTiming,
 } from "react-native-reanimated";
@@ -28,10 +29,14 @@ const HIGHLIGHT_DELAY_MS = 3000;
 const TEAM_COLORS = ["#E901D2", "#7013F2", "#FAD400", "#F35B00", "#FB0057"];
 const MAX_SLOTS = 12;
 const BUBBLE_THROTTLE_MS = 80;
-const SHAKE_DURATION_MS = 800;
-const SHAKE_STEP_MS = 30;
-const SHAKE_CYCLES = Math.max(1, Math.floor(SHAKE_DURATION_MS / SHAKE_STEP_MS));
+const SHAKE_DURATION_MS = 1600;
 const SHAKE_AMPLITUDE = 10;
+const SHAKE_KICK_IN_MS = 24;
+const SHAKE_KICK_OUT_MS = 110;
+const PRE_REVEAL_SILENCE_MS = Math.max(
+  0,
+  HIGHLIGHT_DELAY_MS - SHAKE_DURATION_MS
+);
 
 export function useSelectedPlayersLayer(props: {
   selectedTeams: number | null;
@@ -69,13 +74,13 @@ export function useSelectedPlayersLayer(props: {
     require("../../../assets/audio/bubble.wav"),
     { keepAudioSessionActive: true, downloadFirst: true }
   );
-  const isEnabledSv = useSharedValue(0);
   const isRevealedSv = useSharedValue(0);
   const stableCountSv = useSharedValue(0);
   const countTokenSv = useSharedValue(0);
   const revealProgress = useSharedValue(0);
   const revealToken = useSharedValue(0);
-  const shakePhase = useSharedValue(0.5);
+  const shakeX = useSharedValue(0);
+  const shakeDirRef = useRef(1);
   const backBlurIntensity = useSharedValue(40);
   const backRectSv = useSharedValue<TouchRect>({
     x: 0,
@@ -113,7 +118,11 @@ export function useSelectedPlayersLayer(props: {
       props.selectedTeams ? TEAM_COLORS.slice(0, props.selectedTeams) : [],
     [props.selectedTeams]
   );
-  const isIosPhone = Platform.OS === "ios" && !Platform.isPad;
+
+  const isGestureEnabled =
+    Boolean(props.selectedTeams) &&
+    (props.isTouchEnabled ?? true) &&
+    !(props.isScrollGestureActive ?? false);
 
   useEffect(() => {
     if (!props.selectedTeams) {
@@ -176,27 +185,43 @@ export function useSelectedPlayersLayer(props: {
     preRevealHapticsRef.current = [];
   };
 
-  const resetRevealState = (shouldCancelAnimation = true) => {
+  const resetRevealState = () => {
     setIsRevealed(false);
     setSlotRevealColors(Array.from({ length: MAX_SLOTS }, () => ""));
     setSlotRevealLabels(Array.from({ length: MAX_SLOTS }, () => null));
-    isRevealedSv.value = 0;
-    if (shouldCancelAnimation) {
-      cancelAnimation(revealProgress);
-      revealProgress.value = 0;
-      cancelAnimation(shakePhase);
-      shakePhase.value = 0.5;
-    }
+    cancelAnimation(shakeX);
+    shakeX.value = 0;
     clearPreRevealHaptics();
   };
 
-  const resetAllSlots = () => {
+  const resetAllSlotsJS = () => {
     resetRevealState();
     setIsTouching(false);
     setTouchCount(0);
-    stableCountSv.value = 0;
+  };
+
+  const resetAllSlots = () => {
+    resetAllSlotsJS();
+    runOnUI(hardResetSlotsWorklet)();
+  };
+
+  const hardResetSlotsWorklet = () => {
+    "worklet";
+
+    cancelAnimation(revealProgress);
+    revealProgress.value = 0;
+
+    cancelAnimation(shakeX);
+    shakeX.value = 0;
+
     revealToken.value += 1;
+    countTokenSv.value += 1;
+    isRevealedSv.value = 0;
+    stableCountSv.value = 0;
+
     for (let i = 0; i < MAX_SLOTS; i += 1) {
+      cancelAnimation(slotOpacity[i]);
+      cancelAnimation(slotScale[i]);
       slotActive[i].value = 0;
       slotOpacity[i].value = 0;
       slotScale[i].value = 1;
@@ -211,11 +236,54 @@ export function useSelectedPlayersLayer(props: {
     const scheduleSteps = (totalMs: number, steps: Step[], startAfter = 0) => {
       clearPreRevealHaptics();
 
-      steps.forEach((step) => {
-        if (step.t < startAfter || step.t > totalMs) {
+      // reset shake state at the beginning of a new schedule
+      shakeDirRef.current = 1;
+      cancelAnimation(shakeX);
+      shakeX.value = 0;
+
+      const windowMs = Math.max(1, totalMs - startAfter);
+
+      const kindMultiplier = (fn: Step["fn"]) => {
+        if (fn === H.tickSoft) return 0.35;
+        if (fn === H.tick) return 0.55;
+        if (fn === H.tickStrong) return 0.8;
+        if (fn === H.snap) return 1.0;
+        return 0.25;
+      };
+
+      const kickShake = (p: number, fn: Step["fn"]) => {
+        const clamped = Math.max(0, Math.min(1, p));
+        const envelope = 0.1 + 0.9 * clamped * clamped;
+        const amp = SHAKE_AMPLITUDE * kindMultiplier(fn) * envelope;
+
+        if (amp < 0.25) {
           return;
         }
-        const timerId = setTimeout(() => void step.fn(), step.t);
+
+        shakeDirRef.current *= -1;
+        const dir = shakeDirRef.current;
+
+        shakeX.value = withSequence(
+          withTiming(dir * amp, {
+            duration: SHAKE_KICK_IN_MS,
+            easing: Easing.out(Easing.quad),
+          }),
+          withTiming(0, {
+            duration: SHAKE_KICK_OUT_MS,
+            easing: Easing.out(Easing.quad),
+          })
+        );
+      };
+
+      steps.forEach((step) => {
+        if (step.t < startAfter || step.t > totalMs) return;
+
+        const timerId = setTimeout(() => {
+          const p = (step.t - startAfter) / windowMs;
+          kickShake(p, step.fn);
+          void step.fn();
+        }, step.t);
+
         preRevealHapticsRef.current.push(timerId);
       });
     };
@@ -232,11 +300,11 @@ export function useSelectedPlayersLayer(props: {
     const meetsExpected = allowOverExpected
       ? count >= expectedCount
       : count === expectedCount;
-    resetRevealState(!meetsExpected);
+    resetRevealState();
     setIsTouching(count > 0);
     setTouchCount(count);
     if (meetsExpected && count >= 1) {
-      schedulePreRevealHaptics(HIGHLIGHT_DELAY_MS, 0);
+      schedulePreRevealHaptics(HIGHLIGHT_DELAY_MS, PRE_REVEAL_SILENCE_MS);
     }
   };
 
@@ -273,6 +341,9 @@ export function useSelectedPlayersLayer(props: {
       nextRevealLabels[i] = teamNumber ? String(teamNumber) : null;
     }
 
+    cancelAnimation(shakeX);
+    shakeX.value = withTiming(0, { duration: 120 });
+
     setSlotRevealColors(nextRevealColors);
     setSlotRevealLabels(nextRevealLabels);
     setIsRevealed(true);
@@ -299,14 +370,6 @@ export function useSelectedPlayersLayer(props: {
     H.boom();
   };
 
-  const handleFingerHaptic = (beforeCount: number, afterCount: number) => {
-    if (beforeCount === 0 && afterCount > 0) {
-      H.touchDown();
-    } else {
-      // keep tiny feedback on extra fingers (optional)
-      void Haptics.selectionAsync();
-    }
-  };
   const playBubble = () => {
     const now = Date.now();
     if (now - lastBubbleAtRef.current < BUBBLE_THROTTLE_MS) {
@@ -379,8 +442,8 @@ export function useSelectedPlayersLayer(props: {
     "worklet";
     cancelAnimation(revealProgress);
     revealProgress.value = 0;
-    cancelAnimation(shakePhase);
-    shakePhase.value = 0.5;
+    cancelAnimation(shakeX);
+    shakeX.value = 0;
     revealToken.value += 1;
     const token = revealToken.value;
 
@@ -393,21 +456,6 @@ export function useSelectedPlayersLayer(props: {
     if (count < 1 || !meetsExpected) {
       return;
     }
-
-    const shakeDelay = Math.max(0, HIGHLIGHT_DELAY_MS - SHAKE_DURATION_MS);
-    shakePhase.value = withDelay(
-      shakeDelay,
-      withRepeat(
-        withTiming(1, { duration: SHAKE_STEP_MS }),
-        SHAKE_CYCLES,
-        true,
-        (finished) => {
-          if (finished) {
-            shakePhase.value = 0.8;
-          }
-        }
-      )
-    );
 
     revealProgress.value = withDelay(
       HIGHLIGHT_DELAY_MS,
@@ -429,6 +477,13 @@ export function useSelectedPlayersLayer(props: {
     const expectedCount = props.expectedTouchCount ?? 2;
     const allowOverExpected = props.allowOverExpected ?? false;
     if (!allowOverExpected && count > expectedCount) {
+      cancelAnimation(revealProgress);
+      revealProgress.value = 0;
+
+      cancelAnimation(shakeX);
+      shakeX.value = 0;
+
+      revealToken.value += 1;
       stableCountSv.value = count;
       countTokenSv.value += 1;
       scheduleOnRN(handleCountChange, count, countTokenSv.value);
@@ -459,18 +514,6 @@ export function useSelectedPlayersLayer(props: {
       clearPreRevealHaptics();
     };
   }, []);
-
-  useEffect(() => {
-    const isTouchEnabled = props.isTouchEnabled ?? true;
-    const isScrollGestureActive = props.isScrollGestureActive ?? false;
-    isEnabledSv.value =
-      props.selectedTeams && isTouchEnabled && !isScrollGestureActive ? 1 : 0;
-  }, [
-    props.selectedTeams,
-    props.isTouchEnabled,
-    props.isScrollGestureActive,
-    isEnabledSv,
-  ]);
 
   useEffect(() => {
     resetAllSlots();
@@ -505,11 +548,9 @@ export function useSelectedPlayersLayer(props: {
   }, [props.isScrollGestureActive]);
 
   const touchGesture = Gesture.Manual()
+    .enabled(isGestureEnabled)
     .onTouchesDown((event) => {
       "worklet";
-      if (isEnabledSv.value === 0) return;
-
-      const beforeCount = countVisibleTouches();
 
       let didAddTouch = false;
       for (const touch of event.changedTouches) {
@@ -551,7 +592,6 @@ export function useSelectedPlayersLayer(props: {
       const afterCount = countVisibleTouches();
 
       if (didAddTouch) {
-        scheduleOnRN(handleFingerHaptic, beforeCount, afterCount);
         scheduleOnRN(playBubble);
       }
 
@@ -559,7 +599,6 @@ export function useSelectedPlayersLayer(props: {
     })
     .onTouchesMove((event) => {
       "worklet";
-      if (isEnabledSv.value === 0) return;
       let visibilityChanged = false;
       for (const touch of event.changedTouches) {
         const slot = findSlotByTouchId(touch.id);
@@ -585,52 +624,60 @@ export function useSelectedPlayersLayer(props: {
     })
     .onTouchesUp((event, stateManager) => {
       "worklet";
-      if (isEnabledSv.value === 0) {
-        return;
-      }
+
+      // Always process cleanup; if disabled mid-gesture, we still must clear visuals.
       for (const touch of event.changedTouches) {
         const slot = findSlotByTouchId(touch.id);
-        if (slot === -1) {
-          continue;
+        if (slot === -1) continue;
+
+        // Your existing logic (keep if desired)
+        slotTouchId[slot].value = -1;
+
+        slotOpacity[slot].value = withTiming(0, { duration: 140 }, (done) => {
+          if (done && slotTouchId[slot].value === -1) {
+            slotActive[slot].value = 0;
+            slotScale[slot].value = 1;
+          }
+        });
+      }
+
+      const isStillDown = (id: number) => {
+        "worklet";
+        for (let i = 0; i < event.allTouches.length; i += 1) {
+          if (event.allTouches[i].id === id) return true;
         }
-        if (isRevealedSv.value === 1) {
-          slotTouchId[slot].value = -1;
-        } else {
-          slotTouchId[slot].value = -1;
-          slotOpacity[slot].value = withTiming(0, { duration: 140 }, (done) => {
-            if (done) {
-              slotActive[slot].value = 0;
-              slotScale[slot].value = 1;
-            }
-          });
-        }
-      }
-      const currentCount = countVisibleTouches();
-      updateStableCount(currentCount);
-      if (event.numberOfTouches === 0) {
-        scheduleOnRN(resetAllSlots);
-        stateManager.end();
-      }
-    })
-    .onTouchesCancelled((event, stateManager) => {
-      "worklet";
-      if (isEnabledSv.value === 0) {
-        return;
-      }
+        return false;
+      };
+
       for (let i = 0; i < MAX_SLOTS; i += 1) {
-        if (isRevealedSv.value === 1) {
+        const id = slotTouchId[i].value;
+        if (id !== -1 && !isStillDown(id)) {
           slotTouchId[i].value = -1;
-        } else {
           slotActive[i].value = 0;
           slotOpacity[i].value = 0;
           slotScale[i].value = 1;
-          slotTouchId[i].value = -1;
         }
       }
-      updateStableCount(0);
-      if (isIosPhone) {
-        scheduleOnRN(resetAllSlots);
+
+      const remaining = countVisibleTouches();
+
+      // If there are no more touches, do an immediate UI-thread reset.
+      if (remaining === 0) {
+        hardResetSlotsWorklet(); // ✅ synchronous UI-thread clear
+        scheduleOnRN(resetAllSlotsJS); // ✅ JS state/timers cleanup
+        stateManager.end();
+        return;
       }
+
+      // Otherwise continue normal logic.
+      updateStableCount(remaining);
+    })
+
+    .onTouchesCancelled((event, stateManager) => {
+      "worklet";
+
+      hardResetSlotsWorklet();
+      scheduleOnRN(resetAllSlotsJS);
       stateManager.end();
     });
 
@@ -691,8 +738,7 @@ export function useSelectedPlayersLayer(props: {
             active={active}
             opacity={slotOpacity[index]}
             scale={slotScale[index]}
-            shakePhase={shakePhase}
-            shakeAmplitude={SHAKE_AMPLITUDE}
+            shakeX={shakeX}
             baseColor="#FFFFFF"
             revealColor={revealColor}
             isRevealed={isRevealed}

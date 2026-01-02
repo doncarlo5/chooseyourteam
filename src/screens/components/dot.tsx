@@ -43,8 +43,7 @@ export default function Dot(props: DotProps) {
   const containerStyle = useAnimatedStyle(() => {
     const currentSize = size.value;
     const isVisible = props.active.value === 1;
-    const shakeOffset =
-      (props.shakePhase.value - 0.5) * 2 * props.shakeAmplitude;
+    const shakeOffset = props.shakeX.value;
 
     return {
       position: "absolute",
