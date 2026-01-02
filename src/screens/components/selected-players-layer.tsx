@@ -26,7 +26,7 @@ import Dot from "./dot";
 const BASE_CIRCLE_SIZE = 120;
 const REVEAL_CIRCLE_SIZE = 150;
 const HIGHLIGHT_DELAY_MS = 3000;
-const TEAM_COLORS = ["#E901D2", "#7013F2", "#FAD400", "#F35B00", "#FB0057"];
+const TEAM_COLORS = ["#9d659f", "#FB7185", "#415679", "#FFE4E6", "#E11D48"];
 const MAX_SLOTS = 12;
 const BUBBLE_THROTTLE_MS = 80;
 const SHAKE_DURATION_MS = 1600;

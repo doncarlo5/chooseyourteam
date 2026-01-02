@@ -20,9 +20,9 @@ import Animated, {
 } from "react-native-reanimated";
 import { buildShapePath, getShapeForLabel } from "../utils/dot-shapes";
 
-const GLASS_RING = "rgba(255,255,255,0.28)";
-const GLASS_FILL_CENTER = "rgba(255,255,255,0.06)";
-const GLASS_FILL_EDGE = "rgba(255,255,255,0.16)";
+const GLASS_RING = "rgba(255,255,255,0.55)";
+const GLASS_FILL_CENTER = "rgba(255,255,255,0.6)";
+const GLASS_FILL_EDGE = "rgba(255,255,255,0.75)";
 
 export default function Dot(props: DotProps) {
   const progress = useSharedValue(props.isRevealed ? 1 : 0);
@@ -98,7 +98,7 @@ export default function Dot(props: DotProps) {
       backgroundColor: interpolateColor(
         progress.value,
         [0, 1],
-        ["rgba(255,255,255,0)", props.revealColor]
+        ["#FFFFFF", props.revealColor]
       ),
     };
   });
@@ -126,6 +126,7 @@ export default function Dot(props: DotProps) {
   const rimWidth = useDerivedValue(() => Math.max(1.5, size.value * 0.055));
   const rimRadius = useDerivedValue(() => dotRadius.value - rimWidth.value / 2);
   const rimGradientRadius = useDerivedValue(() => size.value * 0.95);
+  const innerDotRadius = useDerivedValue(() => dotRadius.value * 0.9);
 
   // Small specular highlight
   const specCenter = useDerivedValue(() =>
@@ -134,6 +135,7 @@ export default function Dot(props: DotProps) {
   const specRadius = useDerivedValue(() => size.value * 0.1);
 
   const ringThickness = Math.max(2, props.revealSize * 0.08);
+  const stickerStroke = Math.max(1.5, ringThickness * 0.35);
   const shapeKind = getShapeForLabel(props.label);
   const shapePath = useMemo(
     () => buildShapePath(props.revealSize, shapeKind, ringThickness),
@@ -148,6 +150,14 @@ export default function Dot(props: DotProps) {
 
         <Canvas pointerEvents="none" style={StyleSheet.absoluteFill}>
           <Group opacity={glassOpacity}>
+            {/* Base fill to keep unrevealed dots bright against the background */}
+            <Circle
+              cx={center}
+              cy={center}
+              r={dotRadius}
+              color={props.baseColor}
+            />
+
             {/* Base glass body */}
             <Circle cx={center} cy={center} r={dotRadius}>
               <RadialGradient
@@ -157,14 +167,20 @@ export default function Dot(props: DotProps) {
               />
             </Circle>
 
-            {/* Soft shadow */}
-            <Circle cx={center} cy={center} r={dotRadius}>
-              <RadialGradient
-                c={shadowCenter}
-                r={shadowRadius}
-                colors={["rgba(0,0,0,0.22)", "rgba(0,0,0,0)"]}
-              />
-            </Circle>
+            <Circle
+              cx={center}
+              cy={center}
+              r={innerDotRadius}
+              color="rgba(255,255,255,0.75)"
+            />
+
+            {/* No shadow on unrevealed dots to avoid a dark look */}
+            <Circle
+              cx={center}
+              cy={center}
+              r={dotRadius}
+              color="rgba(0,0,0,0)"
+            />
 
             {/* Broad highlight */}
             <Circle cx={center} cy={center} r={dotRadius}>
@@ -210,6 +226,14 @@ export default function Dot(props: DotProps) {
 
       <Canvas pointerEvents="none" style={StyleSheet.absoluteFill}>
         <Group opacity={revealOpacity}>
+          <Path
+            path={shapePath}
+            style="stroke"
+            strokeWidth={ringThickness + stickerStroke}
+            strokeJoin="round"
+            strokeCap="round"
+            color="rgba(255,255,255,0.95)"
+          />
           <Path path={shapePath} style="fill" color={props.revealColor} />
           <Path
             path={shapePath}

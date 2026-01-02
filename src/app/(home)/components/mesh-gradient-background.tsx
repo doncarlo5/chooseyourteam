@@ -144,26 +144,20 @@ export default function MeshGradientBackground(props: {
 }) {
   const cols = props.cols ?? 6;
   const rows = props.rows ?? 10;
-  const amplitude = props.amplitude ?? 24;
-  const speed = props.speed ?? 0.00045;
-  const baseColor = props.baseColor ?? "#E4E4E4";
-  const overlay = props.overlay ?? "rgba(228,228,228,0.08)";
-  const palette = props.palette ?? [
-    "#FB0057",
-    "#E901D2",
-    "#7013F2",
-    "#FAD400",
-    "#F35B00",
-  ];
-  const vertexAlpha = props.vertexAlpha ?? 0.92;
-  const darkenTop = props.darkenTop ?? true;
-  const blurSigma = props.blurSigma ?? 10;
+  const amplitude = props.amplitude ?? 18;
+  const speed = props.speed ?? 0.00032;
+  const baseColor = props.baseColor ?? "#E8FBFB";
+  const overlay = props.overlay ?? "rgba(232,251,251,0.12)";
+  const palette = props.palette ?? ["#00E2EE", "#69EF6C", "#FFB347"];
+  const vertexAlpha = props.vertexAlpha ?? 0.9;
+  const darkenTop = props.darkenTop ?? false;
+  const blurSigma = props.blurSigma ?? 14;
   const blurMode = props.blurMode ?? "mirror";
   const meshOverscan = props.meshOverscan ?? Math.ceil(blurSigma * 2);
-  const useBandFade = props.useBandFade ?? false;
-  const bandFadeStrength = props.bandFadeStrength ?? 0.35;
-  const colorDarken = props.colorDarken ?? 0.88;
-  const yellowWeight = props.yellowWeight ?? 0.8;
+  const useBandFade = props.useBandFade ?? true;
+  const bandFadeStrength = props.bandFadeStrength ?? 0.45;
+  const colorDarken = props.colorDarken ?? 0.95;
+  const yellowWeight = props.yellowWeight ?? 0.65;
 
   const { width, height } = useWindowDimensions();
   const clock = useClock(); // ms since activated :contentReference[oaicite:2]{index=2}
@@ -186,8 +180,7 @@ export default function MeshGradientBackground(props: {
   // Precompute palette as RGB floats (0..1) for worklet usage
   const paletteRgb = useMemo(() => palette.map(hexToRgb01), [palette]);
 
-  // Stripe-ish: choose purple as "base" and blend other colors on top with noise.
-  // Order: pink, magenta, yellow, orange (base = purple)
+  // Blend a small palette on top of a base layer with noise.
   const layerOrder = useMemo(() => {
     if (paletteRgb.length >= 5) return [0, 1, 3, 4] as const;
     // fallback: everything except the middle index
@@ -196,7 +189,7 @@ export default function MeshGradientBackground(props: {
   }, [paletteRgb]);
 
   // Animate ONLY inner vertices (pin edges to avoid gaps).
-  // Motion is now "coherent": depends on UV coords + time (more Stripe-like).
+  // Motion is coherent: depends on UV coords + time for a soft mesh drift.
   const animatedVertices = useDerivedValue(() => {
     "worklet";
     const t = clock.value * speed;
@@ -234,7 +227,7 @@ export default function MeshGradientBackground(props: {
         42.0
       );
 
-      // Stripe vertex deformation is mostly "vertical"; do the same.
+      // Keep deformation mostly vertical for smooth drift.
       const dx = amplitude * 0.35 * n1 * edgeFade;
       const dy = amplitude * 1.0 * n2 * edgeFade;
 
@@ -242,8 +235,8 @@ export default function MeshGradientBackground(props: {
     });
   }, [baseVertices, cols, rows, amplitude, speed]);
 
-  // Stripe-ish layered color blending:
-  // baseColor = purple, then each layer uses smoothstep(noiseFloor, noiseCeil, noise) and pow(..., 4).
+  // Layered color blending:
+  // baseColor acts as a calm backdrop; each layer uses smoothstep + pow falloff.
   const animatedColors = useDerivedValue(() => {
     "worklet";
     const t = clock.value * speed;
@@ -261,8 +254,7 @@ export default function MeshGradientBackground(props: {
       const uvx = u * 2 - 1;
       const uvy = v * 2 - 1;
 
-      // Similar to Stripe's "fade noise at edges" idea:
-      // keep the strongest color activity around the middle band.
+      // Keep the strongest color activity around the middle band.
       const band = 1 - clamp(Math.abs(uvy), 0, 1);
       const bandFade = useBandFade
         ? lerp(1, band * band, clamp(bandFadeStrength, 0, 1))
@@ -272,7 +264,7 @@ export default function MeshGradientBackground(props: {
       let g = base[1];
       let b = base[2];
 
-      // A few "wave layers" (inspired by the Stripe shader structure)
+      // A few wave layers with varied frequency/flow.
       for (let k = 0; k < layerOrder.length; k++) {
         const idx = layerOrder[k];
         const c = paletteRgb[idx] ?? base;
@@ -336,7 +328,7 @@ export default function MeshGradientBackground(props: {
           />
         </Group>
 
-        {/* Stripe-like "darken top" vibe (subtle) using a linear gradient shader. :contentReference[oaicite:3]{index=3} */}
+        {/* Subtle top fade using a linear gradient shader. */}
         {darkenTop ? (
           <Rect x={0} y={0} width={width} height={height}>
             <LinearGradient

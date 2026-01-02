@@ -8,6 +8,7 @@ const REVEAL_CIRCLE_SIZE = 150;
 
 export default function FrozenDotsLayer(props: { dots: FrozenDot[] }) {
   const ringThickness = Math.max(2, REVEAL_CIRCLE_SIZE * 0.08);
+  const stickerStroke = Math.max(1.5, ringThickness * 0.35);
   const innerSize = REVEAL_CIRCLE_SIZE * 0.73;
 
   return (
@@ -33,6 +34,18 @@ export default function FrozenDotsLayer(props: { dots: FrozenDot[] }) {
               height: REVEAL_CIRCLE_SIZE,
             }}
           >
+            <Path
+              path={buildShapePath(
+                REVEAL_CIRCLE_SIZE,
+                getShapeForLabel(dot.label),
+                ringThickness
+              )}
+              style="stroke"
+              strokeWidth={ringThickness + stickerStroke}
+              strokeJoin="round"
+              strokeCap="round"
+              color="rgba(255,255,255,0.95)"
+            />
             <Path
               path={buildShapePath(
                 REVEAL_CIRCLE_SIZE,
