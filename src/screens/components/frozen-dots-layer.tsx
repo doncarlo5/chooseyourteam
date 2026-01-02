@@ -5,7 +5,6 @@ import { View } from "react-native";
 import { buildShapePath, getShapeForLabel } from "../utils/dot-shapes";
 
 const REVEAL_CIRCLE_SIZE = 150;
-const REVEAL_FILL_COLOR = "#0B0B0B";
 
 export default function FrozenDotsLayer(props: { dots: FrozenDot[] }) {
   const ringThickness = Math.max(2, REVEAL_CIRCLE_SIZE * 0.08);
@@ -40,6 +39,15 @@ export default function FrozenDotsLayer(props: { dots: FrozenDot[] }) {
                 getShapeForLabel(dot.label),
                 ringThickness
               )}
+              style="fill"
+              color={dot.color}
+            />
+            <Path
+              path={buildShapePath(
+                REVEAL_CIRCLE_SIZE,
+                getShapeForLabel(dot.label),
+                ringThickness
+              )}
               style="stroke"
               strokeWidth={ringThickness}
               strokeJoin="round"
@@ -53,7 +61,7 @@ export default function FrozenDotsLayer(props: { dots: FrozenDot[] }) {
               width: innerSize,
               height: innerSize,
               borderRadius: innerSize / 2,
-              backgroundColor: REVEAL_FILL_COLOR,
+              backgroundColor: dot.color,
             }}
           />
           {dot.label ? (

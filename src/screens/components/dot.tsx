@@ -211,6 +211,7 @@ export default function Dot(props: DotProps) {
 
       <Canvas pointerEvents="none" style={StyleSheet.absoluteFill}>
         <Group opacity={revealOpacity}>
+          <Path path={shapePath} style="fill" color={props.revealColor} />
           <Path
             path={shapePath}
             style="stroke"
@@ -223,7 +224,7 @@ export default function Dot(props: DotProps) {
             <RadialGradient
               c={shadowCenter}
               r={shadowRadius}
-              colors={["rgba(0,0,0,0.35)", "rgba(0,0,0,0)"]}
+              colors={[props.revealColor, "rgba(255,255,255,0)"]}
             />
           </Circle>
           <Circle cx={center} cy={center} r={dotRadius}>

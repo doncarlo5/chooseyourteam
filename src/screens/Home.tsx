@@ -118,7 +118,7 @@ export default function Home(props: {}) {
     ? currentRound === 0
       ? firstRoundCount
       : secondRoundCount
-    : undefined;
+    : totalPlayers;
   const canTouch = !isMultiRound
     ? !isRoundOneFrozen
     : currentRound === 0
@@ -209,6 +209,7 @@ export default function Home(props: {}) {
         <TeamsSelection
           selectedTeams={selectedTeams}
           setSelectedTeams={setSelectedTeams}
+          setTotalPlayers={setTotalPlayers}
         />
         <AppReviewButton />
 

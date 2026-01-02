@@ -413,6 +413,7 @@ export function useSelectedPlayersLayer(props: {
       HIGHLIGHT_DELAY_MS,
       withTiming(1, { duration: 0 }, (finished) => {
         if (finished && token === revealToken.value) {
+          const currentCount = countVisibleTouches();
           isRevealedSv.value = 1;
           scheduleOnRN(handleReveal);
         }
@@ -558,9 +559,7 @@ export function useSelectedPlayersLayer(props: {
     })
     .onTouchesMove((event) => {
       "worklet";
-      if (isEnabledSv.value === 0) {
-        return;
-      }
+      if (isEnabledSv.value === 0) return;
       let visibilityChanged = false;
       for (const touch of event.changedTouches) {
         const slot = findSlotByTouchId(touch.id);
@@ -606,7 +605,8 @@ export function useSelectedPlayersLayer(props: {
           });
         }
       }
-      updateStableCount(countVisibleTouches());
+      const currentCount = countVisibleTouches();
+      updateStableCount(currentCount);
       if (event.numberOfTouches === 0) {
         scheduleOnRN(resetAllSlots);
         stateManager.end();

@@ -73,12 +73,7 @@ export default function DialogMorePlayers(props: {
       </Button>
       <Dialog.Portal>
         <DialogBlurBackdrop />
-        <Dialog.Content
-          className={cn(
-            "max-w-sm mx-auto overflow-hidden rounded-3xl",
-            "bg-white/10 shadow-sm border border-white/35"
-          )}
-        >
+        <Dialog.Content className="max-w-sm mx-auto border border-white/35 rounded-3xl overflow-hidden bg-white/10">
           <AnimatedBlurView
             blurIntensity={blurIntensity}
             tint="light"
@@ -89,61 +84,59 @@ export default function DialogMorePlayers(props: {
             style={StyleSheet.absoluteFill}
             className="bg-white/15"
           />
-          <View pointerEvents="none" style={StyleSheet.absoluteFill} />
-          <View className="p-4">
-            <Dialog.Close asChild>
-              <Button
-                size="md"
-                className={cn(
-                  "self-end -mb-2 z-50 border border-white/60 rounded-full size-10 items-center justify-center px-0 overflow-hidden bg-gray-100/40 active:bg-gray-100/80 active:text-white"
-                )}
-                animation={{
-                  scale: {
-                    value: 1.03,
-                    timingConfig: { duration: 170 },
-                  },
-                  highlight: {
-                    backgroundColor: { value: "transparent" },
-                    opacity: { value: [0, 0] },
-                  },
-                }}
-                isIconOnly
-              >
-                <AnimatedBlurView
-                  blurIntensity={blurIntensity}
-                  tint="light"
-                  style={StyleSheet.absoluteFill}
-                />
-                <View
-                  pointerEvents="none"
-                  style={StyleSheet.absoluteFill}
-                  className="bg-white/15"
-                />
-                <Button.Label className="">
-                  <AntDesign name="close" size={20} color="rgba(0,0,0,0.8)" />
-                </Button.Label>
-              </Button>
-            </Dialog.Close>
-            <View className="mb-4 gap-1">
-              <Dialog.Title>Pick a number</Dialog.Title>
-            </View>
-            <View className="flex-row flex-wrap -mx-2">
-              {Array.from({ length: 5 }, (_, index) => index + 6).map(
-                (value, idx) => (
-                  <PlayerCard
-                    key={value}
-                    count={value}
-                    index={idx}
-                    isDisabled={false}
-                    label="players"
-                    onPress={() => {
-                      props.setTotalPlayers(value);
-                      setIsOpen(false);
-                    }}
-                  />
-                )
+
+          <Dialog.Close asChild>
+            <Button
+              size="md"
+              className={cn(
+                "self-end -mb-2 z-50 border border-white/60 rounded-full size-10 items-center justify-center px-0 overflow-hidden bg-gray-100/40 active:bg-gray-100/80 active:text-white"
               )}
-            </View>
+              animation={{
+                scale: {
+                  value: 1.03,
+                  timingConfig: { duration: 170 },
+                },
+                highlight: {
+                  backgroundColor: { value: "transparent" },
+                  opacity: { value: [0, 0] },
+                },
+              }}
+              isIconOnly
+            >
+              <AnimatedBlurView
+                blurIntensity={blurIntensity}
+                tint="light"
+                style={StyleSheet.absoluteFill}
+              />
+              <View
+                pointerEvents="none"
+                style={StyleSheet.absoluteFill}
+                className="bg-white/15"
+              />
+              <Button.Label className="">
+                <AntDesign name="close" size={20} color="rgba(0,0,0,0.8)" />
+              </Button.Label>
+            </Button>
+          </Dialog.Close>
+          <View className="mb-4 gap-1">
+            <Dialog.Title>Pick a number</Dialog.Title>
+          </View>
+          <View className="flex-row flex-wrap -mx-2">
+            {Array.from({ length: 5 }, (_, index) => index + 6).map(
+              (value, idx) => (
+                <PlayerCard
+                  key={value}
+                  count={value}
+                  index={idx}
+                  isDisabled={false}
+                  label="players"
+                  onPress={() => {
+                    props.setTotalPlayers(value);
+                    setIsOpen(false);
+                  }}
+                />
+              )
+            )}
           </View>
         </Dialog.Content>
       </Dialog.Portal>

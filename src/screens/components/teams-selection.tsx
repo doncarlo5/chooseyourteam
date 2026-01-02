@@ -1,3 +1,4 @@
+import { cn } from "heroui-native";
 import { View } from "react-native";
 import { PlayerCard } from "./player-card";
 
@@ -6,11 +7,12 @@ const GROUP_OPTIONS = [2, 3, 4, 5];
 export default function TeamsSelection(props: {
   selectedTeams: number | null;
   setSelectedTeams: (teams: number) => void;
+  setTotalPlayers: (players: number) => void;
 }) {
   if (props.selectedTeams) return null;
 
   return (
-    <View className="flex-1 justify-center px-8 gap-4">
+    <View className={cn("flex-1 justify-center px-8 gap-4")}>
       <View className="w-full">
         <View className="flex-row flex-wrap -mx-2">
           {GROUP_OPTIONS.map((count, index) => {
@@ -22,6 +24,7 @@ export default function TeamsSelection(props: {
                 isDisabled={false}
                 onPress={() => {
                   props.setSelectedTeams(count);
+                  props.setTotalPlayers(count);
                 }}
               />
             );

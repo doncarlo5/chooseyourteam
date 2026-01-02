@@ -20,6 +20,7 @@
 
       --accent: var(--color-neutral-950);
       --accent-foreground: var(--snow);
+      --accent-hover: var(--color-neutral-900);
 
       /* Secondary */
       --secondary: var(--color-neutral-600);
@@ -71,6 +72,7 @@
 
       --accent: var(--color-neutral-50);
       --accent-foreground: var(--eclipse);
+      --accent-hover: var(--color-neutral-100);
 
       /* Secondary */
       --secondary: var(--color-neutral-400);

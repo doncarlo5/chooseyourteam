@@ -21,6 +21,7 @@
       /* Accent: Vibrant teal-mint with modern energy */
       --accent: oklch(0.7 0.16 175);
       --accent-foreground: oklch(0.98 0.005 175);
+      --accent-hover: oklch(0.67 0.17 175);
 
       /* Secondary: Deep forest green for secondary actions */
       --secondary: oklch(0.42 0.1 165);
@@ -73,6 +74,7 @@
       /* Accent: Glowing emerald-teal */
       --accent: oklch(0.68 0.18 175);
       --accent-foreground: oklch(0.12 0.045 175);
+      --accent-hover: oklch(0.71 0.19 175);
 
       /* Secondary: Luminous emerald for secondary actions */
       --secondary: oklch(0.58 0.12 165);
