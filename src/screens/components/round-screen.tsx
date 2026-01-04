@@ -31,9 +31,8 @@ export default function RoundScreen(props: {
   const isIphone = Platform.OS === "ios" && !Platform.isPad;
   const shouldCapAtFive =
     props.allowOverExpected && isIphone && props.fingersCount === 5;
-  const shouldUseExactSingle = !props.allowOverExpected && props.fingersCount === 1;
   const waitingLabel =
-    shouldCapAtFive || shouldUseExactSingle ? "Put" : "Put at least";
+    props.allowOverExpected && !shouldCapAtFive ? "Put at least" : "Put";
   const numberLabel = shouldCapAtFive ? "5" : String(props.fingersCount);
   const fingersLabel = props.fingersCount === 1 ? "finger" : "fingers";
   const shouldShowLabel =
