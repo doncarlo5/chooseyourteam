@@ -56,54 +56,60 @@ export const H = {
 
 export type Step = { t: number; fn: () => void };
 
-// Keeps pulses from being too close together (many phones will “merge” them)
 const MIN_GAP_MS = 70;
 
 export const styleChargeBomb = (totalMs: number): Step[] => {
   const steps: Step[] = [];
 
-  // Act 1: arming stutter (very early)
+  // Act 1: arming stutter
   steps.push({ t: 0, fn: H.arm });
-  steps.push({ t: 60, fn: H.tickSoft });
-  steps.push({ t: 130, fn: H.tickSoft });
-  steps.push({ t: 220, fn: H.tickSoft });
+  steps.push({ t: 70, fn: H.tickSoft });
+  steps.push({ t: 150, fn: H.tickSoft });
+  steps.push({ t: 240, fn: H.tickSoft });
 
-  // Act 2: crescendo — ticks get closer + stronger
-  const rampStart = 380;
-  const rampEnd = Math.max(rampStart, totalMs - 340);
-  const pulses = 14;
+  // Act 2: crescendo — more pulses, packed near end
+  const rampStart = 320;
+  const rampEnd = Math.max(rampStart, totalMs - 420);
+  const pulses = 18;
 
-  let lastT = -Infinity;
+  for (let i = 0; i < pulses; i += 1) {
+    const p = i / (pulses - 1);
 
-  for (let i = 0; i < pulses; i++) {
-    const p = i / (pulses - 1); // 0..1
-
-    // Ease-out => more pulses near the end (crescendo)
-    const eased = 1 - (1 - p) * (1 - p); // quadratic ease-out
+    // cubic ease-out => more beats near the end
+    const eased = 1 - Math.pow(1 - p, 3);
 
     const t = Math.floor(rampStart + (rampEnd - rampStart) * eased);
-    if (t - lastT < MIN_GAP_MS) continue;
-    lastT = t;
 
     const fn =
-      p < 0.35
+      p < 0.25
         ? H.tickSoft
-        : p < 0.65
+        : p < 0.55
           ? H.tick
-          : p < 0.85
+          : p < 0.8
             ? H.tickStrong
             : H.snap;
 
     steps.push({ t, fn });
   }
 
-  // Act 3: final drum-roll right before reveal
-  steps.push({ t: totalMs - 260, fn: H.tickStrong });
-  steps.push({ t: totalMs - 170, fn: H.snap });
-  steps.push({ t: totalMs - 90, fn: H.snap });
+  // Act 3: final rattle (tight but safe)
+  const rattleStart = totalMs - 350;
+  for (let t = rattleStart; t <= totalMs - 70; t += 70) {
+    steps.push({ t, fn: t < totalMs - 140 ? H.tickStrong : H.snap });
+  }
 
-  // IMPORTANT: NO “success/confirm” here — do it in handleReveal() so it always matches the actual reveal moment.
-  return steps
+  // Sort and enforce min gap globally
+  const sorted = steps
     .filter((s) => s.t >= 0 && s.t <= totalMs)
     .sort((a, b) => a.t - b.t);
+
+  const pruned: Step[] = [];
+  let lastT = -Infinity;
+  for (const s of sorted) {
+    if (s.t - lastT < MIN_GAP_MS) continue;
+    pruned.push(s);
+    lastT = s.t;
+  }
+
+  return pruned;
 };

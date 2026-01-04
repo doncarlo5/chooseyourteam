@@ -26,17 +26,28 @@ import Dot from "./dot";
 const BASE_CIRCLE_SIZE = 120;
 const REVEAL_CIRCLE_SIZE = 150;
 const HIGHLIGHT_DELAY_MS = 3000;
-const TEAM_COLORS = ["#9d659f", "#FB7185", "#415679", "#FFE4E6", "#E11D48"];
+const TEAM_COLORS = ["#415679", "#FB7185", "#415679", "#E11D48", "#9D659F"];
 const MAX_SLOTS = 12;
 const BUBBLE_THROTTLE_MS = 80;
 const SHAKE_DURATION_MS = 1600;
-const SHAKE_AMPLITUDE = 10;
-const SHAKE_KICK_IN_MS = 24;
-const SHAKE_KICK_OUT_MS = 110;
 const PRE_REVEAL_SILENCE_MS = Math.max(
   0,
   HIGHLIGHT_DELAY_MS - SHAKE_DURATION_MS
 );
+
+// Shake tuning (px + ms)
+// -> end of countdown should feel “nervous”, not “wobble”
+const SHAKE_AMP_MIN = 1.5;
+const SHAKE_AMP_MAX = 16;
+
+const SHAKE_OSC_MIN = 2;
+const SHAKE_OSC_MAX = 9;
+
+const SHAKE_OSC_MS_SLOW = 34; // early: slower movement
+const SHAKE_OSC_MS_FAST = 12; // end: very fast jitter
+
+const SHAKE_SETTLE_MS_SLOW = 120;
+const SHAKE_SETTLE_MS_FAST = 50;
 
 export function useSelectedPlayersLayer(props: {
   selectedTeams: number | null;
@@ -233,7 +244,11 @@ export function useSelectedPlayersLayer(props: {
     totalDelayMs: number,
     startAfterMs: number
   ) => {
-    const scheduleSteps = (totalMs: number, steps: Step[], startAfter = 0) => {
+    const scheduleSteps = (
+      windowMs: number,
+      steps: Step[],
+      offsetMs: number
+    ) => {
       clearPreRevealHaptics();
 
       // reset shake state at the beginning of a new schedule
@@ -241,54 +256,101 @@ export function useSelectedPlayersLayer(props: {
       cancelAnimation(shakeX);
       shakeX.value = 0;
 
-      const windowMs = Math.max(1, totalMs - startAfter);
+      const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
       const kindMultiplier = (fn: Step["fn"]) => {
-        if (fn === H.tickSoft) return 0.35;
-        if (fn === H.tick) return 0.55;
-        if (fn === H.tickStrong) return 0.8;
+        // make soft beats still visible, but weaker
+        if (fn === H.arm) return 0.35;
+        if (fn === H.tickSoft) return 0.5;
+        if (fn === H.tick) return 0.7;
+        if (fn === H.tickStrong) return 0.9;
         if (fn === H.snap) return 1.0;
-        return 0.25;
+        return 0.45;
       };
 
       const kickShake = (p: number, fn: Step["fn"]) => {
-        const clamped = Math.max(0, Math.min(1, p));
-        const envelope = 0.1 + 0.9 * clamped * clamped;
-        const amp = SHAKE_AMPLITUDE * kindMultiplier(fn) * envelope;
+        const t = Math.max(0, Math.min(1, p));
 
-        if (amp < 0.25) {
-          return;
+        // ramp harder near the end (more “panic”)
+        const energy = Math.pow(t, 2.6); // 0..1
+
+        const ampBase = lerp(SHAKE_AMP_MIN, SHAKE_AMP_MAX, energy);
+        const amp = ampBase * kindMultiplier(fn);
+
+        if (amp < 0.25) return;
+
+        const oscillations = Math.round(
+          lerp(SHAKE_OSC_MIN, SHAKE_OSC_MAX, energy)
+        );
+        const oscMs = Math.round(
+          lerp(SHAKE_OSC_MS_SLOW, SHAKE_OSC_MS_FAST, energy)
+        );
+        const settleMs = Math.round(
+          lerp(SHAKE_SETTLE_MS_SLOW, SHAKE_SETTLE_MS_FAST, energy)
+        );
+
+        // alternate overall direction per beat (keeps it organic)
+        shakeDirRef.current *= -1;
+        let dir = shakeDirRef.current;
+
+        const seq: any[] = [];
+        const denom = Math.max(1, oscillations - 1);
+
+        // Main burst: fast alternating oscillations, slightly damped
+        for (let i = 0; i < oscillations; i += 1) {
+          const decay = 1 - (i / denom) * 0.6; // 1.0 -> 0.4
+          seq.push(
+            withTiming(dir * amp * decay, {
+              duration: oscMs,
+              easing: Easing.linear,
+            })
+          );
+          dir *= -1;
         }
 
-        shakeDirRef.current *= -1;
-        const dir = shakeDirRef.current;
+        // Extra micro-buzz only at the very end (last ~15%)
+        if (t > 0.85) {
+          const buzzAmp = amp * 0.22;
+          seq.push(
+            withTiming(buzzAmp, { duration: 12, easing: Easing.linear }),
+            withTiming(-buzzAmp, { duration: 12, easing: Easing.linear }),
+            withTiming(buzzAmp, { duration: 12, easing: Easing.linear }),
+            withTiming(0, { duration: 12, easing: Easing.linear })
+          );
+        }
 
-        shakeX.value = withSequence(
-          withTiming(dir * amp, {
-            duration: SHAKE_KICK_IN_MS,
-            easing: Easing.out(Easing.quad),
-          }),
+        // Return to rest
+        seq.push(
           withTiming(0, {
-            duration: SHAKE_KICK_OUT_MS,
+            duration: settleMs,
             easing: Easing.out(Easing.quad),
           })
         );
+
+        // Assign sequence directly to the shared value (intended Reanimated usage). :contentReference[oaicite:0]{index=0}
+        shakeX.value = withSequence(...seq);
       };
 
       steps.forEach((step) => {
-        if (step.t < startAfter || step.t > totalMs) return;
+        if (step.t < 0 || step.t > windowMs) return;
 
         const timerId = setTimeout(() => {
-          const p = (step.t - startAfter) / windowMs;
+          const p = step.t / windowMs;
+
+          // “shake produces haptic”
           kickShake(p, step.fn);
           void step.fn();
-        }, step.t);
+        }, offsetMs + step.t);
 
         preRevealHapticsRef.current.push(timerId);
       });
     };
 
-    scheduleSteps(totalDelayMs, styleChargeBomb(totalDelayMs), startAfterMs);
+    // window = last part of the countdown (where we want the charge/shake)
+    const windowMs = Math.max(1, totalDelayMs - startAfterMs);
+
+    // IMPORTANT: build the haptic pattern *for the window*, then offset it into the global countdown
+    scheduleSteps(windowMs, styleChargeBomb(windowMs), startAfterMs);
   };
 
   const handleCountChange = (count: number, token?: number) => {
@@ -739,7 +801,6 @@ export function useSelectedPlayersLayer(props: {
             opacity={slotOpacity[index]}
             scale={slotScale[index]}
             shakeX={shakeX}
-            baseColor="#FFFFFF"
             revealColor={revealColor}
             isRevealed={isRevealed}
             baseSize={BASE_CIRCLE_SIZE}

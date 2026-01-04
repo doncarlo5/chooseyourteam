@@ -5,11 +5,10 @@ import {
   Circle,
   Group,
   Paint,
-  Path,
   RadialGradient,
   vec,
 } from "@shopify/react-native-skia";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
   interpolateColor,
@@ -18,11 +17,8 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { buildShapePath, getShapeForLabel } from "../utils/dot-shapes";
 
-const GLASS_RING = "rgba(255,255,255,0.55)";
-const GLASS_FILL_CENTER = "rgba(255,255,255,0.6)";
-const GLASS_FILL_EDGE = "rgba(255,255,255,0.75)";
+const GLASS_RING = "rgba(255,255,255,0.9)";
 
 export default function Dot(props: DotProps) {
   const progress = useSharedValue(props.isRevealed ? 1 : 0);
@@ -44,6 +40,10 @@ export default function Dot(props: DotProps) {
     const currentSize = size.value;
     const isVisible = props.active.value === 1;
     const shakeOffset = props.shakeX.value;
+    const shake = isVisible ? shakeOffset : 0;
+
+    const shakeY = shake * 0.12;
+    const rotateZ = `${(shake / currentSize) * 0.55}rad`;
 
     return {
       position: "absolute",
@@ -55,7 +55,9 @@ export default function Dot(props: DotProps) {
       justifyContent: "center",
       opacity: isVisible ? props.opacity.value : 0,
       transform: [
-        { translateX: isVisible ? shakeOffset : 0 },
+        { translateX: shake },
+        { translateY: shakeY },
+        { rotateZ },
         { scale: (isVisible ? 1 : 0.85) * props.scale.value },
       ],
     };
@@ -104,13 +106,20 @@ export default function Dot(props: DotProps) {
   });
 
   const revealOpacity = useDerivedValue(() => progress.value);
-  const glassOpacity = useDerivedValue(() => 1 - progress.value);
-
-  const dotRadius = useDerivedValue(() => size.value * 0.365);
+  const baseRadius = useDerivedValue(() => size.value * 0.365);
   const center = useDerivedValue(() => size.value / 2);
 
-  // Glass geometry
-  const fillCenter = useDerivedValue(() => vec(size.value / 2, size.value / 2));
+  // Make these reactive to the animated size
+  const ringThicknessSk = useDerivedValue(() => Math.max(2, size.value * 0.08));
+  const stickerStrokeSk = useDerivedValue(() =>
+    Math.max(1.5, ringThicknessSk.value * 0.35)
+  );
+  const outerStrokeSk = useDerivedValue(
+    () => ringThicknessSk.value + stickerStrokeSk.value
+  );
+  const ringRadiusSk = useDerivedValue(
+    () => size.value / 2 - ringThicknessSk.value
+  );
 
   const highlightCenter = useDerivedValue(() =>
     vec(size.value * 0.32, size.value * 0.24)
@@ -124,98 +133,15 @@ export default function Dot(props: DotProps) {
 
   // Glass rim (stroke)
   const rimWidth = useDerivedValue(() => Math.max(1.5, size.value * 0.055));
-  const rimRadius = useDerivedValue(() => dotRadius.value - rimWidth.value / 2);
+  const rimRadius = useDerivedValue(
+    () => baseRadius.value - rimWidth.value / 2
+  );
   const rimGradientRadius = useDerivedValue(() => size.value * 0.95);
-  const innerDotRadius = useDerivedValue(() => dotRadius.value * 0.9);
-
-  // Small specular highlight
-  const specCenter = useDerivedValue(() =>
-    vec(size.value * 0.27, size.value * 0.2)
-  );
-  const specRadius = useDerivedValue(() => size.value * 0.1);
-
-  const ringThickness = Math.max(2, props.revealSize * 0.08);
-  const stickerStroke = Math.max(1.5, ringThickness * 0.35);
-  const shapeKind = getShapeForLabel(props.label);
-  const shapePath = useMemo(
-    () => buildShapePath(props.revealSize, shapeKind, ringThickness),
-    [props.revealSize, shapeKind, ringThickness]
-  );
 
   if (!props.isRevealed || !props.label) {
     return (
       <Animated.View collapsable={false} style={containerStyle}>
         <Animated.View style={ringStyle} />
-        <Animated.View style={dotStyle} />
-
-        <Canvas pointerEvents="none" style={StyleSheet.absoluteFill}>
-          <Group opacity={glassOpacity}>
-            {/* Base fill to keep unrevealed dots bright against the background */}
-            <Circle
-              cx={center}
-              cy={center}
-              r={dotRadius}
-              color={props.baseColor}
-            />
-
-            {/* Base glass body */}
-            <Circle cx={center} cy={center} r={dotRadius}>
-              <RadialGradient
-                c={fillCenter}
-                r={dotRadius}
-                colors={[GLASS_FILL_CENTER, GLASS_FILL_EDGE]}
-              />
-            </Circle>
-
-            <Circle
-              cx={center}
-              cy={center}
-              r={innerDotRadius}
-              color="rgba(255,255,255,0.75)"
-            />
-
-            {/* No shadow on unrevealed dots to avoid a dark look */}
-            <Circle
-              cx={center}
-              cy={center}
-              r={dotRadius}
-              color="rgba(0,0,0,0)"
-            />
-
-            {/* Broad highlight */}
-            <Circle cx={center} cy={center} r={dotRadius}>
-              <RadialGradient
-                c={highlightCenter}
-                r={highlightRadius}
-                colors={["rgba(255,255,255,0.38)", "rgba(255,255,255,0)"]}
-              />
-            </Circle>
-
-            {/* Glass rim stroke */}
-            <Circle cx={center} cy={center} r={rimRadius}>
-              <Paint style="stroke" strokeWidth={rimWidth}>
-                <RadialGradient
-                  c={highlightCenter}
-                  r={rimGradientRadius}
-                  colors={[
-                    "rgba(255,255,255,0.75)",
-                    "rgba(255,255,255,0.20)",
-                    "rgba(255,255,255,0)",
-                  ]}
-                />
-              </Paint>
-            </Circle>
-
-            {/* Specular “sparkle” */}
-            <Circle c={specCenter} r={specRadius}>
-              <RadialGradient
-                c={specCenter}
-                r={specRadius}
-                colors={["rgba(255,255,255,0.55)", "rgba(255,255,255,0)"]}
-              />
-            </Circle>
-          </Group>
-        </Canvas>
       </Animated.View>
     );
   }
@@ -226,39 +152,48 @@ export default function Dot(props: DotProps) {
 
       <Canvas pointerEvents="none" style={StyleSheet.absoluteFill}>
         <Group opacity={revealOpacity}>
-          <Path
-            path={shapePath}
+          {/* sticker white rim */}
+          <Circle
+            cx={center}
+            cy={center}
+            r={ringRadiusSk}
             style="stroke"
-            strokeWidth={ringThickness + stickerStroke}
-            strokeJoin="round"
-            strokeCap="round"
+            strokeWidth={outerStrokeSk}
             color="rgba(255,255,255,0.95)"
           />
-          <Path path={shapePath} style="fill" color={props.revealColor} />
-          <Path
-            path={shapePath}
-            style="stroke"
-            strokeWidth={ringThickness}
-            strokeJoin="round"
-            strokeCap="round"
+          {/* colored outer fill */}
+          <Circle
+            cx={center}
+            cy={center}
+            r={ringRadiusSk}
             color={props.revealColor}
           />
-          <Circle cx={center} cy={center} r={dotRadius}>
+          {/* colored border */}
+          <Circle
+            cx={center}
+            cy={center}
+            r={ringRadiusSk}
+            style="stroke"
+            strokeWidth={ringThicknessSk}
+            color={props.revealColor}
+          />
+
+          {/* your existing inner shading */}
+          <Circle cx={center} cy={center} r={baseRadius}>
             <RadialGradient
               c={shadowCenter}
               r={shadowRadius}
               colors={[props.revealColor, "rgba(255,255,255,0)"]}
             />
           </Circle>
-          <Circle cx={center} cy={center} r={dotRadius}>
+
+          <Circle cx={center} cy={center} r={baseRadius}>
             <RadialGradient
               c={highlightCenter}
               r={highlightRadius}
               colors={["rgba(255,255,255,0.45)", "rgba(255,255,255,0)"]}
             />
           </Circle>
-
-          {/* keep a subtle rim even when revealed */}
           <Circle cx={center} cy={center} r={rimRadius}>
             <Paint style="stroke" strokeWidth={rimWidth}>
               <RadialGradient
