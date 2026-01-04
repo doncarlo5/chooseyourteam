@@ -5,10 +5,14 @@ import {
   Circle,
   Group,
   Paint,
+  Path,
   RadialGradient,
+  Skia,
+  SweepGradient,
+  useClock,
   vec,
 } from "@shopify/react-native-skia";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
   interpolateColor,
@@ -138,10 +142,60 @@ export default function Dot(props: DotProps) {
   );
   const rimGradientRadius = useDerivedValue(() => size.value * 0.95);
 
+  const shimmerClock = useClock();
+  const shimmerOrigin = useDerivedValue(() =>
+    vec(center.value, center.value)
+  );
+  const shimmerTransform = useDerivedValue(() => [
+    { rotate: (shimmerClock.value / 1200) * Math.PI * 2 },
+  ]);
+
+  const unrevealedOpacity = useDerivedValue(() => 1 - progress.value);
+  const holdProgress = useDerivedValue(() => props.holdProgress.value);
+  const progressPath = useMemo(() => {
+    const path = Skia.Path.Make();
+    const sizeValue = props.baseSize;
+    const ringThickness = Math.max(2, sizeValue * 0.08);
+    const radius = sizeValue / 2 - ringThickness;
+    path.addCircle(sizeValue / 2, sizeValue / 2, radius);
+    return path;
+  }, [props.baseSize]);
+
   if (!props.isRevealed || !props.label) {
     return (
       <Animated.View collapsable={false} style={containerStyle}>
         <Animated.View style={ringStyle} />
+        <Canvas pointerEvents="none" style={StyleSheet.absoluteFill}>
+          <Group opacity={unrevealedOpacity}>
+            <Group origin={shimmerOrigin} transform={shimmerTransform} opacity={0.9}>
+              <Circle
+                cx={center}
+                cy={center}
+                r={ringRadiusSk}
+                style="stroke"
+                strokeWidth={ringThicknessSk}
+              >
+                <SweepGradient
+                  c={shimmerOrigin}
+                  colors={[
+                    "rgba(255,255,255,0)",
+                    "rgba(255,255,255,0.85)",
+                    "rgba(255,255,255,0)",
+                  ]}
+                />
+              </Circle>
+            </Group>
+            <Path
+              path={progressPath}
+              style="stroke"
+              strokeWidth={Math.max(2, props.baseSize * 0.08)}
+              strokeCap="round"
+              color="rgba(255,255,255,0.95)"
+              start={0}
+              end={holdProgress}
+            />
+          </Group>
+        </Canvas>
       </Animated.View>
     );
   }

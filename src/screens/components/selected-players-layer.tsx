@@ -26,7 +26,7 @@ import Dot from "./dot";
 const BASE_CIRCLE_SIZE = 120;
 const REVEAL_CIRCLE_SIZE = 150;
 const HIGHLIGHT_DELAY_MS = 3000;
-const TEAM_COLORS = ["#415679", "#FB7185", "#415679", "#E11D48", "#9D659F"];
+const TEAM_COLORS = ["#415679", "#FB7185", "#512663", "#E11D48", "#9D659F"];
 const MAX_SLOTS = 12;
 const BUBBLE_THROTTLE_MS = 80;
 const SHAKE_DURATION_MS = 1600;
@@ -79,12 +79,30 @@ export function useSelectedPlayersLayer(props: {
   );
   const preRevealHapticsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const backRef = useRef<View>(null);
-  const lastBubbleAtRef = useRef<number>(0);
+  const lastBubbleAtRef = useRef<number[]>(Array.from({ length: 5 }, () => 0));
   const teamOrderRef = useRef<string[] | null>(null);
-  const bubblePlayer = useAudioPlayer(
-    require("../../../assets/audio/bubble.wav"),
-    { keepAudioSessionActive: true, downloadFirst: true }
-  );
+  const bubblePlayers = [
+    useAudioPlayer(require("../../../assets/audio/bubble-1.wav"), {
+      keepAudioSessionActive: true,
+      downloadFirst: true,
+    }),
+    useAudioPlayer(require("../../../assets/audio/bubble-2.wav"), {
+      keepAudioSessionActive: true,
+      downloadFirst: true,
+    }),
+    useAudioPlayer(require("../../../assets/audio/bubble-3.wav"), {
+      keepAudioSessionActive: true,
+      downloadFirst: true,
+    }),
+    useAudioPlayer(require("../../../assets/audio/bubble-4.wav"), {
+      keepAudioSessionActive: true,
+      downloadFirst: true,
+    }),
+    useAudioPlayer(require("../../../assets/audio/bubble-5.wav"), {
+      keepAudioSessionActive: true,
+      downloadFirst: true,
+    }),
+  ];
   const isRevealedSv = useSharedValue(0);
   const stableCountSv = useSharedValue(0);
   const countTokenSv = useSharedValue(0);
@@ -432,17 +450,23 @@ export function useSelectedPlayersLayer(props: {
     H.boom();
   };
 
-  const playBubble = () => {
+  const playBubble = (soundIndex: number) => {
+    const clampedIndex =
+      bubblePlayers.length === 0 ? 0 : soundIndex % bubblePlayers.length;
     const now = Date.now();
-    if (now - lastBubbleAtRef.current < BUBBLE_THROTTLE_MS) {
+    if (
+      bubblePlayers.length === 0 ||
+      now - lastBubbleAtRef.current[clampedIndex] < BUBBLE_THROTTLE_MS
+    ) {
       return;
     }
-    lastBubbleAtRef.current = now;
-    if (!bubblePlayer.isLoaded) {
+    lastBubbleAtRef.current[clampedIndex] = now;
+    const player = bubblePlayers[clampedIndex];
+    if (!player.isLoaded) {
       return;
     }
-    bubblePlayer.seekTo(0).catch(() => {});
-    bubblePlayer.play();
+    player.seekTo(0).catch(() => {});
+    player.play();
   };
 
   const isPointInsideRect = (x: number, y: number, rect: TouchRect) => {
@@ -614,7 +638,6 @@ export function useSelectedPlayersLayer(props: {
     .onTouchesDown((event) => {
       "worklet";
 
-      let didAddTouch = false;
       for (const touch of event.changedTouches) {
         const x = touch.absoluteX;
         const y = touch.absoluteY;
@@ -634,7 +657,6 @@ export function useSelectedPlayersLayer(props: {
         if (slot === -1) {
           slot = allocFreeSlot(touch.id);
           if (slot !== -1) {
-            didAddTouch = true;
             slotOpacity[slot].value = 0;
             slotScale[slot].value = 0.7;
             slotOpacity[slot].value = withTiming(1, { duration: 120 });
@@ -642,6 +664,7 @@ export function useSelectedPlayersLayer(props: {
               damping: 40,
               stiffness: 5000,
             });
+            scheduleOnRN(playBubble, slot);
           }
         }
         if (slot !== -1) {
@@ -652,10 +675,6 @@ export function useSelectedPlayersLayer(props: {
       }
 
       const afterCount = countVisibleTouches();
-
-      if (didAddTouch) {
-        scheduleOnRN(playBubble);
-      }
 
       updateStableCount(afterCount);
     })
@@ -801,6 +820,7 @@ export function useSelectedPlayersLayer(props: {
             opacity={slotOpacity[index]}
             scale={slotScale[index]}
             shakeX={shakeX}
+            holdProgress={revealProgress}
             revealColor={revealColor}
             isRevealed={isRevealed}
             baseSize={BASE_CIRCLE_SIZE}

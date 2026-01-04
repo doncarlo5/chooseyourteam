@@ -23,6 +23,7 @@ export type DotProps = {
   opacity: SharedValue<number>;
   scale: SharedValue<number>;
   shakeX: SharedValue<number>;
+  holdProgress: SharedValue<number>;
   revealColor: string;
   isRevealed: boolean;
   baseSize: number;
