@@ -1,7 +1,7 @@
 import { AppText } from "@/src/components/app-text";
 import { cn } from "heroui-native";
 import { useEffect } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import Animated, {
   cancelAnimation,
   Easing,
@@ -28,8 +28,13 @@ export default function RoundScreen(props: {
   allowOverExpected: boolean;
 }) {
   const pulseProgress = useSharedValue(0.35);
-  const waitingLabel = "Put at least";
-  const numberLabel = String(props.fingersCount);
+  const isIphone = Platform.OS === "ios" && !Platform.isPad;
+  const shouldCapAtFive =
+    props.allowOverExpected && isIphone && props.fingersCount === 5;
+  const shouldUseExactSingle = !props.allowOverExpected && props.fingersCount === 1;
+  const waitingLabel =
+    shouldCapAtFive || shouldUseExactSingle ? "Put" : "Put at least";
+  const numberLabel = shouldCapAtFive ? "5" : String(props.fingersCount);
   const fingersLabel = props.fingersCount === 1 ? "finger" : "fingers";
   const shouldShowLabel =
     !props.isFrozen &&

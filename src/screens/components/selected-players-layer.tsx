@@ -447,7 +447,6 @@ export function useSelectedPlayersLayer(props: {
       }
       props.onRevealSnapshot(snapshot);
     }
-    H.boom();
   };
 
   const playBubble = (soundIndex: number) => {

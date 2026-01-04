@@ -39,19 +39,6 @@ export const H = {
     isAndroid
       ? Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Context_Click)
       : Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid),
-
-  // REVEAL “bomb”
-  boom: () => {
-    if (isAndroid) {
-      // big buzz + semantic confirm
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-      void Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Confirm);
-    } else {
-      // heavy + success feels like a punch + sparkle
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-  },
 };
 
 export type Step = { t: number; fn: () => void };

@@ -22,7 +22,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-const GLASS_RING = "rgba(255,255,255,0.9)";
+const GLASS_RING = "rgba(255,255,255,0.8)";
 
 export default function Dot(props: DotProps) {
   const progress = useSharedValue(props.isRevealed ? 1 : 0);
@@ -124,6 +124,12 @@ export default function Dot(props: DotProps) {
   const ringRadiusSk = useDerivedValue(
     () => size.value / 2 - ringThicknessSk.value
   );
+  const shimmerRadiusSk = useDerivedValue(
+    () => ringRadiusSk.value - ringThicknessSk.value * 0.45
+  );
+  const shimmerStrokeSk = useDerivedValue(() =>
+    Math.max(1, ringThicknessSk.value * 0.99)
+  );
 
   const highlightCenter = useDerivedValue(() =>
     vec(size.value * 0.32, size.value * 0.24)
@@ -143,11 +149,9 @@ export default function Dot(props: DotProps) {
   const rimGradientRadius = useDerivedValue(() => size.value * 0.95);
 
   const shimmerClock = useClock();
-  const shimmerOrigin = useDerivedValue(() =>
-    vec(center.value, center.value)
-  );
+  const shimmerOrigin = useDerivedValue(() => vec(center.value, center.value));
   const shimmerTransform = useDerivedValue(() => [
-    { rotate: (shimmerClock.value / 1200) * Math.PI * 2 },
+    { rotate: (shimmerClock.value / 1200) * Math.PI * 3 },
   ]);
 
   const unrevealedOpacity = useDerivedValue(() => 1 - progress.value);
@@ -167,13 +171,17 @@ export default function Dot(props: DotProps) {
         <Animated.View style={ringStyle} />
         <Canvas pointerEvents="none" style={StyleSheet.absoluteFill}>
           <Group opacity={unrevealedOpacity}>
-            <Group origin={shimmerOrigin} transform={shimmerTransform} opacity={0.9}>
+            <Group
+              origin={shimmerOrigin}
+              transform={shimmerTransform}
+              opacity={0.9}
+            >
               <Circle
                 cx={center}
                 cy={center}
-                r={ringRadiusSk}
+                r={shimmerRadiusSk}
                 style="stroke"
-                strokeWidth={ringThicknessSk}
+                strokeWidth={shimmerStrokeSk}
               >
                 <SweepGradient
                   c={shimmerOrigin}
