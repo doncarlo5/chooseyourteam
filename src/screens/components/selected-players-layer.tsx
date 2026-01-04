@@ -3,7 +3,12 @@ import type { FrozenDot, TouchRect } from "@/src/helpers/types/home-screen";
 import type { TouchPoint } from "@/src/helpers/types/touch-point";
 import { H, Step, styleChargeBomb } from "@/src/screens/utils/helper";
 import { AntDesign } from "@expo/vector-icons";
-import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
+import { Asset } from "expo-asset";
+import {
+  setAudioModeAsync,
+  useAudioPlayer,
+  useAudioPlayerStatus,
+} from "expo-audio";
 import { Button, cn } from "heroui-native";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
@@ -28,7 +33,6 @@ const REVEAL_CIRCLE_SIZE = 150;
 const HIGHLIGHT_DELAY_MS = 3000;
 const TEAM_COLORS = ["#415679", "#FB7185", "#512663", "#E11D48", "#9D659F"];
 const MAX_SLOTS = 12;
-const BUBBLE_THROTTLE_MS = 80;
 const SHAKE_DURATION_MS = 1600;
 const PRE_REVEAL_SILENCE_MS = Math.max(
   0,
@@ -48,6 +52,111 @@ const SHAKE_OSC_MS_FAST = 12; // end: very fast jitter
 
 const SHAKE_SETTLE_MS_SLOW = 120;
 const SHAKE_SETTLE_MS_FAST = 50;
+
+const bubbleModules = [
+  require("../../../assets/audio/bubble-1.wav"),
+  require("../../../assets/audio/bubble-2.wav"),
+  require("../../../assets/audio/bubble-3.wav"),
+  require("../../../assets/audio/bubble-4.wav"),
+  require("../../../assets/audio/bubble-5.wav"),
+] as const;
+
+const setupAudioMode = async () => {
+  try {
+    await setAudioModeAsync({
+      playsInSilentMode: false,
+      interruptionMode: "mixWithOthers",
+      allowsRecording: false,
+      shouldPlayInBackground: false,
+      shouldRouteThroughEarpiece: false,
+    });
+  } catch (error) {
+    console.warn("setAudioModeAsync failed", error);
+  }
+};
+
+const useBubblePlayers = () => {
+  const [uris, setUris] = useState<(string | null)[]>(
+    Array.from({ length: bubbleModules.length }, () => null)
+  );
+  const pendingRef = useRef<Set<number>>(new Set());
+
+  useEffect(() => {
+    let cancelled = false;
+    const modules = bubbleModules.map((module) => module);
+
+    Asset.loadAsync(modules)
+      .then((assets) => {
+        if (cancelled) {
+          return;
+        }
+        setUris(assets.map((asset) => asset.localUri ?? asset.uri));
+      })
+      .catch((error) => {
+        console.warn("Failed to load bubble assets", error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const players = [
+    useAudioPlayer(uris[0], {
+      keepAudioSessionActive: true,
+      downloadFirst: true,
+    }),
+    useAudioPlayer(uris[1], {
+      keepAudioSessionActive: true,
+      downloadFirst: true,
+    }),
+    useAudioPlayer(uris[2], {
+      keepAudioSessionActive: true,
+      downloadFirst: true,
+    }),
+    useAudioPlayer(uris[3], {
+      keepAudioSessionActive: true,
+      downloadFirst: true,
+    }),
+    useAudioPlayer(uris[4], {
+      keepAudioSessionActive: true,
+      downloadFirst: true,
+    }),
+  ];
+
+  const s0 = useAudioPlayerStatus(players[0]);
+  const s1 = useAudioPlayerStatus(players[1]);
+  const s2 = useAudioPlayerStatus(players[2]);
+  const s3 = useAudioPlayerStatus(players[3]);
+  const s4 = useAudioPlayerStatus(players[4]);
+  const statuses = [s0, s1, s2, s3, s4] as const;
+
+  useEffect(() => {
+    statuses.forEach((status, index) => {
+      if (!status.isLoaded || !pendingRef.current.has(index)) {
+        return;
+      }
+      pendingRef.current.delete(index);
+      const player = players[index];
+      player
+        .seekTo(0)
+        .then(() => player.play())
+        .catch(() => {
+          try {
+            player.play();
+          } catch {
+            return;
+          }
+        });
+    });
+  }, [players, statuses]);
+
+  return {
+    players,
+    statuses,
+    pendingRef,
+  };
+};
 
 export function useSelectedPlayersLayer(props: {
   selectedTeams: number | null;
@@ -79,30 +188,11 @@ export function useSelectedPlayersLayer(props: {
   );
   const preRevealHapticsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const backRef = useRef<View>(null);
-  const lastBubbleAtRef = useRef<number[]>(Array.from({ length: 5 }, () => 0));
   const teamOrderRef = useRef<string[] | null>(null);
-  const bubblePlayers = [
-    useAudioPlayer(require("../../../assets/audio/bubble-1.wav"), {
-      keepAudioSessionActive: true,
-      downloadFirst: true,
-    }),
-    useAudioPlayer(require("../../../assets/audio/bubble-2.wav"), {
-      keepAudioSessionActive: true,
-      downloadFirst: true,
-    }),
-    useAudioPlayer(require("../../../assets/audio/bubble-3.wav"), {
-      keepAudioSessionActive: true,
-      downloadFirst: true,
-    }),
-    useAudioPlayer(require("../../../assets/audio/bubble-4.wav"), {
-      keepAudioSessionActive: true,
-      downloadFirst: true,
-    }),
-    useAudioPlayer(require("../../../assets/audio/bubble-5.wav"), {
-      keepAudioSessionActive: true,
-      downloadFirst: true,
-    }),
-  ];
+  const bubbleAudio = useBubblePlayers();
+  const bubblePlayers = bubbleAudio.players;
+  const bubbleStatuses = bubbleAudio.statuses;
+  const bubblePendingRef = bubbleAudio.pendingRef;
   const isRevealedSv = useSharedValue(0);
   const stableCountSv = useSharedValue(0);
   const countTokenSv = useSharedValue(0);
@@ -452,20 +542,25 @@ export function useSelectedPlayersLayer(props: {
   const playBubble = (soundIndex: number) => {
     const clampedIndex =
       bubblePlayers.length === 0 ? 0 : soundIndex % bubblePlayers.length;
-    const now = Date.now();
-    if (
-      bubblePlayers.length === 0 ||
-      now - lastBubbleAtRef.current[clampedIndex] < BUBBLE_THROTTLE_MS
-    ) {
+    if (bubblePlayers.length === 0) {
       return;
     }
-    lastBubbleAtRef.current[clampedIndex] = now;
     const player = bubblePlayers[clampedIndex];
-    if (!player.isLoaded) {
+    const status = bubbleStatuses[clampedIndex];
+    if (!status.isLoaded) {
+      bubblePendingRef.current.add(clampedIndex);
       return;
     }
-    player.seekTo(0).catch(() => {});
-    player.play();
+    player
+      .seekTo(0)
+      .then(() => player.play())
+      .catch(() => {
+        try {
+          player.play();
+        } catch {
+          return;
+        }
+      });
   };
 
   const isPointInsideRect = (x: number, y: number, rect: TouchRect) => {
@@ -588,13 +683,7 @@ export function useSelectedPlayersLayer(props: {
   };
 
   useEffect(() => {
-    void setAudioModeAsync({
-      playsInSilentMode: false,
-      interruptionMode: "mixWithOthers",
-      allowsRecording: false,
-      shouldPlayInBackground: false,
-      shouldRouteThroughEarpiece: false,
-    });
+    void setupAudioMode();
     return () => {
       clearPreRevealHaptics();
     };
