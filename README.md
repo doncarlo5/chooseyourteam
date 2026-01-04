@@ -1,18 +1,49 @@
 # Choose Your Team
 
-## Goal
+Choose Your Team is a fast, touch-based team picker for any in-person game or
+quick matchup. Drop the phone on the table, everyone touches the screen, hold
+for a few seconds, and the app reveals each player's team color and number.
 
-Choose Your Team is a fast, playful way to split players into teams for games like pool, darts, foosball, or any quick matchup. Each finger represents a player, and the app assigns teams randomly so nobody has to decide manually.
+## Why it is useful
 
-## How it works
+- Decide who starts in 1v1 games (chess, darts, pool, foosball, table tennis).
+- Split a group into fair teams for doubles, 3v3, or uneven party matchups.
+- Settle "who goes first" before a tournament, bar game, or friendly challenge.
+- Rerun it between rounds to reshuffle teams without arguments.
 
-- Pick the number of groups (2 to 5).
-- On the team screen, place one finger per player on the screen.
-- Hold steady for a few seconds and each dot reveals a team color and number.
-- If any finger lifts before the reveal, the countdown resets and teams are not assigned.
+## App flows
 
-## Notes
+### 1. Pick teams
 
-- Touches near controls (theme toggle or back) are ignored.
-- Haptics confirm new fingers, a short pre-reveal countdown, and the final reveal.
-- The theme toggle is available on the group selection screen.
+- Choose how many teams you want (2 to 5).
+- If you have 6 to 10 players, tap +5 and choose the total player count.
+
+### 2. Place fingers
+
+- Each player places one finger on the screen.
+- Keep fingers steady while the countdown ring fills and feedback builds.
+
+### 3. Reveal teams
+
+- Each dot flips to a colored badge with a team number.
+- If a finger lifts early, the countdown resets for a clean restart.
+
+### 4. Multi-round for 6-10 players
+
+- Round 1 handles the first five players and freezes the results.
+- Swipe to Round 2 for the remaining players, then swipe back to review both
+  rounds.
+
+### 5. Reset and play again
+
+- Tap back to return to team selection and reshuffle for the next game.
+
+## Features
+
+- Random team assignment with color and number labels.
+- Multi-touch input with no names or setup.
+- Countdown feedback with haptics, subtle sounds, and a nervous shake before
+  reveal.
+- Touch-safe controls: touches on the back button or +5 do not count as players.
+- Built for quick decisions: who breaks, who serves, who starts, and who teams
+  up.
