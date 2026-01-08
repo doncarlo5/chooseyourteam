@@ -11,7 +11,7 @@ import {
 } from "expo-audio";
 import { Button, cn } from "heroui-native";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import {
   cancelAnimation,
@@ -65,10 +65,10 @@ const setupAudioMode = async () => {
   try {
     await setAudioModeAsync({
       playsInSilentMode: false,
-      interruptionMode: "mixWithOthers",
       allowsRecording: false,
       shouldPlayInBackground: false,
       shouldRouteThroughEarpiece: false,
+      ...(Platform.OS === "ios" ? { interruptionMode: "mixWithOthers" } : {}),
     });
   } catch (error) {
     console.warn("setAudioModeAsync failed", error);
