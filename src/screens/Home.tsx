@@ -367,11 +367,7 @@ export default function Home(props: {}) {
         {isMultiRound && currentRound === 1 && isRoundTwoFrozen ? (
           <View className="absolute left-8 inset-y-0 items-center justify-center">
             <Animated.View style={arrowLeftStyle}>
-              <Ionicons
-                name="chevron-back-outline"
-                size={34}
-                color="#0B0B0B"
-              />
+              <Ionicons name="chevron-back-outline" size={34} color="#0B0B0B" />
             </Animated.View>
           </View>
         ) : null}

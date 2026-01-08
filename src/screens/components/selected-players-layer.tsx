@@ -158,7 +158,7 @@ const useBubblePlayers = () => {
   };
 };
 
-export function useSelectedPlayersLayer(props: {
+export default function useSelectedPlayersLayer(props: {
   selectedTeams: number | null;
   onBack: () => void;
   toggleRectSv: SharedValue<TouchRect>;
@@ -929,5 +929,3 @@ export function useSelectedPlayersLayer(props: {
     touchCount,
   };
 }
-
-export default useSelectedPlayersLayer;

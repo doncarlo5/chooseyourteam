@@ -130,7 +130,7 @@ export default function App() {
                 if (Platform.OS === "ios") {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 }
-                router.push(`/components/${item.path}`);
+                router.push(`/components/${item.path}` as any);
               }}
             >
               <AppText className="text-foreground text-base ml-1">

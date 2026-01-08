@@ -55,7 +55,7 @@ const VariantItem = memo(
               scrollY.get() / itemHeight,
               [index - 0.5, index, index + 0.5],
               [0, 1, 0],
-              Extrapolation.CLAMP,
+              Extrapolation.CLAMP
             )
           : 1,
         transform: [
@@ -64,7 +64,7 @@ const VariantItem = memo(
               scrollY.get() / itemHeight,
               [index - 0.5, index, index + 0.5],
               [0.9, 1, 0.9],
-              Extrapolation.CLAMP,
+              Extrapolation.CLAMP
             ),
           },
         ],
@@ -76,7 +76,7 @@ const VariantItem = memo(
         {item.content}
       </Animated.View>
     );
-  },
+  }
 );
 
 VariantItem.displayName = "VariantItem";
@@ -102,7 +102,7 @@ export const UsageVariantFlatList = ({
   const listRef = useRef<FlatList<UsageVariant>>(null);
 
   const handleViewableItemsChanged = useCallback(
-    ({ viewableItems }: { viewableItems: Array<{ item: UsageVariant }> }) => {
+    ({ viewableItems }: { viewableItems: { item: UsageVariant }[] }) => {
       if (viewableItems.length > 0 && viewableItems[0]) {
         if (Platform.OS === "ios") {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -110,7 +110,7 @@ export const UsageVariantFlatList = ({
         setCurrentVariant(viewableItems[0].item);
       }
     },
-    [],
+    []
   );
 
   const viewabilityConfig = useRef({
@@ -152,7 +152,7 @@ export const UsageVariantFlatList = ({
       intensity: interpolate(
         scrollY.get() / itemHeight,
         inputRange,
-        outputRange,
+        outputRange
       ),
     };
   });
@@ -211,7 +211,6 @@ export const UsageVariantFlatList = ({
             <PaginationIndicator
               key={index}
               index={index}
-              label={item.label}
               scrollX={scrollY}
               itemSize={height}
             />
