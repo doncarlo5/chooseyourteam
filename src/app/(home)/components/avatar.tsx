@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";

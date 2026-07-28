@@ -221,7 +221,6 @@ const CustomStylingContent = () => {
           </Button>
 
           <Button
-            feedbackPosition="top"
             animation={{
               highlight: {
                 backgroundColor: {

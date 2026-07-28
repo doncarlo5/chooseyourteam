@@ -31,69 +31,72 @@ type PlacementContentListProps = {
   valueIndex: number;
 };
 
-const PlacementContentList: FC<PlacementContentListProps> = memo(
-  ({ valueIndex }) => {
-    const themeColorOverlay = useThemeColor("overlay");
+function scrollToValueIndex(
+  listRef: React.RefObject<FlatList | null>,
+  valueIndex: number,
+) {
+  const index = valueIndex === 0 ? 1 : valueIndex;
 
-    const listRef = useRef<FlatList>(null);
+  return setTimeout(() => {
+    listRef.current?.scrollToIndex({
+      index,
+      animated: true,
+      viewPosition: 0.5,
+    });
+  }, 0);
+}
 
-    useEffect(() => {
-      if (valueIndex === 0) {
-        setTimeout(() => {
-          listRef.current?.scrollToIndex({
-            index: 1,
-            animated: true,
-            viewPosition: 0.5,
-          });
-        }, 0);
-        return;
-      }
-      setTimeout(() => {
-        listRef.current?.scrollToIndex({
-          index: valueIndex,
-          animated: true,
-          viewPosition: 0.5,
-        });
-      }, 0);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+const PlacementContentList = memo(function PlacementContentList(
+  props: PlacementContentListProps,
+) {
+  const themeColorOverlay = useThemeColor("overlay");
 
-    return (
-      <ScrollShadow
-        LinearGradientComponent={LinearGradient}
-        color={themeColorOverlay}
-      >
-        <FlatList
-          ref={listRef}
-          data={US_STATES}
-          getItemLayout={(_, index) => ({
-            length: ITEM_HEIGHT,
-            offset: ITEM_HEIGHT * index,
-            index,
-          })}
-          initialScrollIndex={valueIndex}
-          renderItem={({ item }) => (
-            <Select.Item
-              key={item.value}
-              value={item.value}
-              label={item.label}
-              className="py-0"
-              style={{
-                height: ITEM_HEIGHT,
-              }}
-            />
-          )}
-        />
-      </ScrollShadow>
-    );
-  },
-);
+  const listRef = useRef<FlatList>(null);
+
+  useEffect(() => {
+    const timer = scrollToValueIndex(listRef, props.valueIndex);
+    return () => clearTimeout(timer);
+  }, [props.valueIndex]);
+
+  return (
+    <ScrollShadow
+      LinearGradientComponent={LinearGradient}
+      color={themeColorOverlay}
+    >
+      <FlatList
+        ref={listRef}
+        data={US_STATES}
+        getItemLayout={(_, index) => ({
+          length: ITEM_HEIGHT,
+          offset: ITEM_HEIGHT * index,
+          index,
+        })}
+        initialScrollIndex={props.valueIndex}
+        renderItem={({ item }) => (
+          <Select.Item
+            key={item.value}
+            value={item.value}
+            label={item.label}
+            className="py-0"
+            style={{
+              height: ITEM_HEIGHT,
+            }}
+          />
+        )}
+      />
+    </ScrollShadow>
+  );
+});
 
 const PlacementContent = () => {
   const { value } = useSelect();
+  const selectedOption = Array.isArray(value) ? value[0] : value;
 
   const valueIndex = useMemo(
-    () => US_STATES.findIndex((item) => item.value === (value?.value ?? "CA")),
+    () =>
+      US_STATES.findIndex(
+        (item) => item.value === (selectedOption?.value ?? "CA"),
+      ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
@@ -120,7 +123,12 @@ export const PlacementSelect: FC<Props> = ({ placeholder, placement }) => {
       </Select.Trigger>
       <Select.Portal>
         <Select.Overlay />
-        <Select.Content width={200} placement={placement} className="h-[150px]">
+        <Select.Content
+          presentation="popover"
+          width={200}
+          placement={placement}
+          className="h-[150px]"
+        >
           <PlacementContent />
         </Select.Content>
       </Select.Portal>

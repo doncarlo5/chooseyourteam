@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -9,6 +8,9 @@ import {
   ScrollShadow,
   TextField,
   useThemeColor,
+  Label,
+  FieldError,
+  Input,
 } from "heroui-native";
 import { useState } from "react";
 import { Platform, Text, useWindowDimensions, View } from "react-native";
@@ -117,13 +119,11 @@ const BlurBackdropDialogContent = () => {
                 <Button variant="danger" onPress={simulatePress}>
                   Delete
                 </Button>
-                <Dialog.Close asChild>
-                  <Button
-                    variant="tertiary"
-                    className="bg-overlay-foreground/5"
-                  >
-                    Cancel
-                  </Button>
+                <Dialog.Close
+                  variant="tertiary"
+                  className="bg-overlay-foreground/5"
+                >
+                  Cancel
                 </Dialog.Close>
               </View>
             </Dialog.Content>
@@ -149,7 +149,6 @@ const TextInputDialogContent = () => {
   const insetTop = insets.top + 12;
   const maxTextInputDialogHeight = (height - insetTop) / 2;
 
-  const themeColorSurfaceSecondary = useThemeColor("surface-secondary");
   const themeColorMuted = useThemeColor("muted");
 
   const validateEmail = (emailValue: string) => {
@@ -223,11 +222,6 @@ const TextInputDialogContent = () => {
             >
               <Dialog.Content
                 className="bg-surface rounded-3xl"
-                animation={{
-                  scale: {
-                    value: [0.85, 1, 0.95],
-                  },
-                }}
                 style={{
                   marginTop: insetTop,
                   height: maxTextInputDialogHeight,
@@ -239,10 +233,8 @@ const TextInputDialogContent = () => {
                 <View className="flex-1">
                   <StyleScrollView contentContainerClassName="gap-5">
                     <TextField isRequired isInvalid={!!nameError}>
-                      <TextField.Label isInvalid={false}>
-                        Full Name
-                      </TextField.Label>
-                      <TextField.Input
+                      <Label isInvalid={false}>Full Name</Label>
+                      <Input
                         placeholder="Enter your name"
                         value={name}
                         onChangeText={(text) => {
@@ -253,26 +245,15 @@ const TextInputDialogContent = () => {
                         autoCorrect
                         autoFocus
                         isInvalid={false}
-                        animation={{
-                          backgroundColor: {
-                            value: {
-                              blur: themeColorSurfaceSecondary,
-                              focus: themeColorSurfaceSecondary,
-                            },
-                          },
-                        }}
+                        className="bg-surface-secondary"
                         selectionColor={themeColorMuted}
                       />
-                      <TextField.ErrorMessage>
-                        {nameError}
-                      </TextField.ErrorMessage>
+                      <FieldError>{nameError}</FieldError>
                     </TextField>
 
                     <TextField isRequired isInvalid={!!emailError}>
-                      <TextField.Label isInvalid={false}>
-                        Email Address
-                      </TextField.Label>
-                      <TextField.Input
+                      <Label isInvalid={false}>Email Address</Label>
+                      <Input
                         placeholder="email@example.com"
                         value={email}
                         onChangeText={(text) => {
@@ -281,37 +262,26 @@ const TextInputDialogContent = () => {
                         }}
                         autoCapitalize="none"
                         isInvalid={false}
-                        animation={{
-                          backgroundColor: {
-                            value: {
-                              blur: themeColorSurfaceSecondary,
-                              focus: themeColorSurfaceSecondary,
-                            },
-                          },
-                        }}
+                        className="bg-surface-secondary"
                         selectionColor={themeColorMuted}
                       />
-                      <TextField.ErrorMessage>
-                        {emailError}
-                      </TextField.ErrorMessage>
+                      <FieldError>{emailError}</FieldError>
                     </TextField>
                   </StyleScrollView>
                 </View>
 
                 <View className="flex-row justify-end gap-3 pt-3">
-                  <Dialog.Close asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onPress={() => {
-                        setName("");
-                        setEmail("");
-                        setNameError("");
-                        setEmailError("");
-                      }}
-                    >
-                      Cancel
-                    </Button>
+                  <Dialog.Close
+                    variant="ghost"
+                    size="sm"
+                    onPress={() => {
+                      setName("");
+                      setEmail("");
+                      setNameError("");
+                      setEmailError("");
+                    }}
+                  >
+                    Cancel
                   </Dialog.Close>
                   <Button size="sm" onPress={handleSubmit}>
                     Update Profile
@@ -428,7 +398,7 @@ const NativeModalDialogContent = () => {
       <View className="flex-1 items-center justify-center">
         <Button
           variant="secondary"
-          onPress={() => router.push("components/dialog-native-modal")}
+          onPress={() => router.push("/components/dialog-native-modal")}
         >
           Dialog from native modal
         </Button>

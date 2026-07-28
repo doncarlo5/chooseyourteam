@@ -6,10 +6,8 @@
     "orientation": "portrait",
     "scheme": "chooseyourteam",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "appStoreId": "6756816697",
       "bundleIdentifier": "com.doncarlos.chooseyourteam",
       "appStoreUrl": "https://apps.apple.com/app/id6756816697",
       "icon": {
@@ -25,14 +23,13 @@
       "package": "com.doncarlos.chooseyourteam",
       "versionCode": 7,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
+      "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
@@ -51,7 +48,8 @@
         }
       ],
       "expo-audio",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -45,7 +45,7 @@ const components: Component[] = [
     path: "dialog",
   },
   {
-    title: "Divider",
+    title: "Separator",
     path: "divider",
   },
   {

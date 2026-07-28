@@ -1,7 +1,7 @@
 import Feather from "@expo/vector-icons/Feather";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import * as Haptics from "expo-haptics";
-import { Avatar, Chip, Dialog, RadioGroup } from "heroui-native";
+import { Avatar, Chip, Dialog, RadioGroup, Label, Radio } from "heroui-native";
 import { useMemo, useState, type FC } from "react";
 import { Platform, useWindowDimensions, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
@@ -157,9 +157,9 @@ export const Assignee: FC = () => {
                           <View className="w-7 pl-0.5 justify-center">
                             <View className="scale-105">{item.indicator}</View>
                           </View>
-                          <RadioGroup.Label>{item.label}</RadioGroup.Label>
+                          <Label>{item.label}</Label>
                         </View>
-                        <RadioGroup.Indicator className="border-0 bg-transparent">
+                        <Radio className="border-0 bg-transparent">
                           {value === item.value && (
                             <Animated.View
                               key={item.value}
@@ -172,7 +172,7 @@ export const Assignee: FC = () => {
                               />
                             </Animated.View>
                           )}
-                        </RadioGroup.Indicator>
+                        </Radio>
                       </RadioGroup.Item>
                     </Dialog.Close>
                   ))}

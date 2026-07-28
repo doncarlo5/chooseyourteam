@@ -25,16 +25,11 @@ export function PlayerCard(props: PlayerCardProps) {
         isDisabled={props.isDisabled}
         accessibilityRole="button"
         accessibilityLabel={`Select ${props.count} ${label}`}
-        feedbackVariant="highlight"
         className="w-full rounded-3xl active:bg-white/40"
         animation={{
           scale: {
             value: 1.03,
             timingConfig: { duration: 170 },
-          },
-          highlight: {
-            backgroundColor: { value: "transparent" },
-            opacity: { value: [0, 0] },
           },
         }}
       >
@@ -42,7 +37,7 @@ export function PlayerCard(props: PlayerCardProps) {
           className={cn(
             "p-0 rounded-3xl overflow-hidden shadow-sm shadow-black/10",
             "bg-white/10 border-2 border-white/30",
-            props.isDisabled && "opacity-50"
+            props.isDisabled && "opacity-50",
           )}
         >
           <AnimatedBlurView
@@ -60,7 +55,7 @@ export function PlayerCard(props: PlayerCardProps) {
             <View className="flex-1">
               <Card.Title
                 className={cn(
-                  "text-5xl font-extrabold leading-none text-[#0B0B0B]"
+                  "text-5xl font-extrabold leading-none text-[#0B0B0B]",
                 )}
               >
                 {props.count}

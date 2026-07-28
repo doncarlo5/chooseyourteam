@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import MaskedView from "@react-native-masked-view/masked-view";
 import { BlurView, type BlurViewProps } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
@@ -55,7 +54,7 @@ export const ProgressiveBlurView: FC<Props> = ({
         </MaskedView>
       ) : (
         <LinearGradient
-          style={StyleSheet.absoluteFillObject}
+          style={StyleSheet.absoluteFill}
           colors={
             position === "top"
               ? [

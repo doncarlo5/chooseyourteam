@@ -9,9 +9,15 @@
       --surface: oklch(0.98 0.01 170);
       --surface-foreground: oklch(0.28 0.055 170);
 
+      --surface-secondary: var(--default);
+      --surface-secondary-foreground: var(--surface-foreground);
+      --surface-tertiary: var(--default);
+      --surface-tertiary-foreground: var(--surface-foreground);
+
       /* Overlay: Used for floating/overlay components (dialogs, popovers, modals, menus) */
       --overlay: oklch(0.998 0.003 170);
       --overlay-foreground: oklch(0.28 0.055 170);
+      --backdrop: oklch(0% 0 0 / 20%);
 
       --muted: oklch(0.52 0.04 170);
 
@@ -22,10 +28,10 @@
       --accent: oklch(0.7 0.16 175);
       --accent-foreground: oklch(0.98 0.005 175);
       --accent-hover: oklch(0.67 0.17 175);
-
-      /* Secondary: Deep forest green for secondary actions */
       --secondary: oklch(0.42 0.1 165);
       --secondary-foreground: oklch(0.98 0.005 165);
+
+      /* Secondary: Deep forest green for secondary actions */
 
       /* Form Field Defaults - Colors */
       --field-background: oklch(0.98 0.01 170);
@@ -49,7 +55,13 @@
 
       /* Misc Colors */
       --border: oklch(0 0 0 / 0%);
-      --divider: oklch(0.92 0.016 170);
+      --separator: oklch(0.92 0.016 170);
+      --focus: var(--accent);
+
+      /* Shadows */
+      --surface-shadow: 0 2px 4px 0 rgb(0 0 0 / 4%);
+      --overlay-shadow: 0 8px 24px 0 rgb(0 0 0 / 8%);
+      --field-shadow: 0 2px 4px 0 rgb(0 0 0 / 4%);
       --link: oklch(0.62 0.15 175);
     }
 
@@ -62,9 +74,15 @@
       --surface: oklch(0.19 0.05 170);
       --surface-foreground: oklch(0.91 0.015 170);
 
+      --surface-secondary: var(--default);
+      --surface-secondary-foreground: var(--surface-foreground);
+      --surface-tertiary: var(--default);
+      --surface-tertiary-foreground: var(--surface-foreground);
+
       /* Overlay: Used for floating/overlay components (dialogs, popovers, modals, menus) */
       --overlay: oklch(0.22 0.048 170);
       --overlay-foreground: oklch(0.91 0.015 170);
+      --backdrop: oklch(0% 0 0 / 20%);
 
       --muted: oklch(0.48 0.045 170);
 
@@ -75,10 +93,10 @@
       --accent: oklch(0.68 0.18 175);
       --accent-foreground: oklch(0.12 0.045 175);
       --accent-hover: oklch(0.71 0.19 175);
-
-      /* Secondary: Luminous emerald for secondary actions */
       --secondary: oklch(0.58 0.12 165);
       --secondary-foreground: oklch(0.12 0.045 165);
+
+      /* Secondary: Luminous emerald for secondary actions */
 
       /* Form Field Defaults - Colors */
       --field-background: var(--default);
@@ -102,7 +120,13 @@
 
       /* Misc Colors */
       --border: oklch(0 0 0 / 0%);
-      --divider: oklch(0.26 0.048 170);
+      --separator: oklch(0.26 0.048 170);
+      --focus: var(--accent);
+
+      /* Shadows */
+      --surface-shadow: 0 2px 4px 0 rgb(0 0 0 / 4%);
+      --overlay-shadow: 0 8px 24px 0 rgb(0 0 0 / 8%);
+      --field-shadow: 0 2px 4px 0 rgb(0 0 0 / 4%);
       --link: oklch(0.72 0.16 175);
     }
   }

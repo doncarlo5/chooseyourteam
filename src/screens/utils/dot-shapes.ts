@@ -1,37 +1,21 @@
+import type { TeamShape } from "@/src/domain/team-identity";
 import { Skia } from "@shopify/react-native-skia";
 
 type Point = { x: number; y: number };
 
-export type ShapeKind = "spike" | "wave" | "hex" | "diamond" | "squircle";
-
-const SHAPES: ShapeKind[] = ["spike", "wave", "hex", "diamond", "squircle"];
-
-export const getShapeForLabel = (label?: string): ShapeKind => {
-  const index = label ? Number.parseInt(label, 10) - 1 : 0;
-  if (Number.isNaN(index) || index < 0) {
-    return SHAPES[0];
-  }
-  return SHAPES[index % SHAPES.length];
-};
-
 const closePath = (points: Point[]) => {
-  const path = Skia.Path.Make();
   if (points.length === 0) {
-    return path;
+    return Skia.Path.Make();
   }
-  path.moveTo(points[0].x, points[0].y);
-  for (let i = 1; i < points.length; i += 1) {
-    path.lineTo(points[i].x, points[i].y);
-  }
-  path.close();
-  return path;
+
+  return Skia.Path.Polygon(points, true);
 };
 
 const buildPolygon = (
   sides: number,
   cx: number,
   cy: number,
-  radius: number
+  radius: number,
 ) => {
   const points: Point[] = [];
   for (let i = 0; i < sides; i += 1) {
@@ -46,14 +30,14 @@ const buildPolygon = (
 
 export const buildShapePath = (
   size: number,
-  shape: ShapeKind,
-  strokeWidth: number
+  shape: TeamShape,
+  strokeWidth: number,
 ) => {
   const cx = size / 2;
   const cy = size / 2;
   const radius = Math.max(1, size / 2 - strokeWidth);
 
-  if (shape === "hex") {
+  if (shape === "hexagon") {
     return buildPolygon(6, cx, cy, radius);
   }
 
@@ -101,10 +85,8 @@ export const buildShapePath = (
       const angle = (Math.PI * 2 * i) / segments;
       const cos = Math.cos(angle);
       const sin = Math.sin(angle);
-      const x =
-        Math.sign(cos) * Math.pow(Math.abs(cos), 2 / n) * radius + cx;
-      const y =
-        Math.sign(sin) * Math.pow(Math.abs(sin), 2 / n) * radius + cy;
+      const x = Math.sign(cos) * Math.pow(Math.abs(cos), 2 / n) * radius + cx;
+      const y = Math.sign(sin) * Math.pow(Math.abs(sin), 2 / n) * radius + cy;
       points.push({ x, y });
     }
     return closePath(points);

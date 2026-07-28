@@ -1,5 +1,5 @@
 import Feather from "@expo/vector-icons/Feather";
-import { Divider, Select, useSelectAnimation } from "heroui-native";
+import { Separator, Select, useSelectAnimation } from "heroui-native";
 import React, { useState, type FC } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, {
@@ -72,6 +72,7 @@ export function SelectButtonTrigger({ contentOffset }: Props) {
       <Select.Portal>
         <Select.Overlay />
         <Select.Content
+          presentation="popover"
           width="trigger"
           offset={contentOffset}
           className="w-[256px]"
@@ -80,7 +81,7 @@ export function SelectButtonTrigger({ contentOffset }: Props) {
           {US_STATES.map((state, index) => (
             <React.Fragment key={state.value}>
               <Select.Item value={state.value} label={state.label} />
-              {index < US_STATES.length - 1 && <Divider />}
+              {index < US_STATES.length - 1 && <Separator />}
             </React.Fragment>
           ))}
         </Select.Content>

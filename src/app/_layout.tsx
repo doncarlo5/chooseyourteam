@@ -43,7 +43,7 @@ function AppContent() {
         {children}
       </KeyboardAvoidingView>
     ),
-    []
+    [],
   );
 
   return (

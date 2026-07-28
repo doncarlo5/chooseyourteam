@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import Animated, { Easing, SlideInDown } from "react-native-reanimated";
+import Animated, { SlideInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { withUniwind } from "uniwind";
 import { useAppTheme } from "../../../../contexts/app-theme-context";
@@ -47,22 +47,6 @@ export const ModelSelect = ({ data, model, setModel }: Props) => {
         setModel(modelValue!);
       }}
       defaultValue={data[0]}
-      animation={{
-        entering: {
-          type: "timing",
-          config: {
-            duration: 400,
-            easing: Easing.out(Easing.quad),
-          },
-        },
-        exiting: {
-          type: "timing",
-          config: {
-            duration: 200,
-            easing: Easing.out(Easing.quad),
-          },
-        },
-      }}
     >
       <Select.Trigger asChild>
         <Button

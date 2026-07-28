@@ -1,6 +1,6 @@
-/* eslint-disable react-native/no-inline-styles */
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { Button, cn, Divider, Select, useThemeColor } from "heroui-native";
+import { useRouter } from "expo-router";
+import { Button, cn, Separator, Select, useThemeColor } from "heroui-native";
 import React, { useState } from "react";
 import { Platform, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
@@ -171,13 +171,13 @@ const PresentationContent = () => {
                 width: 42,
                 backgroundColor: themeColorMuted,
               }}
-              bottomSheetViewClassName={cn(
-                "h-full mx-2 border border-divider/20 bg-overlay overflow-hidden",
+              contentContainerClassName={cn(
+                "h-full mx-2 border border-separator/20 bg-overlay overflow-hidden",
                 Platform.OS === "ios"
                   ? "rounded-t-4xl rounded-b-[54px]"
                   : "rounded-4xl",
               )}
-              bottomSheetViewProps={{
+              contentContainerProps={{
                 style: {
                   padding: 0,
                 },
@@ -206,7 +206,7 @@ const PresentationContent = () => {
                       </View>
                       <Select.ItemIndicator />
                     </Select.Item>
-                    {index < COUNTRIES.length - 1 && <Divider />}
+                    {index < COUNTRIES.length - 1 && <Separator />}
                   </React.Fragment>
                 ))}
               </BottomSheetScrollView>
@@ -256,7 +256,12 @@ const AlignmentOptionsContent = () => {
           </Select.Trigger>
           <Select.Portal>
             <Select.Overlay />
-            <Select.Content width={200} placement="top" align="start">
+            <Select.Content
+              presentation="popover"
+              width={200}
+              placement="top"
+              align="start"
+            >
               {US_STATES.slice(0, 3).map((state) => (
                 <Select.Item
                   key={state.value}
@@ -280,7 +285,12 @@ const AlignmentOptionsContent = () => {
           </Select.Trigger>
           <Select.Portal>
             <Select.Overlay />
-            <Select.Content width={200} placement="top" align="center">
+            <Select.Content
+              presentation="popover"
+              width={200}
+              placement="top"
+              align="center"
+            >
               {US_STATES.slice(0, 3).map((state) => (
                 <Select.Item
                   key={state.value}
@@ -304,7 +314,12 @@ const AlignmentOptionsContent = () => {
           </Select.Trigger>
           <Select.Portal>
             <Select.Overlay />
-            <Select.Content width={200} placement="top" align="end">
+            <Select.Content
+              presentation="popover"
+              width={200}
+              placement="top"
+              align="end"
+            >
               {US_STATES.slice(0, 3).map((state) => (
                 <Select.Item
                   key={state.value}
@@ -323,13 +338,13 @@ const AlignmentOptionsContent = () => {
 // ------------------------------------------------------------------------------
 
 const NativeModalTestContent = () => {
-  const router = require("expo-router").useRouter();
+  const router = useRouter();
 
   return (
     <View className="flex-1 px-5 items-center justify-center">
       <Button
         variant="secondary"
-        onPress={() => router.push("components/select-native-modal")}
+        onPress={() => router.push("/components/select-native-modal")}
       >
         Select from Native Modal
       </Button>

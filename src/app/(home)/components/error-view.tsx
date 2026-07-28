@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Button, ErrorView, TextField } from "heroui-native";
+import { Button, FieldError, TextField, Label, Input } from "heroui-native";
 import { useState } from "react";
 import { View } from "react-native";
 import { FadeInDown } from "react-native-reanimated";
@@ -17,15 +17,13 @@ const BasicErrorViewContent = () => {
     <View className="flex-1 items-center justify-center px-5">
       <View className="w-full h-[160px] justify-between">
         <TextField isInvalid={slideError} isRequired>
-          <TextField.Label isInvalid={false}>Username</TextField.Label>
-          <TextField.Input
+          <Label isInvalid={false}>Username</Label>
+          <Input
             placeholder="Enter username"
             editable={false}
             isInvalid={false}
           />
-          <TextField.ErrorMessage>
-            Username is already taken
-          </TextField.ErrorMessage>
+          <FieldError>Username is already taken</FieldError>
         </TextField>
         <Button
           variant="secondary"
@@ -44,7 +42,7 @@ const CustomTextWithIconsContent = () => {
   return (
     <View className="flex-1 items-center justify-center px-5">
       <View className="gap-4">
-        <ErrorView isInvalid={true}>
+        <FieldError isInvalid={true}>
           <View className="flex-row items-center gap-2">
             <StyledIonicons
               name="close-circle"
@@ -55,18 +53,18 @@ const CustomTextWithIconsContent = () => {
               Payment method declined
             </AppText>
           </View>
-        </ErrorView>
+        </FieldError>
 
-        <ErrorView isInvalid={true}>
+        <FieldError isInvalid={true}>
           <View className="flex-row items-center gap-2">
             <StyledIonicons name="warning" size={16} className="text-warning" />
             <AppText className="text-warning text-sm">
               Account verification pending
             </AppText>
           </View>
-        </ErrorView>
+        </FieldError>
 
-        <ErrorView isInvalid={true}>
+        <FieldError isInvalid={true}>
           <View className="flex-row items-center gap-2">
             <StyledIonicons
               name="information-circle"
@@ -77,7 +75,7 @@ const CustomTextWithIconsContent = () => {
               Profile completion required
             </AppText>
           </View>
-        </ErrorView>
+        </FieldError>
       </View>
     </View>
   );
@@ -87,7 +85,7 @@ const CustomStylingContent = () => {
   return (
     <View className="flex-1 items-center justify-center px-5">
       <View className="gap-4">
-        <ErrorView
+        <FieldError
           isInvalid={true}
           className="bg-danger/10 p-3 rounded-xl border border-danger/20"
           classNames={{
@@ -95,9 +93,9 @@ const CustomStylingContent = () => {
           }}
         >
           Server connection failed. Please try again.
-        </ErrorView>
+        </FieldError>
 
-        <ErrorView
+        <FieldError
           isInvalid={true}
           className="bg-amber-500/10 p-2 rounded"
           classNames={{
@@ -105,9 +103,9 @@ const CustomStylingContent = () => {
           }}
         >
           Session will expire in 5 minutes
-        </ErrorView>
+        </FieldError>
 
-        <ErrorView
+        <FieldError
           isInvalid={true}
           className="border-l-4 border-danger pl-2"
           classNames={{
@@ -115,7 +113,7 @@ const CustomStylingContent = () => {
           }}
         >
           Invalid credentials provided
-        </ErrorView>
+        </FieldError>
       </View>
     </View>
   );
@@ -126,30 +124,30 @@ const InlineErrorMessagesContent = () => {
     <View className="flex-1 items-center justify-center px-5">
       <View className="gap-4 w-full">
         <TextField>
-          <TextField.Label>Email Address</TextField.Label>
+          <Label>Email Address</Label>
           <View className="flex-row items-center gap-2">
-            <TextField.Input
+            <Input
               placeholder="user@example"
               value="user@example"
               editable={false}
               className="flex-1"
             />
-            <ErrorView isInvalid={true}>
+            <FieldError isInvalid={true}>
               <AppText className="text-danger text-xs">Invalid email</AppText>
-            </ErrorView>
+            </FieldError>
           </View>
         </TextField>
 
         <TextField>
-          <TextField.Label>Phone Number</TextField.Label>
+          <Label>Phone Number</Label>
           <View className="flex-row items-center gap-2">
-            <TextField.Input
+            <Input
               placeholder="+1 (555) 000-0000"
               value=""
               editable={false}
               className="flex-1"
             />
-            <ErrorView isInvalid={true}>
+            <FieldError isInvalid={true}>
               <View className="flex-row items-center gap-1">
                 <StyledIonicons
                   name="warning"
@@ -158,7 +156,7 @@ const InlineErrorMessagesContent = () => {
                 />
                 <AppText className="text-danger text-xs">Required</AppText>
               </View>
-            </ErrorView>
+            </FieldError>
           </View>
         </TextField>
       </View>
@@ -174,8 +172,8 @@ const MultipleErrorsContent = () => {
       <View className="w-full h-[240px] justify-between">
         <View className="gap-2">
           <TextField>
-            <TextField.Label>Create Password</TextField.Label>
-            <TextField.Input
+            <Label>Create Password</Label>
+            <Input
               placeholder="Enter your password"
               secureTextEntry
               editable={false}
@@ -183,10 +181,10 @@ const MultipleErrorsContent = () => {
           </TextField>
 
           <View className="gap-2">
-            <ErrorView isInvalid={showMultipleErrors}>
+            <FieldError isInvalid={showMultipleErrors}>
               • At least 8 characters long
-            </ErrorView>
-            <ErrorView
+            </FieldError>
+            <FieldError
               isInvalid={showMultipleErrors}
               animation={{
                 entering: {
@@ -195,8 +193,8 @@ const MultipleErrorsContent = () => {
               }}
             >
               • At least one uppercase letter
-            </ErrorView>
-            <ErrorView
+            </FieldError>
+            <FieldError
               isInvalid={showMultipleErrors}
               animation={{
                 entering: {
@@ -205,8 +203,8 @@ const MultipleErrorsContent = () => {
               }}
             >
               • At least one number
-            </ErrorView>
-            <ErrorView
+            </FieldError>
+            <FieldError
               isInvalid={showMultipleErrors}
               animation={{
                 entering: {
@@ -215,7 +213,7 @@ const MultipleErrorsContent = () => {
               }}
             >
               • At least one special character (!@#$%^&*)
-            </ErrorView>
+            </FieldError>
           </View>
         </View>
         <Button
@@ -234,7 +232,7 @@ const MultipleErrorsContent = () => {
 const ERROR_VIEW_VARIANTS: UsageVariant[] = [
   {
     value: "basic-error-view",
-    label: "Basic ErrorView",
+    label: "Basic FieldError",
     content: <BasicErrorViewContent />,
   },
   {

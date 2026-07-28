@@ -125,9 +125,10 @@ const DefaultVariantContent = () => {
       <Accordion defaultValue="2" className="w-full">
         {accordionData.map((item) => (
           <Accordion.Item key={item.id} value={item.id}>
-            <PressableFeedback
-              animation={{ highlight: { opacity: { value: [0, 0.05] } } }}
-            >
+            <PressableFeedback>
+              <PressableFeedback.Highlight
+                animation={{ opacity: { value: [0, 0.05] } }}
+              />
               <Accordion.Trigger>
                 <View className={classNames.triggerContentContainer}>
                   {item.icon}
@@ -218,7 +219,7 @@ const MultipleSelectionContent = () => {
 const WithoutDividersContent = () => {
   return (
     <View className="flex-1 items-center justify-center px-5">
-      <Accordion isDividerVisible={false} className="w-full">
+      <Accordion hideSeparator className="w-full">
         {accordionData.slice(0, 3).map((item) => (
           <Accordion.Item key={item.id} value={item.id}>
             <Accordion.Trigger className="rounded-lg">

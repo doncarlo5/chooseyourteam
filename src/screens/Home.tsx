@@ -1,22 +1,26 @@
 import { PaginationIndicator } from "@/src/components/component-presentation/pagination-indicator";
+import {
+  planMultiRoundAssignments,
+  type MultiRoundAssignmentPlan,
+} from "@/src/domain/team-allocation";
 import type { FrozenDot, TouchRect } from "@/src/helpers/types/home-screen";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { cn } from "heroui-native";
-import { useEffect, useRef, useState, type ElementRef } from "react";
-import { View, useWindowDimensions } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { ScrollView, View, useWindowDimensions } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Easing,
   Extrapolation,
   interpolate,
-  runOnJS,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import AppReviewButton from "./components/app-review-button";
 import DialogMorePlayers from "./components/dialog-more-players";
 import FrozenDotsLayer from "./components/frozen-dots-layer";
@@ -29,13 +33,16 @@ export default function Home(props: {}) {
   const { width } = useWindowDimensions();
 
   const [selectedTeams, setSelectedTeams] = useState<number | null>(null);
-  const [totalPlayers, setTotalPlayers] = useState(5);
+  const [declaredPlayerCount, setDeclaredPlayerCount] = useState<number | null>(
+    null,
+  );
+  const [multiRoundPlan, setMultiRoundPlan] =
+    useState<MultiRoundAssignmentPlan | null>(null);
   const [currentRound, setCurrentRound] = useState(0);
   const [roundOneSnapshot, setRoundOneSnapshot] = useState<FrozenDot[]>([]);
   const [isRoundOneFrozen, setIsRoundOneFrozen] = useState(false);
   const [roundTwoSnapshot, setRoundTwoSnapshot] = useState<FrozenDot[]>([]);
   const [isRoundTwoFrozen, setIsRoundTwoFrozen] = useState(false);
-  const [round2Started, setRound2Started] = useState(false);
   const [roundResetKey, setRoundResetKey] = useState(0);
   const [isRoundTwoVisible, setIsRoundTwoVisible] = useState(false);
   const [isRoundScrolling, setIsRoundScrolling] = useState(false);
@@ -56,12 +63,12 @@ export default function Home(props: {}) {
     isReady: false,
   });
   const roundScrollX = useSharedValue(0);
-  const roundScrollRef = useRef<ElementRef<typeof Animated.ScrollView>>(null);
+  const roundScrollRef = useRef<ScrollView>(null);
   const roundScrollHandler = useAnimatedScrollHandler((event) => {
     roundScrollX.value = event.contentOffset.x;
     if (isMultiRound) {
       const isSecond = event.contentOffset.x >= width * 0.5;
-      runOnJS(setIsRoundTwoVisible)(isSecond);
+      scheduleOnRN(setIsRoundTwoVisible, isSecond);
     }
   });
   const arrowBounce = useSharedValue(0);
@@ -71,7 +78,7 @@ export default function Home(props: {}) {
       roundScrollX.value,
       [0, width * 0.5, width],
       [1, 0.5, 0],
-      Extrapolation.CLAMP
+      Extrapolation.CLAMP,
     ),
   }));
   const roundTwoFrozenStyle = useAnimatedStyle(() => ({
@@ -80,7 +87,7 @@ export default function Home(props: {}) {
       roundScrollX.value,
       [0, width * 0.5, width],
       [0, 0.5, 1],
-      Extrapolation.CLAMP
+      Extrapolation.CLAMP,
     ),
   }));
   const arrowStyle = useAnimatedStyle(() => {
@@ -88,7 +95,7 @@ export default function Home(props: {}) {
       roundScrollX.value,
       [0, width * 0.5, width],
       [1, 0.5, 0],
-      Extrapolation.CLAMP
+      Extrapolation.CLAMP,
     );
     return {
       transform: [
@@ -102,7 +109,7 @@ export default function Home(props: {}) {
       roundScrollX.value,
       [0, width * 0.5, width],
       [0, 0.5, 1],
-      Extrapolation.CLAMP
+      Extrapolation.CLAMP,
     );
     return {
       transform: [
@@ -111,81 +118,89 @@ export default function Home(props: {}) {
       opacity: roundFade,
     };
   });
-  const isMultiRound = totalPlayers > 5;
-  const firstRoundCount = Math.min(5, totalPlayers);
-  const secondRoundCount = Math.max(0, totalPlayers - 5);
-  const expectedTouchCount = isMultiRound
+  const selectedTeamCount = selectedTeams ?? 0;
+  const isMultiRound = declaredPlayerCount !== null;
+  const firstRoundCount = isMultiRound ? 5 : selectedTeamCount;
+  const secondRoundCount = declaredPlayerCount
+    ? declaredPlayerCount - firstRoundCount
+    : 0;
+  const requiredTouchCount = isMultiRound
     ? currentRound === 0
       ? firstRoundCount
       : secondRoundCount
-    : totalPlayers;
+    : selectedTeamCount;
   const canTouch = !isMultiRound
     ? !isRoundOneFrozen
     : currentRound === 0
       ? !isRoundOneFrozen
       : !isRoundTwoFrozen;
   const touchEnabled = canTouch && !isRoundScrolling;
-  const {
-    touchGesture,
-    overlay,
-    backButton,
-    isRevealed,
-    isTouching,
-    touchCount,
-  } = useSelectedPlayersLayer({
-    selectedTeams,
-    toggleRectSv,
-    plusButtonRectSv,
-    onRevealSnapshot: (dots) => {
-      if (!isMultiRound) {
-        setRoundOneSnapshot(dots);
-        setIsRoundOneFrozen(true);
-        return;
-      }
-      if (currentRound === 0 && !isRoundOneFrozen) {
-        setRoundOneSnapshot(dots);
-        setIsRoundOneFrozen(true);
-      }
-      if (currentRound === 1 && !isRoundTwoFrozen) {
-        setRoundTwoSnapshot(dots);
-        setIsRoundTwoFrozen(true);
-      }
-    },
-    isTouchEnabled: touchEnabled,
-    isScrollGestureActive: isRoundScrolling,
-    expectedTouchCount,
-    allowOverExpected: !isMultiRound,
-    resetKey: roundResetKey,
-    onBack: () => {
-      setSelectedTeams(null);
-      setTotalPlayers(5);
-      setCurrentRound(0);
-      setRoundOneSnapshot([]);
-      setIsRoundOneFrozen(false);
-      setRoundTwoSnapshot([]);
-      setIsRoundTwoFrozen(false);
-      setRound2Started(false);
-      setRoundResetKey((prev) => prev + 1);
-      setIsRoundTwoVisible(false);
-      roundScrollX.value = 0;
-      roundScrollRef.current?.scrollTo({ x: 0, animated: false });
-    },
-  });
-
-  useEffect(() => {
+  const resetAllocationSession = () => {
     setCurrentRound(0);
     setRoundOneSnapshot([]);
     setIsRoundOneFrozen(false);
     setRoundTwoSnapshot([]);
     setIsRoundTwoFrozen(false);
-    setRound2Started(false);
-    setRoundResetKey((prev) => prev + 1);
+    setRoundResetKey((previous) => previous + 1);
     setIsRoundTwoVisible(false);
     setIsRoundScrolling(false);
     setHasShownSwipeHint(false);
-    roundScrollX.value = 0;
+    roundScrollX.set(0);
     roundScrollRef.current?.scrollTo({ x: 0, animated: false });
-  }, [selectedTeams, totalPlayers]);
+  };
+  const handleTeamSelection = (teamCount: number) => {
+    setSelectedTeams(teamCount);
+    setDeclaredPlayerCount(null);
+    setMultiRoundPlan(null);
+    resetAllocationSession();
+  };
+  const handleDeclaredPlayerCountSelection = (playerCount: number) => {
+    if (!selectedTeams) {
+      return;
+    }
+    const nextPlan = planMultiRoundAssignments(selectedTeams, playerCount);
+    setDeclaredPlayerCount(playerCount);
+    setMultiRoundPlan(nextPlan);
+    resetAllocationSession();
+  };
+  const handleBack = () => {
+    setSelectedTeams(null);
+    setDeclaredPlayerCount(null);
+    setMultiRoundPlan(null);
+    resetAllocationSession();
+  };
+  const { touchGesture, overlay, backButton, isTouching, touchCount } =
+    useSelectedPlayersLayer({
+      selectedTeams,
+      toggleRectSv,
+      plusButtonRectSv,
+      onRevealSnapshot: (dots) => {
+        if (!isMultiRound) {
+          setRoundOneSnapshot(dots);
+          setIsRoundOneFrozen(true);
+          return;
+        }
+        if (currentRound === 0 && !isRoundOneFrozen) {
+          setRoundOneSnapshot(dots);
+          setIsRoundOneFrozen(true);
+        }
+        if (currentRound === 1 && !isRoundTwoFrozen) {
+          setRoundTwoSnapshot(dots);
+          setIsRoundTwoFrozen(true);
+        }
+      },
+      isTouchEnabled: touchEnabled,
+      isScrollGestureActive: isRoundScrolling,
+      expectedTouchCount: requiredTouchCount,
+      allowOverExpected: !isMultiRound,
+      roundAssignment: isMultiRound
+        ? currentRound === 0
+          ? multiRoundPlan?.roundOne
+          : multiRoundPlan?.roundTwo
+        : undefined,
+      resetKey: roundResetKey,
+      onBack: handleBack,
+    });
 
   useEffect(() => {
     if (isRoundTwoVisible) {
@@ -193,13 +208,15 @@ export default function Home(props: {}) {
     }
   }, [isRoundTwoVisible]);
   useEffect(() => {
-    arrowBounce.value = withRepeat(
-      withTiming(1, {
-        duration: 700,
-        easing: Easing.inOut(Easing.quad),
-      }),
-      -1,
-      true
+    arrowBounce.set(
+      withRepeat(
+        withTiming(1, {
+          duration: 700,
+          easing: Easing.inOut(Easing.quad),
+        }),
+        -1,
+        true,
+      ),
     );
   }, [arrowBounce]);
 
@@ -208,8 +225,7 @@ export default function Home(props: {}) {
       <View className={cn("flex-1")} style={{ backgroundColor: "transparent" }}>
         <TeamsSelection
           selectedTeams={selectedTeams}
-          setSelectedTeams={setSelectedTeams}
-          setTotalPlayers={setTotalPlayers}
+          onSelectTeams={handleTeamSelection}
         />
         <AppReviewButton />
 
@@ -225,26 +241,15 @@ export default function Home(props: {}) {
       : !isRoundTwoFrozen || roundTwoSnapshot.length === 0;
   const hideOverlayDuringSwipe =
     isMultiRound && currentRound === 0 && isRoundTwoVisible;
-  const showPlusButton =
-    currentRound === 0 &&
-    !isRoundTwoVisible &&
-    !isRevealed &&
-    !isRoundOneFrozen &&
-    !isRoundTwoFrozen;
-
   return (
     <GestureDetector gesture={touchGesture}>
       <View className={cn("flex-1")} style={{ backgroundColor: "transparent" }}>
         <View className="absolute top-16 right-6 z-10 items-center gap-2">
-          {showPlusButton ? (
-            <DialogMorePlayers
-              selectedTeams={selectedTeams}
-              setTotalPlayers={setTotalPlayers}
-              plusButtonRectSv={plusButtonRectSv}
-              isRevealed={isRevealed}
-              isTouching={isTouching}
-            />
-          ) : null}
+          <DialogMorePlayers
+            selectedTeams={selectedTeams}
+            onSelectPlayerCount={handleDeclaredPlayerCountSelection}
+            plusButtonRectSv={plusButtonRectSv}
+          />
         </View>
         {isMultiRound && (
           <Animated.ScrollView
@@ -252,13 +257,7 @@ export default function Home(props: {}) {
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
-            scrollEnabled={
-              (currentRound !== 1 || isRoundTwoFrozen || isRevealed) &&
-              (isRevealed ||
-                !isTouching ||
-                isRoundOneFrozen ||
-                isRoundTwoFrozen)
-            }
+            scrollEnabled={isRoundOneFrozen && !isTouching}
             onScroll={roundScrollHandler}
             scrollEventThrottle={16}
             onScrollBeginDrag={() => setIsRoundScrolling(true)}
@@ -269,13 +268,12 @@ export default function Home(props: {}) {
             }}
             onMomentumScrollEnd={(event) => {
               const nextRound = Math.round(
-                event.nativeEvent.contentOffset.x / width
+                event.nativeEvent.contentOffset.x / width,
               );
-              setCurrentRound(nextRound);
-              if (nextRound === 1 && !round2Started) {
-                setRound2Started(true);
-                setRoundResetKey((prev) => prev + 1);
+              if (nextRound !== currentRound) {
+                setRoundResetKey((previous) => previous + 1);
               }
+              setCurrentRound(nextRound);
               setIsRoundScrolling(false);
             }}
           >
@@ -302,7 +300,7 @@ export default function Home(props: {}) {
         {!isMultiRound ? (
           <View className="absolute inset-0" pointerEvents="none">
             <RoundScreen
-              fingersCount={totalPlayers}
+              fingersCount={selectedTeamCount}
               touchCount={touchCount}
               isActive={true}
               isFrozen={isRoundOneFrozen}

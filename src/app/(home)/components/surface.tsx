@@ -39,7 +39,7 @@ const VariantsContent = () => {
           description="This is a tertiary surface variant. It uses bg-surface-tertiary styling."
         />
         <SurfaceItem
-          variant="quaternary"
+          variant="tertiary"
           title="Surface Content"
           description="This is a quaternary surface variant. It uses bg-surface-quaternary styling."
         />

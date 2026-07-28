@@ -1,4 +1,6 @@
 import { AnimatedBlurView } from "@/src/components/animated-blur-view";
+import { planBalancedRoundAssignment } from "@/src/domain/team-allocation";
+import type { RoundAssignment, TeamNumber } from "@/src/domain/team-identity";
 import type { FrozenDot, TouchRect } from "@/src/helpers/types/home-screen";
 import type { TouchPoint } from "@/src/helpers/types/touch-point";
 import { H, Step, styleChargeBomb } from "@/src/screens/utils/helper";
@@ -17,7 +19,6 @@ import {
   cancelAnimation,
   Easing,
   makeMutable,
-  runOnUI,
   SharedValue,
   useSharedValue,
   withDelay,
@@ -25,18 +26,17 @@ import {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { scheduleOnRN } from "react-native-worklets";
+import { scheduleOnRN, scheduleOnUI } from "react-native-worklets";
 import Dot from "./dot";
 
 const BASE_CIRCLE_SIZE = 120;
 const REVEAL_CIRCLE_SIZE = 150;
 const HIGHLIGHT_DELAY_MS = 3000;
-const TEAM_COLORS = ["#415679", "#FB7185", "#512663", "#E11D48", "#9D659F"];
 const MAX_SLOTS = 12;
 const SHAKE_DURATION_MS = 1600;
 const PRE_REVEAL_SILENCE_MS = Math.max(
   0,
-  HIGHLIGHT_DELAY_MS - SHAKE_DURATION_MS
+  HIGHLIGHT_DELAY_MS - SHAKE_DURATION_MS,
 );
 
 // Shake tuning (px + ms)
@@ -77,7 +77,7 @@ const setupAudioMode = async () => {
 
 const useBubblePlayers = () => {
   const [uris, setUris] = useState<(string | null)[]>(
-    Array.from({ length: bubbleModules.length }, () => null)
+    Array.from({ length: bubbleModules.length }, () => null),
   );
   const pendingRef = useRef<Set<number>>(new Set());
 
@@ -168,6 +168,7 @@ export default function useSelectedPlayersLayer(props: {
   isScrollGestureActive?: boolean;
   expectedTouchCount?: number;
   allowOverExpected?: boolean;
+  roundAssignment?: RoundAssignment;
   resetKey?: number;
 }): {
   touchGesture: ReturnType<typeof Gesture.Manual>;
@@ -180,15 +181,11 @@ export default function useSelectedPlayersLayer(props: {
   const [isRevealed, setIsRevealed] = useState(false);
   const [isTouching, setIsTouching] = useState(false);
   const [touchCount, setTouchCount] = useState(0);
-  const [slotRevealColors, setSlotRevealColors] = useState<string[]>(
-    Array.from({ length: MAX_SLOTS }, () => "")
-  );
-  const [slotRevealLabels, setSlotRevealLabels] = useState<(string | null)[]>(
-    Array.from({ length: MAX_SLOTS }, () => null)
+  const [slotRevealTeams, setSlotRevealTeams] = useState<(TeamNumber | null)[]>(
+    Array.from({ length: MAX_SLOTS }, () => null),
   );
   const preRevealHapticsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const backRef = useRef<View>(null);
-  const teamOrderRef = useRef<string[] | null>(null);
   const bubbleAudio = useBubblePlayers();
   const bubblePlayers = bubbleAudio.players;
   const bubbleStatuses = bubbleAudio.statuses;
@@ -210,93 +207,49 @@ export default function useSelectedPlayersLayer(props: {
   });
   const slotActive = useMemo(
     () => Array.from({ length: MAX_SLOTS }, () => makeMutable(0)),
-    []
+    [],
   );
   const slotX = useMemo(
     () => Array.from({ length: MAX_SLOTS }, () => makeMutable(0)),
-    []
+    [],
   );
   const slotY = useMemo(
     () => Array.from({ length: MAX_SLOTS }, () => makeMutable(0)),
-    []
+    [],
   );
   const slotOpacity = useMemo(
     () => Array.from({ length: MAX_SLOTS }, () => makeMutable(0)),
-    []
+    [],
   );
   const slotScale = useMemo(
     () => Array.from({ length: MAX_SLOTS }, () => makeMutable(1)),
-    []
+    [],
   );
   const slotTouchId = useMemo(
     () => Array.from({ length: MAX_SLOTS }, () => makeMutable(-1)),
-    []
+    [],
   );
-  const activeTeamColors = useMemo(
-    () =>
-      props.selectedTeams ? TEAM_COLORS.slice(0, props.selectedTeams) : [],
-    [props.selectedTeams]
-  );
-
   const isGestureEnabled =
     Boolean(props.selectedTeams) &&
     (props.isTouchEnabled ?? true) &&
     !(props.isScrollGestureActive ?? false);
 
-  useEffect(() => {
-    if (!props.selectedTeams) {
-      teamOrderRef.current = null;
-      return;
-    }
-    const nextOrder = TEAM_COLORS.slice(0, props.selectedTeams);
-    for (let i = nextOrder.length - 1; i > 0; i -= 1) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [nextOrder[i], nextOrder[j]] = [nextOrder[j], nextOrder[i]];
-    }
-    teamOrderRef.current = nextOrder;
-  }, [props.selectedTeams]);
-
   const assignTeams = (touchList: TouchPoint[]) => {
-    const assignments: Record<string, string> = {};
-    const numbers: Record<string, number> = {};
-    if (activeTeamColors.length === 0) {
-      return { assignments, numbers };
+    const assignments: Record<string, TeamNumber> = {};
+    if (!props.selectedTeams) {
+      return assignments;
     }
-    let colorPool = [...activeTeamColors];
 
-    const shuffle = <T,>(values: T[]): T[] => {
-      const result = [...values];
-      for (let i = result.length - 1; i > 0; i -= 1) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [result[i], result[j]] = [result[j], result[i]];
-      }
-      return result;
-    };
+    const plannedAssignment =
+      props.roundAssignment?.length === touchList.length
+        ? props.roundAssignment
+        : planBalancedRoundAssignment(props.selectedTeams, touchList.length);
 
     touchList.forEach((touch, index) => {
-      if (index % activeTeamColors.length === 0) {
-        colorPool = shuffle(activeTeamColors);
-      }
-      const poolIndex = index % activeTeamColors.length;
-      const color = colorPool[poolIndex];
-      assignments[touch.id] = color;
+      assignments[touch.id] = plannedAssignment[index];
     });
 
-    const baseOrder = teamOrderRef.current ?? activeTeamColors;
-    const colorToNumber = baseOrder.reduce<Record<string, number>>(
-      (acc, color, idx) => {
-        acc[color] = idx + 1;
-        return acc;
-      },
-      {}
-    );
-
-    touchList.forEach((touch) => {
-      const color = assignments[touch.id];
-      numbers[touch.id] = colorToNumber[color];
-    });
-
-    return { assignments, numbers };
+    return assignments;
   };
 
   const clearPreRevealHaptics = () => {
@@ -306,8 +259,7 @@ export default function useSelectedPlayersLayer(props: {
 
   const resetRevealState = () => {
     setIsRevealed(false);
-    setSlotRevealColors(Array.from({ length: MAX_SLOTS }, () => ""));
-    setSlotRevealLabels(Array.from({ length: MAX_SLOTS }, () => null));
+    setSlotRevealTeams(Array.from({ length: MAX_SLOTS }, () => null));
     cancelAnimation(shakeX);
     shakeX.value = 0;
     clearPreRevealHaptics();
@@ -321,7 +273,7 @@ export default function useSelectedPlayersLayer(props: {
 
   const resetAllSlots = () => {
     resetAllSlotsJS();
-    runOnUI(hardResetSlotsWorklet)();
+    scheduleOnUI(hardResetSlotsWorklet);
   };
 
   const hardResetSlotsWorklet = () => {
@@ -350,12 +302,12 @@ export default function useSelectedPlayersLayer(props: {
 
   const schedulePreRevealHaptics = (
     totalDelayMs: number,
-    startAfterMs: number
+    startAfterMs: number,
   ) => {
     const scheduleSteps = (
       windowMs: number,
       steps: Step[],
-      offsetMs: number
+      offsetMs: number,
     ) => {
       clearPreRevealHaptics();
 
@@ -388,13 +340,13 @@ export default function useSelectedPlayersLayer(props: {
         if (amp < 0.25) return;
 
         const oscillations = Math.round(
-          lerp(SHAKE_OSC_MIN, SHAKE_OSC_MAX, energy)
+          lerp(SHAKE_OSC_MIN, SHAKE_OSC_MAX, energy),
         );
         const oscMs = Math.round(
-          lerp(SHAKE_OSC_MS_SLOW, SHAKE_OSC_MS_FAST, energy)
+          lerp(SHAKE_OSC_MS_SLOW, SHAKE_OSC_MS_FAST, energy),
         );
         const settleMs = Math.round(
-          lerp(SHAKE_SETTLE_MS_SLOW, SHAKE_SETTLE_MS_FAST, energy)
+          lerp(SHAKE_SETTLE_MS_SLOW, SHAKE_SETTLE_MS_FAST, energy),
         );
 
         // alternate overall direction per beat (keeps it organic)
@@ -411,7 +363,7 @@ export default function useSelectedPlayersLayer(props: {
             withTiming(dir * amp * decay, {
               duration: oscMs,
               easing: Easing.linear,
-            })
+            }),
           );
           dir *= -1;
         }
@@ -423,7 +375,7 @@ export default function useSelectedPlayersLayer(props: {
             withTiming(buzzAmp, { duration: 12, easing: Easing.linear }),
             withTiming(-buzzAmp, { duration: 12, easing: Easing.linear }),
             withTiming(buzzAmp, { duration: 12, easing: Easing.linear }),
-            withTiming(0, { duration: 12, easing: Easing.linear })
+            withTiming(0, { duration: 12, easing: Easing.linear }),
           );
         }
 
@@ -432,7 +384,7 @@ export default function useSelectedPlayersLayer(props: {
           withTiming(0, {
             duration: settleMs,
             easing: Easing.out(Easing.quad),
-          })
+          }),
         );
 
         // Assign sequence directly to the shared value (intended Reanimated usage). :contentReference[oaicite:0]{index=0}
@@ -478,8 +430,8 @@ export default function useSelectedPlayersLayer(props: {
     }
   };
 
-  const handleReveal = () => {
-    if (activeTeamColors.length === 0) {
+  const handleReveal = (token: number, revealedTouchCount: number) => {
+    if (!props.selectedTeams) {
       return;
     }
     const touches: TouchPoint[] = [];
@@ -492,12 +444,14 @@ export default function useSelectedPlayersLayer(props: {
         });
       }
     }
+    if (token !== revealToken.get() || touches.length !== revealedTouchCount) {
+      return;
+    }
 
-    const { assignments, numbers } = assignTeams(touches);
-    const nextRevealColors = Array.from({ length: MAX_SLOTS }, () => "");
-    const nextRevealLabels: (string | null)[] = Array.from(
+    const assignments = assignTeams(touches);
+    const nextRevealTeams: (TeamNumber | null)[] = Array.from(
       { length: MAX_SLOTS },
-      () => null
+      () => null,
     );
 
     for (let i = 0; i < MAX_SLOTS; i += 1) {
@@ -506,16 +460,13 @@ export default function useSelectedPlayersLayer(props: {
         continue;
       }
       const id = String(touchId);
-      nextRevealColors[i] = assignments[id] ?? "";
-      const teamNumber = numbers[id];
-      nextRevealLabels[i] = teamNumber ? String(teamNumber) : null;
+      nextRevealTeams[i] = assignments[id] ?? null;
     }
 
     cancelAnimation(shakeX);
     shakeX.value = withTiming(0, { duration: 120 });
 
-    setSlotRevealColors(nextRevealColors);
-    setSlotRevealLabels(nextRevealLabels);
+    setSlotRevealTeams(nextRevealTeams);
     setIsRevealed(true);
     clearPreRevealHaptics();
     if (props.onRevealSnapshot) {
@@ -524,15 +475,14 @@ export default function useSelectedPlayersLayer(props: {
         if (slotActive[i].value !== 1 || slotTouchId[i].value === -1) {
           continue;
         }
-        const color = nextRevealColors[i];
-        if (!color) {
+        const team = nextRevealTeams[i];
+        if (!team) {
           continue;
         }
         snapshot.push({
           x: slotX[i].value,
           y: slotY[i].value,
-          color,
-          label: nextRevealLabels[i] ?? undefined,
+          team,
         });
       }
       props.onRevealSnapshot(snapshot);
@@ -643,9 +593,9 @@ export default function useSelectedPlayersLayer(props: {
         if (finished && token === revealToken.value) {
           const currentCount = countVisibleTouches();
           isRevealedSv.value = 1;
-          scheduleOnRN(handleReveal);
+          scheduleOnRN(handleReveal, token, currentCount);
         }
-      })
+      }),
     );
   };
 
@@ -854,7 +804,7 @@ export default function useSelectedPlayersLayer(props: {
     <Button
       size="md"
       className={cn(
-        "absolute top-16 left-6 z-10 border border-white/60 rounded-full size-12 items-center justify-center px-0 overflow-hidden bg-gray-100/40 active:bg-gray-100/80 active:text-white"
+        "absolute top-16 left-6 z-10 border border-white/60 rounded-full size-12 items-center justify-center px-0 overflow-hidden bg-gray-100/40 active:bg-gray-100/80 active:text-white",
       )}
       animation={{
         scale: {
@@ -897,8 +847,7 @@ export default function useSelectedPlayersLayer(props: {
   const overlay = props.selectedTeams ? (
     <>
       {slotActive.map((active, index) => {
-        const revealColor = slotRevealColors[index] || "#0B0B0B";
-        const label = slotRevealLabels[index];
+        const team = slotRevealTeams[index];
         return (
           <Dot
             key={index}
@@ -909,11 +858,10 @@ export default function useSelectedPlayersLayer(props: {
             scale={slotScale[index]}
             shakeX={shakeX}
             holdProgress={revealProgress}
-            revealColor={revealColor}
+            team={isRevealed && team ? team : undefined}
             isRevealed={isRevealed}
             baseSize={BASE_CIRCLE_SIZE}
             revealSize={REVEAL_CIRCLE_SIZE}
-            label={isRevealed && label ? label : undefined}
           />
         );
       })}

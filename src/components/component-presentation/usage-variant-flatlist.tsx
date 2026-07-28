@@ -55,7 +55,7 @@ const VariantItem = memo(
               scrollY.get() / itemHeight,
               [index - 0.5, index, index + 0.5],
               [0, 1, 0],
-              Extrapolation.CLAMP
+              Extrapolation.CLAMP,
             )
           : 1,
         transform: [
@@ -64,7 +64,7 @@ const VariantItem = memo(
               scrollY.get() / itemHeight,
               [index - 0.5, index, index + 0.5],
               [0.9, 1, 0.9],
-              Extrapolation.CLAMP
+              Extrapolation.CLAMP,
             ),
           },
         ],
@@ -76,7 +76,7 @@ const VariantItem = memo(
         {item.content}
       </Animated.View>
     );
-  }
+  },
 );
 
 VariantItem.displayName = "VariantItem";
@@ -110,7 +110,7 @@ export const UsageVariantFlatList = ({
         setCurrentVariant(viewableItems[0].item);
       }
     },
-    []
+    [],
   );
 
   const viewabilityConfig = useRef({
@@ -152,7 +152,7 @@ export const UsageVariantFlatList = ({
       intensity: interpolate(
         scrollY.get() / itemHeight,
         inputRange,
-        outputRange
+        outputRange,
       ),
     };
   });

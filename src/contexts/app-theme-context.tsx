@@ -32,7 +32,7 @@ const AppThemeContext = createContext<AppThemeContextType | undefined>(
 );
 
 export const AppThemeProvider: React.FC<{ children: React.ReactNode }> = (
-  props
+  props,
 ) => {
   const { theme } = useUniwind();
 

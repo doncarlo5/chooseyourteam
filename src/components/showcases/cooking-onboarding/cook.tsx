@@ -23,7 +23,7 @@ export const Cook: FC<Props> = ({ isOnboardingDone, triggerRef }) => {
   const themeColorForeground = useThemeColor("foreground");
 
   return (
-    <Popover animation={popoverAnimation}>
+    <Popover>
       <Popover.Trigger ref={triggerRef}>
         <Button
           animation={{ highlight: "disabled" }}
@@ -35,7 +35,12 @@ export const Cook: FC<Props> = ({ isOnboardingDone, triggerRef }) => {
         </Button>
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Content className={className.popoverContent} placement="top">
+        <Popover.Content
+          animation={popoverAnimation}
+          presentation="popover"
+          className={className.popoverContent}
+          placement="top"
+        >
           <Popover.Arrow
             stroke={themeColorForeground}
             fill={themeColorForeground}

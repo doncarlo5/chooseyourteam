@@ -1,5 +1,5 @@
 import { Image as ExpoImage } from "expo-image";
-import { useRouter } from "expo-router";
+import { type Href, useRouter } from "expo-router";
 import { Chip, cn, Surface } from "heroui-native";
 import { Platform, Pressable, StyleSheet, View } from "react-native";
 import Animated, {
@@ -17,7 +17,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type ShowcaseComponent = {
   name: string;
-  href: string;
+  href: Href;
 };
 
 export type ShowcaseItemData = {
@@ -25,7 +25,7 @@ export type ShowcaseItemData = {
   imageDark: string;
   title: string;
   description: string;
-  href: string;
+  href: Href;
   components: ShowcaseComponent[];
 };
 

@@ -1,6 +1,13 @@
-/* eslint-disable react-native/no-inline-styles */
 import { Ionicons } from "@expo/vector-icons";
-import { Button, TextField } from "heroui-native";
+import {
+  Button,
+  TextField,
+  Label,
+  Description,
+  FieldError,
+  InputGroup,
+  Input,
+} from "heroui-native";
 import { useState } from "react";
 import { Pressable, useWindowDimensions, View } from "react-native";
 import { useReanimatedKeyboardAnimation } from "react-native-keyboard-controller";
@@ -35,15 +42,15 @@ const BasicTextFieldContent = () => {
     <View className="flex-1 justify-center px-5">
       <KeyboardAvoidingContainer>
         <TextField isRequired>
-          <TextField.Label>Email</TextField.Label>
-          <TextField.Input
+          <Label>Email</Label>
+          <Input
             placeholder="Enter your email"
             keyboardType="email-address"
             autoCapitalize="none"
           />
-          <TextField.Description>
+          <Description>
             We'll never share your email with anyone else.
-          </TextField.Description>
+          </Description>
         </TextField>
       </KeyboardAvoidingContainer>
     </View>
@@ -57,19 +64,20 @@ const TextFieldWithIconsContent = () => {
     <View className="flex-1 justify-center px-5">
       <KeyboardAvoidingContainer>
         <TextField isRequired>
-          <TextField.Label>Password</TextField.Label>
-          <TextField.Input
-            placeholder="Enter your password"
-            secureTextEntry={!isPasswordVisible}
-          >
-            <TextField.InputStartContent className="pointer-events-none">
+          <Label>Password</Label>
+          <InputGroup>
+            <InputGroup.Prefix isDecorative>
               <StyledIonicons
                 name="lock-closed-outline"
                 size={16}
                 className="text-muted"
               />
-            </TextField.InputStartContent>
-            <TextField.InputEndContent>
+            </InputGroup.Prefix>
+            <InputGroup.Input
+              placeholder="Enter your password"
+              secureTextEntry={!isPasswordVisible}
+            />
+            <InputGroup.Suffix>
               <Pressable
                 onPress={() => setIsPasswordVisible(!isPasswordVisible)}
               >
@@ -79,8 +87,8 @@ const TextFieldWithIconsContent = () => {
                   className="text-muted"
                 />
               </Pressable>
-            </TextField.InputEndContent>
-          </TextField.Input>
+            </InputGroup.Suffix>
+          </InputGroup>
         </TextField>
       </KeyboardAvoidingContainer>
     </View>
@@ -93,25 +101,15 @@ const DisabledTextFieldContent = () => {
       <KeyboardAvoidingContainer>
         <View className="gap-8">
           <TextField>
-            <TextField.Label>Account ID</TextField.Label>
-            <TextField.Input
-              placeholder="Enter account ID"
-              value="ACC-2024-12345"
-            />
-            <TextField.Description>
-              Your unique account identifier
-            </TextField.Description>
+            <Label>Account ID</Label>
+            <Input placeholder="Enter account ID" value="ACC-2024-12345" />
+            <Description>Your unique account identifier</Description>
           </TextField>
 
           <TextField isDisabled>
-            <TextField.Label>User Role</TextField.Label>
-            <TextField.Input
-              placeholder="Role assignment"
-              value="Administrator"
-            />
-            <TextField.Description>
-              Contact support to change your role
-            </TextField.Description>
+            <Label>User Role</Label>
+            <Input placeholder="Role assignment" value="Administrator" />
+            <Description>Contact support to change your role</Description>
           </TextField>
         </View>
       </KeyboardAvoidingContainer>
@@ -124,14 +122,14 @@ const MultilineTextFieldContent = () => {
     <View className="flex-1 justify-center px-5">
       <KeyboardAvoidingContainer>
         <TextField>
-          <TextField.Label>Message</TextField.Label>
-          <TextField.Input
+          <Label>Message</Label>
+          <Input
             placeholder="Type your message here..."
             multiline
             numberOfLines={4}
             textAlignVertical="top"
           />
-          <TextField.Description>Maximum 500 characters</TextField.Description>
+          <Description>Maximum 500 characters</Description>
         </TextField>
       </KeyboardAvoidingContainer>
     </View>
@@ -147,19 +145,15 @@ const TextFieldWithValidationContent = () => {
       <KeyboardAvoidingContainer>
         <View className="gap-8">
           <TextField isRequired isInvalid={isTestFieldInvalid}>
-            <TextField.Label>Promo Code</TextField.Label>
-            <TextField.Input
+            <Label>Promo Code</Label>
+            <Input
               placeholder="Enter promo code"
               value={testFieldValue}
               onChangeText={setTestFieldValue}
               autoCapitalize="characters"
             />
-            <TextField.Description>
-              Enter a valid code to receive discount
-            </TextField.Description>
-            <TextField.ErrorMessage>
-              This promo code is invalid or has expired
-            </TextField.ErrorMessage>
+            <Description>Enter a valid code to receive discount</Description>
+            <FieldError>This promo code is invalid or has expired</FieldError>
           </TextField>
           <Button
             onPress={() => setIsTestFieldInvalid(!isTestFieldInvalid)}
@@ -182,8 +176,8 @@ const TextFieldWithCustomStylesContent = () => {
     <View className="flex-1 justify-center px-5">
       <KeyboardAvoidingContainer>
         <TextField>
-          <TextField.Label>Gift Card Number</TextField.Label>
-          <TextField.Input
+          <Label>Gift Card Number</Label>
+          <Input
             placeholder="Enter 16-digit gift card number"
             keyboardType="number-pad"
             maxLength={16}
@@ -191,11 +185,8 @@ const TextFieldWithCustomStylesContent = () => {
             style={{
               borderColor: isDark ? "#fafafa" : "#09090b",
             }}
-            animation="disabled"
           />
-          <TextField.Description>
-            Redeem your gift card at checkout
-          </TextField.Description>
+          <Description>Redeem your gift card at checkout</Description>
         </TextField>
       </KeyboardAvoidingContainer>
     </View>

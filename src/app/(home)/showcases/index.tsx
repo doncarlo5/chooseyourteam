@@ -5,9 +5,10 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { withUniwind } from "uniwind";
 import { Carousel } from "../../../components/showcase-carousel";
+import type { ShowcaseItemData } from "../../../components/showcases/showcase-item";
 
 const StyledIonicons = withUniwind(Ionicons);
-const data = [
+const data: ShowcaseItemData[] = [
   {
     imageLight:
       "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/images/heroui-native-example/raycast-showcase-light.png",
@@ -36,7 +37,7 @@ const data = [
       { name: "Popover", href: "/components/popover" },
       { name: "Avatar", href: "/components/avatar" },
       { name: "Button", href: "/components/button" },
-      { name: "Divider", href: "/components/divider" },
+      { name: "Separator", href: "/components/divider" },
     ],
   },
   {
@@ -53,7 +54,7 @@ const data = [
       { name: "Card", href: "/components/card" },
       { name: "Chip", href: "/components/chip" },
       { name: "RadioGroup", href: "/components/radio-group" },
-      { name: "FormField", href: "/components/form-field" },
+      { name: "ControlField", href: "/components/form-field" },
       { name: "Checkbox", href: "/components/checkbox" },
       { name: "Button", href: "/components/button" },
       { name: "Avatar", href: "/components/avatar" },
@@ -70,7 +71,7 @@ const data = [
     href: "/showcases/paywall",
     components: [
       { name: "Switch", href: "/components/switch" },
-      { name: "FormField", href: "/components/form-field" },
+      { name: "ControlField", href: "/components/form-field" },
       { name: "RadioGroup", href: "/components/radio-group" },
       { name: "Button", href: "/components/button" },
     ],
@@ -86,7 +87,7 @@ const data = [
     components: [
       { name: "Button", href: "/components/button" },
       { name: "Card", href: "/components/card" },
-      { name: "Divider", href: "/components/divider" },
+      { name: "Separator", href: "/components/divider" },
     ],
   },
 ];

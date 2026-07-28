@@ -1,16 +1,17 @@
-/* eslint-disable react-native/no-inline-styles */
 import { Ionicons } from "@expo/vector-icons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Entypo from "@expo/vector-icons/Entypo";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { useHeaderHeight } from "@react-navigation/elements";
+import { useHeaderHeight } from "expo-router/react-navigation";
 import {
   Accordion,
   cn,
-  Divider,
-  FormField,
+  Separator,
+  ControlField,
   useAccordion,
   useAccordionItem,
+  Label,
+  Description,
 } from "heroui-native";
 import { createContext, use, useState, type FC } from "react";
 import { StyleSheet, View } from "react-native";
@@ -260,7 +261,7 @@ const AccordionItemContent: FC<AccordionItemProps> = ({ item, index }) => {
           entering={FadeIn.duration(200)}
           className={cn("px-3 bg-surface", depth && "pb-3 -mb-3")}
         >
-          <Divider />
+          <Separator />
         </StyledAnimatedView>
       )}
     </Animated.View>
@@ -291,7 +292,7 @@ export const AccordionWithDepthEffect: FC = () => {
             },
           }}
           defaultValue="2"
-          isDividerVisible={false}
+          hideSeparator
           className="w-full overflow-visible"
         >
           {accordionData.map((item, index) => (
@@ -305,20 +306,18 @@ export const AccordionWithDepthEffect: FC = () => {
           ))}
         </Accordion>
         <View>
-          <FormField
+          <ControlField
             isSelected={depth}
             onSelectedChange={setDepth}
             className="pr-2"
           >
             <View className="flex-1">
-              <FormField.Label>Depth</FormField.Label>
-              <FormField.Description>
-                Enable depth effect for the accordion
-              </FormField.Description>
+              <Label>Depth</Label>
+              <Description>Enable depth effect for the accordion</Description>
             </View>
-            <FormField.Indicator />
-          </FormField>
-          <Divider className="mt-6" />
+            <ControlField.Indicator />
+          </ControlField>
+          <Separator className="mt-6" />
         </View>
       </View>
     </SettingsContext>

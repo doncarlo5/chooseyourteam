@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Button, Card, PressableFeedback } from "heroui-native";
@@ -11,17 +10,14 @@ import { simulatePress } from "../../../helpers/utils/simulate-press";
 const BackgroundImageCardContent = () => {
   return (
     <View className="flex-1 items-center justify-center px-5">
-      <PressableFeedback
-        feedbackVariant="ripple"
-        className="w-full aspect-square rounded-3xl"
-        animation={{
-          ripple: {
+      <PressableFeedback className="w-full aspect-square rounded-3xl">
+        <PressableFeedback.Ripple
+          animation={{
             backgroundColor: { value: "white" },
             opacity: { value: [0, 0.3, 0] },
             progress: { baseDuration: 600 },
-          },
-        }}
-      >
+          }}
+        />
         <Card className="flex-1">
           <Image
             source={{
@@ -76,16 +72,13 @@ const CardWithImageContent = () => {
   return (
     <View className="flex-1 items-center justify-center px-5">
       <View className="flex-row gap-4">
-        <PressableFeedback
-          feedbackVariant="ripple"
-          className="flex-1 aspect-[1/1.3] rounded-3xl"
-          animation={{
-            ripple: {
+        <PressableFeedback className="flex-1 aspect-[1/1.3] rounded-3xl">
+          <PressableFeedback.Ripple
+            animation={{
               backgroundColor: { value: "#fecdd3" },
               opacity: { value: [0, 0.2, 0] },
-            },
-          }}
-        >
+            }}
+          />
           <Card className="flex-1">
             <View className="flex-1 gap-4">
               <Card.Header>
@@ -115,15 +108,12 @@ const CardWithImageContent = () => {
             </View>
           </Card>
         </PressableFeedback>
-        <PressableFeedback
-          feedbackVariant="ripple"
-          className="flex-1 aspect-[1/1.3] rounded-3xl"
-          animation={{
-            ripple: {
+        <PressableFeedback className="flex-1 aspect-[1/1.3] rounded-3xl">
+          <PressableFeedback.Ripple
+            animation={{
               backgroundColor: { value: "#67e8f9" },
-            },
-          }}
-        >
+            }}
+          />
           <Card className="flex-1">
             <View className="flex-1 gap-4">
               <Card.Header>

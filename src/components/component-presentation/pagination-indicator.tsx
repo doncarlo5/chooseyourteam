@@ -32,12 +32,12 @@ export function PaginationIndicator(props: {
           props.index + 2,
         ],
         [0.2, 0.5, 1, 0.5, 0.2],
-        Extrapolation.CLAMP
+        Extrapolation.CLAMP,
       ),
       backgroundColor: interpolateColor(
         props.scrollX.get() / props.itemSize,
         [props.index - 1, props.index, props.index + 1],
-        [DOT_INACTIVE_COLOR, DOT_ACTIVE_COLOR, DOT_INACTIVE_COLOR]
+        [DOT_INACTIVE_COLOR, DOT_ACTIVE_COLOR, DOT_INACTIVE_COLOR],
       ),
       transform: [
         {
@@ -51,7 +51,7 @@ export function PaginationIndicator(props: {
               props.index + 2,
             ],
             [1, 1.15, DOT_ACTIVE_SCALE, 1.15, 1],
-            Extrapolation.CLAMP
+            Extrapolation.CLAMP,
           ),
         },
       ],

@@ -374,7 +374,7 @@ const FromNativeModalContent = () => {
     <View className="flex-1 items-center justify-center px-5 gap-5">
       <Button
         variant="secondary"
-        onPress={() => router.push("components/toast-native-modal")}
+        onPress={() => router.push("/components/toast-native-modal")}
       >
         Open modal
       </Button>

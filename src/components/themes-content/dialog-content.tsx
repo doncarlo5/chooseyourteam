@@ -43,10 +43,11 @@ export const DialogContent = () => {
             >
               Delete Account
             </Button>
-            <Dialog.Close asChild>
-              <Button variant="tertiary" className="bg-overlay-foreground/5">
-                Cancel
-              </Button>
+            <Dialog.Close
+              variant="tertiary"
+              className="bg-overlay-foreground/5"
+            >
+              Cancel
             </Dialog.Close>
           </View>
         </Dialog.Content>

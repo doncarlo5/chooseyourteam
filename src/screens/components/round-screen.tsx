@@ -16,7 +16,7 @@ const startSkeletonPulse = (progress: SharedValue<number>) => {
   progress.value = withRepeat(
     withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.quad) }),
     -1,
-    true
+    true,
   );
 };
 
@@ -62,7 +62,7 @@ export default function RoundScreen(props: {
             <>
               <AppText
                 className={cn(
-                  "text-4xl font-medium text-center leading-none text-black/25"
+                  "text-4xl font-medium text-center leading-none text-black/25",
                 )}
                 style={{ fontFamily: "QuickSand" }}
               >
@@ -70,7 +70,7 @@ export default function RoundScreen(props: {
               </AppText>
               <AppText
                 className={cn(
-                  "text-7xl font-medium text-center leading-none mt-3 text-black/30"
+                  "text-7xl font-medium text-center leading-none mt-3 text-black/30",
                 )}
                 style={{ fontFamily: "QuickSand" }}
               >
@@ -78,7 +78,7 @@ export default function RoundScreen(props: {
               </AppText>
               <AppText
                 className={cn(
-                  "text-4xl font-medium text-center leading-none text-black/25"
+                  "text-4xl font-medium text-center leading-none text-black/25",
                 )}
                 style={{ fontFamily: "QuickSand" }}
               >

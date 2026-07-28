@@ -24,7 +24,7 @@ export const Share: FC<Props> = ({ isOnboardingDone, triggerRef }) => {
   const themeColorForeground = useThemeColor("foreground");
 
   return (
-    <Popover animation={popoverAnimation}>
+    <Popover>
       <Popover.Trigger ref={triggerRef}>
         <Button
           variant="secondary"
@@ -39,7 +39,11 @@ export const Share: FC<Props> = ({ isOnboardingDone, triggerRef }) => {
         </Button>
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Content className={className.popoverContent}>
+        <Popover.Content
+          animation={popoverAnimation}
+          presentation="popover"
+          className={className.popoverContent}
+        >
           <Popover.Arrow
             stroke={themeColorForeground}
             fill={themeColorForeground}

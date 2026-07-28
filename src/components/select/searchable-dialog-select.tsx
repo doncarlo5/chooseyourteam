@@ -7,7 +7,6 @@ import {
   KeyboardAvoidingView,
   KeyboardController,
 } from "react-native-keyboard-controller";
-import { Easing } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppTheme } from "../../contexts/app-theme-context";
 import { AppText } from "../app-text";
@@ -62,16 +61,6 @@ export function SearchableDialogSelect() {
         const country = COUNTRIES.find((c) => c.value === newValue?.value);
         setValue(country);
         setSearchQuery("");
-      }}
-      closeDelay={300}
-      animation={{
-        exiting: {
-          type: "timing",
-          config: {
-            duration: 250,
-            easing: Easing.out(Easing.quad),
-          },
-        },
       }}
     >
       <Select.Trigger asChild>

@@ -10,8 +10,11 @@ type Props = {
 
 export const SelectItem: FC<Props> = ({ data }) => {
   const { value: selectedValue } = useSelect();
+  const selectedOption = Array.isArray(selectedValue)
+    ? selectedValue[0]
+    : selectedValue;
 
-  const isSelected = selectedValue?.value === data.value;
+  const isSelected = selectedOption?.value === data.value;
 
   return (
     <Select.Item

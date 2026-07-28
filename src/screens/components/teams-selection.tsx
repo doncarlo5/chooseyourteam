@@ -15,8 +15,7 @@ const AnimatedAppText = Animated.createAnimatedComponent(AppText);
 
 export default function TeamsSelection(props: {
   selectedTeams: number | null;
-  setSelectedTeams: (teams: number) => void;
-  setTotalPlayers: (players: number) => void;
+  onSelectTeams: (teams: number) => void;
 }) {
   const titleOpacity = useSharedValue(0);
   const titleTranslateY = useSharedValue(12);
@@ -29,14 +28,18 @@ export default function TeamsSelection(props: {
   });
 
   useEffect(() => {
-    titleOpacity.value = withTiming(1, {
-      duration: 2000,
-      easing: Easing.out(Easing.cubic),
-    });
-    titleTranslateY.value = withTiming(0, {
-      duration: 420,
-      easing: Easing.out(Easing.cubic),
-    });
+    titleOpacity.set(
+      withTiming(1, {
+        duration: 2000,
+        easing: Easing.out(Easing.cubic),
+      }),
+    );
+    titleTranslateY.set(
+      withTiming(0, {
+        duration: 420,
+        easing: Easing.out(Easing.cubic),
+      }),
+    );
   }, [titleOpacity, titleTranslateY]);
 
   if (props.selectedTeams) return null;
@@ -59,8 +62,7 @@ export default function TeamsSelection(props: {
                 index={index}
                 isDisabled={false}
                 onPress={() => {
-                  props.setSelectedTeams(count);
-                  props.setTotalPlayers(count);
+                  props.onSelectTeams(count);
                 }}
               />
             );

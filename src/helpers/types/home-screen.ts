@@ -1,3 +1,4 @@
+import type { TeamNumber } from "@/src/domain/team-identity";
 import type { SharedValue } from "react-native-reanimated";
 
 export type TouchRect = {
@@ -24,16 +25,14 @@ export type DotProps = {
   scale: SharedValue<number>;
   shakeX: SharedValue<number>;
   holdProgress: SharedValue<number>;
-  revealColor: string;
+  team?: TeamNumber;
   isRevealed: boolean;
   baseSize: number;
   revealSize: number;
-  label?: string;
 };
 
 export type FrozenDot = {
   x: number;
   y: number;
-  color: string;
-  label?: string;
+  team: TeamNumber;
 };

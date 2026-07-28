@@ -24,7 +24,7 @@ export const Ask: FC<Props> = ({ isOnboardingDone, triggerRef }) => {
   const themeColorForeground = useThemeColor("foreground");
 
   return (
-    <Popover animation={popoverAnimation}>
+    <Popover>
       <Popover.Trigger ref={triggerRef}>
         <Button
           variant="secondary"
@@ -46,6 +46,8 @@ export const Ask: FC<Props> = ({ isOnboardingDone, triggerRef }) => {
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content
+          animation={popoverAnimation}
+          presentation="popover"
           className={cn(className.popoverContent, "w-[240px]")}
           placement="top"
         >

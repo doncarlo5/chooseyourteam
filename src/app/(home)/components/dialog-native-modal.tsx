@@ -25,10 +25,8 @@ export default function DialogNativeModalScreen() {
               </Dialog.Description>
             </View>
             <View className="flex-row justify-end gap-3">
-              <Dialog.Close asChild>
-                <Button variant="ghost" size="sm">
-                  Cancel
-                </Button>
+              <Dialog.Close variant="ghost" size="sm">
+                Cancel
               </Dialog.Close>
               <Button size="sm">Confirm</Button>
             </View>

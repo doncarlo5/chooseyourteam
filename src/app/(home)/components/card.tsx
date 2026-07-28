@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Button, Card, type CardRootProps } from "heroui-native";
@@ -279,7 +278,7 @@ const VariantsContent = () => {
           description="Higher prominence (surface-quaternary). Use for important content."
         />
         <CardItem
-          variant="quaternary"
+          variant="tertiary"
           title="Quaternary"
           description="Highest prominence (surface-quaternary). Use for critical content."
         />

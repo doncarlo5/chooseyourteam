@@ -19,6 +19,7 @@ const WithTitleDescriptionContent = () => {
         <Popover.Portal>
           <Popover.Overlay />
           <Popover.Content
+            presentation="popover"
             width={320}
             placement="top"
             className="gap-3 px-6 py-5"
@@ -94,9 +95,7 @@ const PresentationVariantsContent = () => {
                 sent to your email.
               </Popover.Description>
             </View>
-            <Popover.Close asChild>
-              <Button variant="secondary">Dismiss</Button>
-            </Popover.Close>
+            <Popover.Close variant="secondary">Dismiss</Popover.Close>
           </Popover.Content>
         </Popover.Portal>
       </Popover>
@@ -169,14 +168,12 @@ const PresentationVariantsContent = () => {
                   </View>
                 </View>
               </View>
-              <Popover.Close asChild>
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  className="self-stretch mt-2"
-                >
-                  Cancel
-                </Button>
+              <Popover.Close
+                variant="secondary"
+                size="lg"
+                className="self-stretch mt-2"
+              >
+                Cancel
               </Popover.Close>
             </View>
           </Popover.Content>
@@ -204,7 +201,12 @@ const PlacementPopover = ({
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Overlay />
-        <Popover.Content placement={placement} width={220} className="gap-2">
+        <Popover.Content
+          presentation="popover"
+          placement={placement}
+          width={220}
+          className="gap-2"
+        >
           <View className="flex-row items-center gap-2">
             <View className="size-8 items-center justify-center rounded-full bg-accent/15">
               <StyledIonicons
@@ -258,6 +260,7 @@ const AlignmentPopover = ({ align }: { align: "start" | "center" | "end" }) => {
       <Popover.Portal>
         <Popover.Overlay />
         <Popover.Content
+          presentation="popover"
           placement="top"
           align={align}
           width={200}
@@ -305,7 +308,7 @@ const NativeModalTestContent = () => {
     <View className="flex-1 px-5 items-center justify-center">
       <Button
         variant="secondary"
-        onPress={() => router.push("components/popover-native-modal")}
+        onPress={() => router.push("/components/popover-native-modal")}
       >
         Popover from native modal
       </Button>

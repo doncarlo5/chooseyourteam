@@ -3,30 +3,28 @@ import { DialogBlurBackdrop } from "@/src/components/dialog-blur-backdrop";
 import type { TouchRect } from "@/src/helpers/types/home-screen";
 import { AntDesign } from "@expo/vector-icons";
 import { Button, Dialog, cn } from "heroui-native";
-import { useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useSharedValue, type SharedValue } from "react-native-reanimated";
 import { PlayerCard } from "./player-card";
 
 export default function DialogMorePlayers(props: {
   selectedTeams: number | null;
-  setTotalPlayers: Dispatch<SetStateAction<number>>;
+  onSelectPlayerCount: (playerCount: number) => void;
   plusButtonRectSv: SharedValue<TouchRect>;
-  isRevealed: boolean;
-  isTouching: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const plusButtonRef = useRef<View>(null);
   const blurIntensity = useSharedValue(40);
 
-  if (!props.selectedTeams || props.isRevealed || props.isTouching) return null;
+  if (!props.selectedTeams) return null;
 
   return (
     <Dialog isOpen={isOpen} onOpenChange={setIsOpen}>
       <Button
         size="md"
         className={cn(
-          "border border-white/60 rounded-full size-12 items-center justify-center px-0 overflow-hidden bg-gray-100/40 active:bg-gray-100/80 active:text-white"
+          "border border-white/60 rounded-full size-12 items-center justify-center px-0 overflow-hidden bg-gray-100/40 active:bg-gray-100/80 active:text-white",
         )}
         animation={{
           scale: {
@@ -85,38 +83,33 @@ export default function DialogMorePlayers(props: {
             className="bg-white/15"
           />
 
-          <Dialog.Close asChild>
-            <Button
-              size="md"
-              className={cn(
-                "self-end -mb-2 z-50 border border-white/60 rounded-full size-10 items-center justify-center px-0 overflow-hidden bg-gray-100/40 active:bg-gray-100/80 active:text-white"
-              )}
-              animation={{
-                scale: {
-                  value: 1.03,
-                  timingConfig: { duration: 170 },
-                },
-                highlight: {
-                  backgroundColor: { value: "transparent" },
-                  opacity: { value: [0, 0] },
-                },
-              }}
-              isIconOnly
-            >
-              <AnimatedBlurView
-                blurIntensity={blurIntensity}
-                tint="light"
-                style={StyleSheet.absoluteFill}
-              />
-              <View
-                pointerEvents="none"
-                style={StyleSheet.absoluteFill}
-                className="bg-white/15"
-              />
-              <Button.Label className="">
-                <AntDesign name="close" size={20} color="rgba(0,0,0,0.8)" />
-              </Button.Label>
-            </Button>
+          <Dialog.Close
+            size="md"
+            className={cn(
+              "self-end -mb-2 z-50 border border-white/60 rounded-full size-10 items-center justify-center px-0 overflow-hidden bg-gray-100/40 active:bg-gray-100/80 active:text-white",
+            )}
+            animation={{
+              scale: {
+                value: 1.03,
+                timingConfig: { duration: 170 },
+              },
+              highlight: {
+                backgroundColor: { value: "transparent" },
+                opacity: { value: [0, 0] },
+              },
+            }}
+          >
+            <AnimatedBlurView
+              blurIntensity={blurIntensity}
+              tint="light"
+              style={StyleSheet.absoluteFill}
+            />
+            <View
+              pointerEvents="none"
+              style={StyleSheet.absoluteFill}
+              className="bg-white/15"
+            />
+            <AntDesign name="close" size={20} color="rgba(0,0,0,0.8)" />
           </Dialog.Close>
           <View className="mb-4 gap-1">
             <Dialog.Title>Pick a number</Dialog.Title>
@@ -131,11 +124,11 @@ export default function DialogMorePlayers(props: {
                   isDisabled={false}
                   label="players"
                   onPress={() => {
-                    props.setTotalPlayers(value);
+                    props.onSelectPlayerCount(value);
                     setIsOpen(false);
                   }}
                 />
-              )
+              ),
             )}
           </View>
         </Dialog.Content>

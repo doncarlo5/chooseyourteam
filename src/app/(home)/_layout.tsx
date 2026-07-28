@@ -83,7 +83,7 @@ export default function Layout() {
         />
         <Stack.Screen
           name="components/divider"
-          options={{ title: "Divider" }}
+          options={{ title: "Separator" }}
         />
         <Stack.Screen
           name="components/error-view"

@@ -1,4 +1,4 @@
-import { useHeaderHeight } from "@react-navigation/elements";
+import { useHeaderHeight } from "expo-router/react-navigation";
 import { useThemeColor } from "heroui-native";
 import React from "react";
 import { Pressable, Text, View } from "react-native";

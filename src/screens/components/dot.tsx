@@ -1,12 +1,11 @@
 import { AppText } from "@/src/components/app-text";
+import { getTeamIdentity } from "@/src/domain/team-identity";
 import type { DotProps } from "@/src/helpers/types/home-screen";
 import {
   Canvas,
   Circle,
   Group,
-  Paint,
   Path,
-  RadialGradient,
   Skia,
   SweepGradient,
   useClock,
@@ -21,22 +20,24 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { TeamResultArtwork } from "./team-result-artwork";
 
 const GLASS_RING = "rgba(255,255,255,0.8)";
 
 export default function Dot(props: DotProps) {
   const progress = useSharedValue(props.isRevealed ? 1 : 0);
   const size = useSharedValue(
-    props.isRevealed ? props.revealSize : props.baseSize
+    props.isRevealed ? props.revealSize : props.baseSize,
   );
+  const identity = props.team ? getTeamIdentity(props.team) : null;
+  const revealColor = identity?.color ?? "#0B0B0B";
 
   useEffect(() => {
-    progress.value = withTiming(props.isRevealed ? 1 : 0, { duration: 200 });
-    size.value = withTiming(
-      props.isRevealed ? props.revealSize : props.baseSize,
-      {
+    progress.set(withTiming(props.isRevealed ? 1 : 0, { duration: 200 }));
+    size.set(
+      withTiming(props.isRevealed ? props.revealSize : props.baseSize, {
         duration: 200,
-      }
+      }),
     );
   }, [props.isRevealed, props.baseSize, props.revealSize, progress, size]);
 
@@ -83,70 +84,26 @@ export default function Dot(props: DotProps) {
       borderColor: interpolateColor(
         progress.value,
         [0, 1],
-        [GLASS_RING, props.revealColor]
+        [GLASS_RING, revealColor],
       ),
       backgroundColor: "transparent",
     };
   });
 
-  const dotStyle = useAnimatedStyle(() => {
-    const currentSize = size.value;
-    const innerSize = currentSize * 0.73;
-
-    return {
-      position: "absolute",
-      left: (currentSize - innerSize) / 2,
-      top: (currentSize - innerSize) / 2,
-      width: innerSize,
-      height: innerSize,
-      borderRadius: innerSize / 2,
-      // IMPORTANT: no solid white fill at the start
-      backgroundColor: interpolateColor(
-        progress.value,
-        [0, 1],
-        ["#FFFFFF", props.revealColor]
-      ),
-    };
-  });
-
   const revealOpacity = useDerivedValue(() => progress.value);
-  const baseRadius = useDerivedValue(() => size.value * 0.365);
   const center = useDerivedValue(() => size.value / 2);
 
   // Make these reactive to the animated size
   const ringThicknessSk = useDerivedValue(() => Math.max(2, size.value * 0.08));
-  const stickerStrokeSk = useDerivedValue(() =>
-    Math.max(1.5, ringThicknessSk.value * 0.35)
-  );
-  const outerStrokeSk = useDerivedValue(
-    () => ringThicknessSk.value + stickerStrokeSk.value
-  );
   const ringRadiusSk = useDerivedValue(
-    () => size.value / 2 - ringThicknessSk.value
+    () => size.value / 2 - ringThicknessSk.value,
   );
   const shimmerRadiusSk = useDerivedValue(
-    () => ringRadiusSk.value - ringThicknessSk.value * 0.45
+    () => ringRadiusSk.value - ringThicknessSk.value * 0.45,
   );
   const shimmerStrokeSk = useDerivedValue(() =>
-    Math.max(1, ringThicknessSk.value * 0.99)
+    Math.max(1, ringThicknessSk.value * 0.99),
   );
-
-  const highlightCenter = useDerivedValue(() =>
-    vec(size.value * 0.32, size.value * 0.24)
-  );
-  const highlightRadius = useDerivedValue(() => size.value * 0.55);
-
-  const shadowCenter = useDerivedValue(() =>
-    vec(size.value * 0.72, size.value * 0.78)
-  );
-  const shadowRadius = useDerivedValue(() => size.value * 0.7);
-
-  // Glass rim (stroke)
-  const rimWidth = useDerivedValue(() => Math.max(1.5, size.value * 0.055));
-  const rimRadius = useDerivedValue(
-    () => baseRadius.value - rimWidth.value / 2
-  );
-  const rimGradientRadius = useDerivedValue(() => size.value * 0.95);
 
   const shimmerClock = useClock();
   const shimmerOrigin = useDerivedValue(() => vec(center.value, center.value));
@@ -156,16 +113,17 @@ export default function Dot(props: DotProps) {
 
   const unrevealedOpacity = useDerivedValue(() => 1 - progress.value);
   const holdProgress = useDerivedValue(() => props.holdProgress.value);
+  const revealTransform = useDerivedValue(() => [
+    { scale: size.value / props.revealSize },
+  ]);
   const progressPath = useMemo(() => {
-    const path = Skia.Path.Make();
     const sizeValue = props.baseSize;
     const ringThickness = Math.max(2, sizeValue * 0.08);
     const radius = sizeValue / 2 - ringThickness;
-    path.addCircle(sizeValue / 2, sizeValue / 2, radius);
-    return path;
-  }, [props.baseSize]);
 
-  if (!props.isRevealed || !props.label) {
+    return Skia.Path.Circle(sizeValue / 2, sizeValue / 2, radius);
+  }, [props.baseSize]);
+  if (!props.isRevealed || !identity) {
     return (
       <Animated.View collapsable={false} style={containerStyle}>
         <Animated.View style={ringStyle} />
@@ -210,70 +168,14 @@ export default function Dot(props: DotProps) {
 
   return (
     <Animated.View collapsable={false} style={containerStyle}>
-      <Animated.View style={dotStyle} />
-
       <Canvas pointerEvents="none" style={StyleSheet.absoluteFill}>
-        <Group opacity={revealOpacity}>
-          {/* sticker white rim */}
-          <Circle
-            cx={center}
-            cy={center}
-            r={ringRadiusSk}
-            style="stroke"
-            strokeWidth={outerStrokeSk}
-            color="rgba(255,255,255,0.95)"
-          />
-          {/* colored outer fill */}
-          <Circle
-            cx={center}
-            cy={center}
-            r={ringRadiusSk}
-            color={props.revealColor}
-          />
-          {/* colored border */}
-          <Circle
-            cx={center}
-            cy={center}
-            r={ringRadiusSk}
-            style="stroke"
-            strokeWidth={ringThicknessSk}
-            color={props.revealColor}
-          />
-
-          {/* your existing inner shading */}
-          <Circle cx={center} cy={center} r={baseRadius}>
-            <RadialGradient
-              c={shadowCenter}
-              r={shadowRadius}
-              colors={[props.revealColor, "rgba(255,255,255,0)"]}
-            />
-          </Circle>
-
-          <Circle cx={center} cy={center} r={baseRadius}>
-            <RadialGradient
-              c={highlightCenter}
-              r={highlightRadius}
-              colors={["rgba(255,255,255,0.45)", "rgba(255,255,255,0)"]}
-            />
-          </Circle>
-          <Circle cx={center} cy={center} r={rimRadius}>
-            <Paint style="stroke" strokeWidth={rimWidth}>
-              <RadialGradient
-                c={highlightCenter}
-                r={rimGradientRadius}
-                colors={[
-                  "rgba(255,255,255,0.45)",
-                  "rgba(255,255,255,0.10)",
-                  "rgba(255,255,255,0)",
-                ]}
-              />
-            </Paint>
-          </Circle>
+        <Group opacity={revealOpacity} transform={revealTransform}>
+          <TeamResultArtwork size={props.revealSize} team={identity.number} />
         </Group>
       </Canvas>
 
       <AppText className="text-7xl font-extrabold font-mono text-white text-center mt-3">
-        {props.label}
+        {identity.number}
       </AppText>
     </Animated.View>
   );

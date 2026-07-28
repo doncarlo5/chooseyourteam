@@ -25,7 +25,7 @@ export function PaginationIndicator({
         scrollY.get() / itemSize,
         [index - 2, index - 1, index, index + 1, index + 2],
         [0.2, 0.5, 1, 0.5, 0.2],
-        Extrapolation.CLAMP
+        Extrapolation.CLAMP,
       ),
       transform: [
         {
@@ -33,7 +33,7 @@ export function PaginationIndicator({
             scrollY.get() / itemSize,
             [index - 2, index - 1, index, index + 1, index + 2],
             [1, 1.4, 2, 1.4, 1],
-            Extrapolation.CLAMP
+            Extrapolation.CLAMP,
           ),
         },
       ],

@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import {
   Avatar,
   Button,
@@ -8,6 +7,8 @@ import {
   SkeletonGroup,
   Surface,
   type SkeletonAnimation,
+  Label,
+  Radio,
 } from "heroui-native";
 import { useState } from "react";
 import { Image, Text, View } from "react-native";
@@ -35,16 +36,16 @@ const SkeletonControls = ({
         className="flex-row justify-center gap-5"
       >
         <RadioGroup.Item value="shimmer">
-          <RadioGroup.Indicator />
-          <RadioGroup.Label>Shimmer</RadioGroup.Label>
+          <Radio />
+          <Label>Shimmer</Label>
         </RadioGroup.Item>
         <RadioGroup.Item value="pulse">
-          <RadioGroup.Indicator />
-          <RadioGroup.Label>Pulse</RadioGroup.Label>
+          <Radio />
+          <Label>Pulse</Label>
         </RadioGroup.Item>
         <RadioGroup.Item value="none">
-          <RadioGroup.Indicator />
-          <RadioGroup.Label>None</RadioGroup.Label>
+          <Radio />
+          <Label>None</Label>
         </RadioGroup.Item>
       </RadioGroup>
       <Button variant="secondary" onPress={() => setIsLoading(!isLoading)}>

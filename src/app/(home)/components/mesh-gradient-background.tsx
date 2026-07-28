@@ -22,7 +22,7 @@ const makeGrid = (
   width: number,
   height: number,
   cols: number,
-  rows: number
+  rows: number,
 ) => {
   const pts: Point[] = [];
   for (let y = 0; y <= rows; y++) {
@@ -172,7 +172,7 @@ export default function MeshGradientBackground(props: {
         x: p.x - safeOverscan,
         y: p.y - safeOverscan,
       })),
-    [meshWidth, meshHeight, cols, rows, safeOverscan]
+    [meshWidth, meshHeight, cols, rows, safeOverscan],
   );
 
   const indices = useMemo(() => makeIndices(cols, rows), [cols, rows]);
@@ -224,7 +224,7 @@ export default function MeshGradientBackground(props: {
       const n2 = noise2D(
         uvx * fx - t * 0.22 + 9.3,
         uvy * fy + t * 0.28 + 2.1,
-        42.0
+        42.0,
       );
 
       // Keep deformation mostly vertical for smooth drift.
@@ -279,7 +279,7 @@ export default function MeshGradientBackground(props: {
         const raw = noise2D(
           uvx * freqX + t * flowX + seed,
           uvy * freqY - t * flowY + seed * 0.33,
-          seed
+          seed,
         ); // -1..1
         const n = raw * 0.5 + 0.5; // 0..1
 
