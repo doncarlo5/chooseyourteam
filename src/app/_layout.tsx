@@ -20,7 +20,6 @@ import {
 } from "react-native-reanimated";
 import "../../global.css";
 import { AppThemeProvider } from "../contexts/app-theme-context";
-import MeshGradientBackground from "./(home)/components/mesh-gradient-background";
 
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
@@ -56,7 +55,6 @@ function AppContent() {
         }}
       >
         <View style={{ flex: 1, backgroundColor: "transparent" }}>
-          <MeshGradientBackground />
           <Slot />
         </View>
       </HeroUINativeProvider>

@@ -1,26 +1,103 @@
 import { AnimatedBlurView } from "@/src/components/animated-blur-view";
-import { DialogBlurBackdrop } from "@/src/components/dialog-blur-backdrop";
+import { AppText } from "@/src/components/app-text";
 import type { TouchRect } from "@/src/helpers/types/home-screen";
-import { AntDesign } from "@expo/vector-icons";
-import { Button, Dialog, cn } from "heroui-native";
+import {
+  BottomSheet as ExpoBottomSheet,
+  BottomSheetView,
+} from "@expo/ui/community/bottom-sheet";
+import { LinearGradient } from "expo-linear-gradient";
+import { Button, PressableFeedback, cn } from "heroui-native";
 import { useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { useSharedValue, type SharedValue } from "react-native-reanimated";
-import { PlayerCard } from "./player-card";
+import Animated, {
+  Easing,
+  FadeInDown,
+  useSharedValue,
+  type SharedValue,
+} from "react-native-reanimated";
+
+const PLAYER_COUNTS = [6, 7, 8, 9, 10];
+
+function PlayerCountOption(props: {
+  count: number;
+  index: number;
+  isCentered?: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Animated.View
+      entering={FadeInDown.delay(props.index * 60)
+        .duration(360)
+        .easing(Easing.out(Easing.cubic))}
+      className={cn(
+        "rounded-3xl shadow-sm shadow-black/10",
+        props.isCentered ? "w-full" : "min-w-0 flex-1",
+      )}
+    >
+      <PressableFeedback
+        onPress={props.onPress}
+        accessibilityRole="button"
+        accessibilityLabel={`Select ${props.count} players`}
+        className={cn(
+          "h-28 w-full overflow-hidden rounded-3xl border-2 border-white/55 active:opacity-90",
+        )}
+        animation={{
+          scale: {
+            value: 0.96,
+            timingConfig: { duration: 150 },
+          },
+        }}
+      >
+        <LinearGradient
+          colors={["rgba(91, 202, 186, 0.58)", "rgba(246, 187, 91, 0.68)"]}
+          start={{ x: 0, y: 0.35 }}
+          end={{ x: 1, y: 0.65 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <View
+          pointerEvents="none"
+          style={StyleSheet.absoluteFill}
+          className={cn("bg-white/10")}
+        />
+        <View className={cn("flex-1 justify-end px-4 pb-4")}>
+          <AppText
+            className={cn(
+              "text-5xl font-extrabold leading-none text-[#0B0B0B]",
+            )}
+          >
+            {props.count}
+          </AppText>
+          <AppText className={cn("pl-0.5 leading-none text-black/60")}>
+            players
+          </AppText>
+        </View>
+      </PressableFeedback>
+    </Animated.View>
+  );
+}
 
 export default function DialogMorePlayers(props: {
   selectedTeams: number | null;
   onSelectPlayerCount: (playerCount: number) => void;
+  onOpenChange?: (isOpen: boolean) => void;
   plusButtonRectSv: SharedValue<TouchRect>;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const plusButtonRef = useRef<View>(null);
   const blurIntensity = useSharedValue(40);
+  const handleOpenChange = (nextIsOpen: boolean) => {
+    setIsOpen(nextIsOpen);
+    props.onOpenChange?.(nextIsOpen);
+  };
+  const handlePlayerCountSelection = (playerCount: number) => {
+    props.onSelectPlayerCount(playerCount);
+    handleOpenChange(false);
+  };
 
   if (!props.selectedTeams) return null;
 
   return (
-    <Dialog isOpen={isOpen} onOpenChange={setIsOpen}>
+    <>
       <Button
         size="md"
         className={cn(
@@ -28,7 +105,7 @@ export default function DialogMorePlayers(props: {
         )}
         animation={{
           scale: {
-            value: 1.03,
+            value: 0.96,
             timingConfig: { duration: 170 },
           },
           highlight: {
@@ -52,7 +129,7 @@ export default function DialogMorePlayers(props: {
         }}
         ref={plusButtonRef}
         onPress={() => {
-          setIsOpen(true);
+          handleOpenChange(true);
         }}
       >
         <AnimatedBlurView
@@ -69,70 +146,61 @@ export default function DialogMorePlayers(props: {
           +5
         </Button.Label>
       </Button>
-      <Dialog.Portal>
-        <DialogBlurBackdrop />
-        <Dialog.Content className="max-w-sm mx-auto border border-white/35 rounded-3xl overflow-hidden bg-white/10">
-          <AnimatedBlurView
-            blurIntensity={blurIntensity}
-            tint="light"
-            style={StyleSheet.absoluteFill}
-          />
-          <View
-            pointerEvents="none"
-            style={StyleSheet.absoluteFill}
-            className="bg-white/15"
-          />
-
-          <Dialog.Close
-            size="md"
-            className={cn(
-              "self-end -mb-2 z-50 border border-white/60 rounded-full size-10 items-center justify-center px-0 overflow-hidden bg-gray-100/40 active:bg-gray-100/80 active:text-white",
-            )}
-            animation={{
-              scale: {
-                value: 1.03,
-                timingConfig: { duration: 170 },
-              },
-              highlight: {
-                backgroundColor: { value: "transparent" },
-                opacity: { value: [0, 0] },
-              },
-            }}
-          >
-            <AnimatedBlurView
-              blurIntensity={blurIntensity}
-              tint="light"
-              style={StyleSheet.absoluteFill}
-            />
-            <View
-              pointerEvents="none"
-              style={StyleSheet.absoluteFill}
-              className="bg-white/15"
-            />
-            <AntDesign name="close" size={20} color="rgba(0,0,0,0.8)" />
-          </Dialog.Close>
-          <View className="mb-4 gap-1">
-            <Dialog.Title>Pick a number</Dialog.Title>
+      <ExpoBottomSheet
+        index={isOpen ? 0 : -1}
+        enablePanDownToClose
+        backgroundStyle={{ backgroundColor: "#F4EDDE" }}
+        onDismiss={() => handleOpenChange(false)}
+      >
+        <BottomSheetView>
+          <View className={cn("px-5 pb-7")}>
+            <AppText
+              accessibilityRole="header"
+              className={cn("text-[#0B0B0B]")}
+              style={{
+                fontFamily: "QuickSand",
+                fontSize: 28,
+                lineHeight: 34,
+                letterSpacing: -0.7,
+              }}
+            >
+              How many players in total?
+            </AppText>
+            <AppText className={cn("mt-1 text-[15px] text-black/55")}>
+              Choose between 6 and 10 players
+            </AppText>
+            <View className={cn("mt-6 gap-3")}>
+              {[PLAYER_COUNTS.slice(0, 2), PLAYER_COUNTS.slice(2, 4)].map(
+                (row, rowIndex) => (
+                  <View key={rowIndex} className={cn("flex-row gap-3")}>
+                    {row.map((value, columnIndex) => {
+                      const index = rowIndex * 2 + columnIndex;
+                      return (
+                        <PlayerCountOption
+                          key={value}
+                          count={value}
+                          index={index}
+                          onPress={() => handlePlayerCountSelection(value)}
+                        />
+                      );
+                    })}
+                  </View>
+                ),
+              )}
+              <View className={cn("flex-row justify-center")}>
+                <View style={{ width: "48%" }}>
+                  <PlayerCountOption
+                    count={10}
+                    index={4}
+                    isCentered
+                    onPress={() => handlePlayerCountSelection(10)}
+                  />
+                </View>
+              </View>
+            </View>
           </View>
-          <View className="flex-row flex-wrap -mx-2">
-            {Array.from({ length: 5 }, (_, index) => index + 6).map(
-              (value, idx) => (
-                <PlayerCard
-                  key={value}
-                  count={value}
-                  index={idx}
-                  isDisabled={false}
-                  label="players"
-                  onPress={() => {
-                    props.onSelectPlayerCount(value);
-                    setIsOpen(false);
-                  }}
-                />
-              ),
-            )}
-          </View>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog>
+        </BottomSheetView>
+      </ExpoBottomSheet>
+    </>
   );
 }

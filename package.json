@@ -1,6 +1,6 @@
 {
   "name": "chooseyourteam",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start -c",
@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.1",
+    "@expo/ui": "~57.0.7",
     "@expo/vector-icons": "^15.0.2",
     "@gorhom/bottom-sheet": "^5.2.6",
     "@react-native-async-storage/async-storage": "2.2.0",

@@ -1,72 +1,84 @@
 import { AppText } from "@/src/components/app-text";
 import { cn } from "heroui-native";
-import { useEffect } from "react";
 import { View } from "react-native";
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { Easing, FadeInDown } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PlayerCard } from "./player-card";
 
 const GROUP_OPTIONS = [2, 3, 4, 5];
-const AnimatedAppText = Animated.createAnimatedComponent(AppText);
 
 export default function TeamsSelection(props: {
   selectedTeams: number | null;
   onSelectTeams: (teams: number) => void;
 }) {
-  const titleOpacity = useSharedValue(0);
-  const titleTranslateY = useSharedValue(12);
-
-  const titleStyle = useAnimatedStyle(() => {
-    return {
-      opacity: titleOpacity.value,
-      transform: [{ translateY: titleTranslateY.value }],
-    };
-  });
-
-  useEffect(() => {
-    titleOpacity.set(
-      withTiming(1, {
-        duration: 2000,
-        easing: Easing.out(Easing.cubic),
-      }),
-    );
-    titleTranslateY.set(
-      withTiming(0, {
-        duration: 420,
-        easing: Easing.out(Easing.cubic),
-      }),
-    );
-  }, [titleOpacity, titleTranslateY]);
+  const insets = useSafeAreaInsets();
 
   if (props.selectedTeams) return null;
 
   return (
-    <View className={cn("flex-1 justify-center px-8 gap-10")}>
-      <AnimatedAppText
-        className="text-4xl font-extralight text-center"
-        style={titleStyle}
+    <View
+      className={cn("flex-1 px-6")}
+      style={{
+        paddingTop: insets.top + 18,
+        paddingBottom: Math.max(insets.bottom, 24),
+      }}
+    >
+      <Animated.View
+        entering={FadeInDown.duration(420).easing(Easing.out(Easing.cubic))}
+        className={cn("items-center")}
       >
-        Choose your team
-      </AnimatedAppText>
-      <View className="w-full">
-        <View className="flex-row flex-wrap -mx-2">
-          {GROUP_OPTIONS.map((count, index) => {
-            return (
-              <PlayerCard
-                key={count}
-                count={count}
-                index={index}
-                isDisabled={false}
-                onPress={() => {
-                  props.onSelectTeams(count);
-                }}
-              />
-            );
-          })}
+        <AppText
+          className={cn("text-center text-black/75")}
+          style={{
+            fontFamily: "QuickSand",
+            fontSize: 19,
+            lineHeight: 24,
+            letterSpacing: -0.35,
+          }}
+        >
+          Choose your team
+        </AppText>
+      </Animated.View>
+
+      <View className={cn("flex-1 justify-center")}>
+        <Animated.View
+          entering={FadeInDown.delay(100)
+            .duration(460)
+            .easing(Easing.out(Easing.cubic))}
+          className={cn("mb-8 px-2")}
+        >
+          <AppText
+            className={cn("text-center text-[#0B0B0B]")}
+            style={{
+              fontFamily: "QuickSand",
+              fontSize: 38,
+              lineHeight: 44,
+              letterSpacing: -1.15,
+            }}
+          >
+            How many teams?
+          </AppText>
+          <AppText className={cn("mt-2 text-center text-base text-black/55")}>
+            Pick a number to get started
+          </AppText>
+        </Animated.View>
+
+        <View className={cn("w-full")}>
+          <View className={cn("flex-row flex-wrap -mx-2")}>
+            {GROUP_OPTIONS.map((count, index) => {
+              return (
+                <PlayerCard
+                  key={count}
+                  count={count}
+                  index={index}
+                  isDisabled={false}
+                  onPress={() => {
+                    props.onSelectTeams(count);
+                  }}
+                />
+              );
+            })}
+          </View>
         </View>
       </View>
     </View>

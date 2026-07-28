@@ -1,13 +1,10 @@
 import { PaginationIndicator } from "@/src/components/component-presentation/pagination-indicator";
-import {
-  planMultiRoundAssignments,
-  type MultiRoundAssignmentPlan,
-} from "@/src/domain/team-allocation";
-import type { FrozenDot, TouchRect } from "@/src/helpers/types/home-screen";
+import MeshGradientBackground from "@/src/app/(home)/components/mesh-gradient-background";
+import type { TouchRect } from "@/src/helpers/types/home-screen";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { cn } from "heroui-native";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { ScrollView, View, useWindowDimensions } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -27,26 +24,16 @@ import FrozenDotsLayer from "./components/frozen-dots-layer";
 import RoundScreen from "./components/round-screen";
 import useSelectedPlayersLayer from "./components/selected-players-layer";
 import TeamsSelection from "./components/teams-selection";
+import { homeGameReducer, initialHomeGameState } from "./state/home-game-state";
 
-export default function Home(props: {}) {
-  void props;
+export default function Home() {
   const { width } = useWindowDimensions();
 
-  const [selectedTeams, setSelectedTeams] = useState<number | null>(null);
-  const [declaredPlayerCount, setDeclaredPlayerCount] = useState<number | null>(
-    null,
+  const [game, dispatchGame] = useReducer(
+    homeGameReducer,
+    initialHomeGameState,
   );
-  const [multiRoundPlan, setMultiRoundPlan] =
-    useState<MultiRoundAssignmentPlan | null>(null);
-  const [currentRound, setCurrentRound] = useState(0);
-  const [roundOneSnapshot, setRoundOneSnapshot] = useState<FrozenDot[]>([]);
-  const [isRoundOneFrozen, setIsRoundOneFrozen] = useState(false);
-  const [roundTwoSnapshot, setRoundTwoSnapshot] = useState<FrozenDot[]>([]);
-  const [isRoundTwoFrozen, setIsRoundTwoFrozen] = useState(false);
-  const [roundResetKey, setRoundResetKey] = useState(0);
-  const [isRoundTwoVisible, setIsRoundTwoVisible] = useState(false);
-  const [isRoundScrolling, setIsRoundScrolling] = useState(false);
-  const [hasShownSwipeHint, setHasShownSwipeHint] = useState(false);
+  const [isMorePlayersDialogOpen, setIsMorePlayersDialogOpen] = useState(false);
 
   const toggleRectSv = useSharedValue<TouchRect>({
     x: 0,
@@ -68,7 +55,10 @@ export default function Home(props: {}) {
     roundScrollX.value = event.contentOffset.x;
     if (isMultiRound) {
       const isSecond = event.contentOffset.x >= width * 0.5;
-      scheduleOnRN(setIsRoundTwoVisible, isSecond);
+      scheduleOnRN(dispatchGame, {
+        type: "roundVisibilityChanged",
+        isRoundTwoVisible: isSecond,
+      });
     }
   });
   const arrowBounce = useSharedValue(0);
@@ -118,95 +108,73 @@ export default function Home(props: {}) {
       opacity: roundFade,
     };
   });
-  const selectedTeamCount = selectedTeams ?? 0;
-  const isMultiRound = declaredPlayerCount !== null;
+  const selectedTeamCount = game.selectedTeams ?? 0;
+  const isMultiRound = game.declaredPlayerCount !== null;
   const firstRoundCount = isMultiRound ? 5 : selectedTeamCount;
-  const secondRoundCount = declaredPlayerCount
-    ? declaredPlayerCount - firstRoundCount
+  const secondRoundCount = game.declaredPlayerCount
+    ? game.declaredPlayerCount - firstRoundCount
     : 0;
   const requiredTouchCount = isMultiRound
-    ? currentRound === 0
+    ? game.currentRound === 0
       ? firstRoundCount
       : secondRoundCount
     : selectedTeamCount;
   const canTouch = !isMultiRound
-    ? !isRoundOneFrozen
-    : currentRound === 0
-      ? !isRoundOneFrozen
-      : !isRoundTwoFrozen;
-  const touchEnabled = canTouch && !isRoundScrolling;
+    ? !game.isRoundOneFrozen
+    : game.currentRound === 0
+      ? !game.isRoundOneFrozen
+      : !game.isRoundTwoFrozen;
+  const touchEnabled =
+    canTouch && !game.isRoundScrolling && !isMorePlayersDialogOpen;
   const resetAllocationSession = () => {
-    setCurrentRound(0);
-    setRoundOneSnapshot([]);
-    setIsRoundOneFrozen(false);
-    setRoundTwoSnapshot([]);
-    setIsRoundTwoFrozen(false);
-    setRoundResetKey((previous) => previous + 1);
-    setIsRoundTwoVisible(false);
-    setIsRoundScrolling(false);
-    setHasShownSwipeHint(false);
     roundScrollX.set(0);
     roundScrollRef.current?.scrollTo({ x: 0, animated: false });
   };
   const handleTeamSelection = (teamCount: number) => {
-    setSelectedTeams(teamCount);
-    setDeclaredPlayerCount(null);
-    setMultiRoundPlan(null);
+    dispatchGame({ type: "selectTeams", teamCount });
     resetAllocationSession();
   };
   const handleDeclaredPlayerCountSelection = (playerCount: number) => {
-    if (!selectedTeams) {
+    if (!game.selectedTeams) {
       return;
     }
-    const nextPlan = planMultiRoundAssignments(selectedTeams, playerCount);
-    setDeclaredPlayerCount(playerCount);
-    setMultiRoundPlan(nextPlan);
+    dispatchGame({ type: "selectPlayerCount", playerCount });
     resetAllocationSession();
   };
   const handleBack = () => {
-    setSelectedTeams(null);
-    setDeclaredPlayerCount(null);
-    setMultiRoundPlan(null);
+    dispatchGame({ type: "backToTeamSelection" });
     resetAllocationSession();
   };
   const { touchGesture, overlay, backButton, isTouching, touchCount } =
     useSelectedPlayersLayer({
-      selectedTeams,
+      selectedTeams: game.selectedTeams,
       toggleRectSv,
       plusButtonRectSv,
       onRevealSnapshot: (dots) => {
         if (!isMultiRound) {
-          setRoundOneSnapshot(dots);
-          setIsRoundOneFrozen(true);
+          dispatchGame({ type: "revealRound", round: 0, dots });
           return;
         }
-        if (currentRound === 0 && !isRoundOneFrozen) {
-          setRoundOneSnapshot(dots);
-          setIsRoundOneFrozen(true);
+        if (game.currentRound === 0 && !game.isRoundOneFrozen) {
+          dispatchGame({ type: "revealRound", round: 0, dots });
         }
-        if (currentRound === 1 && !isRoundTwoFrozen) {
-          setRoundTwoSnapshot(dots);
-          setIsRoundTwoFrozen(true);
+        if (game.currentRound === 1 && !game.isRoundTwoFrozen) {
+          dispatchGame({ type: "revealRound", round: 1, dots });
         }
       },
       isTouchEnabled: touchEnabled,
-      isScrollGestureActive: isRoundScrolling,
+      isScrollGestureActive: game.isRoundScrolling,
       expectedTouchCount: requiredTouchCount,
       allowOverExpected: !isMultiRound,
       roundAssignment: isMultiRound
-        ? currentRound === 0
-          ? multiRoundPlan?.roundOne
-          : multiRoundPlan?.roundTwo
+        ? game.currentRound === 0
+          ? game.multiRoundPlan?.roundOne
+          : game.multiRoundPlan?.roundTwo
         : undefined,
-      resetKey: roundResetKey,
+      resetKey: game.roundResetKey,
       onBack: handleBack,
     });
 
-  useEffect(() => {
-    if (isRoundTwoVisible) {
-      setHasShownSwipeHint(true);
-    }
-  }, [isRoundTwoVisible]);
   useEffect(() => {
     arrowBounce.set(
       withRepeat(
@@ -220,159 +188,170 @@ export default function Home(props: {}) {
     );
   }, [arrowBounce]);
 
-  if (!selectedTeams) {
-    return (
-      <View className={cn("flex-1")} style={{ backgroundColor: "transparent" }}>
-        <TeamsSelection
-          selectedTeams={selectedTeams}
-          onSelectTeams={handleTeamSelection}
-        />
-        <AppReviewButton />
-
-        <StatusBar style="dark" />
-      </View>
-    );
-  }
-
   const showLiveOverlay = !isMultiRound
-    ? !isRoundOneFrozen || roundOneSnapshot.length === 0
-    : currentRound === 0
-      ? !isRoundOneFrozen || roundOneSnapshot.length === 0
-      : !isRoundTwoFrozen || roundTwoSnapshot.length === 0;
+    ? !game.isRoundOneFrozen || game.roundOneSnapshot.length === 0
+    : game.currentRound === 0
+      ? !game.isRoundOneFrozen || game.roundOneSnapshot.length === 0
+      : !game.isRoundTwoFrozen || game.roundTwoSnapshot.length === 0;
   const hideOverlayDuringSwipe =
-    isMultiRound && currentRound === 0 && isRoundTwoVisible;
+    isMultiRound && game.currentRound === 0 && game.isRoundTwoVisible;
+
   return (
-    <GestureDetector gesture={touchGesture}>
-      <View className={cn("flex-1")} style={{ backgroundColor: "transparent" }}>
-        <View className="absolute top-16 right-6 z-10 items-center gap-2">
-          <DialogMorePlayers
-            selectedTeams={selectedTeams}
-            onSelectPlayerCount={handleDeclaredPlayerCountSelection}
-            plusButtonRectSv={plusButtonRectSv}
+    <View className={cn("flex-1")} style={{ backgroundColor: "transparent" }}>
+      <MeshGradientBackground />
+      {!game.selectedTeams ? (
+        <>
+          <TeamsSelection
+            selectedTeams={game.selectedTeams}
+            onSelectTeams={handleTeamSelection}
           />
-        </View>
-        {isMultiRound && (
-          <Animated.ScrollView
-            ref={roundScrollRef}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            scrollEnabled={isRoundOneFrozen && !isTouching}
-            onScroll={roundScrollHandler}
-            scrollEventThrottle={16}
-            onScrollBeginDrag={() => setIsRoundScrolling(true)}
-            onScrollEndDrag={(event) => {
-              if (!event.nativeEvent.velocity?.x) {
-                setIsRoundScrolling(false);
-              }
-            }}
-            onMomentumScrollEnd={(event) => {
-              const nextRound = Math.round(
-                event.nativeEvent.contentOffset.x / width,
-              );
-              if (nextRound !== currentRound) {
-                setRoundResetKey((previous) => previous + 1);
-              }
-              setCurrentRound(nextRound);
-              setIsRoundScrolling(false);
-            }}
-          >
-            <View style={{ width }}>
-              <RoundScreen
-                fingersCount={firstRoundCount}
-                touchCount={touchCount}
-                isActive={currentRound === 0}
-                isFrozen={isRoundOneFrozen}
-                allowOverExpected={false}
-              />
-            </View>
-            <View style={{ width }}>
-              <RoundScreen
-                fingersCount={secondRoundCount}
-                touchCount={touchCount}
-                isActive={currentRound === 1}
-                isFrozen={isRoundTwoFrozen}
-                allowOverExpected={false}
-              />
-            </View>
-          </Animated.ScrollView>
-        )}
-        {!isMultiRound ? (
-          <View className="absolute inset-0" pointerEvents="none">
-            <RoundScreen
-              fingersCount={selectedTeamCount}
-              touchCount={touchCount}
-              isActive={true}
-              isFrozen={isRoundOneFrozen}
-              allowOverExpected={true}
-            />
-          </View>
-        ) : null}
-        {isMultiRound && (
+          <AppReviewButton />
+        </>
+      ) : (
+        <GestureDetector gesture={touchGesture}>
           <View
-            className="absolute left-0 right-0 items-center"
-            style={{ bottom: 40 }}
+            className={cn("flex-1")}
+            style={{ backgroundColor: "transparent" }}
           >
-            <View className="flex-row items-center gap-2">
-              {Array.from({ length: 2 }, (_, index) => (
-                <PaginationIndicator
-                  key={index}
-                  index={index}
-                  scrollX={roundScrollX}
-                  itemSize={width}
-                />
-              ))}
-            </View>
-          </View>
-        )}
-        {isMultiRound && isRoundOneFrozen ? (
-          <Animated.View
-            className="absolute inset-0"
-            style={roundOneFrozenStyle}
-            pointerEvents="none"
-          >
-            <FrozenDotsLayer dots={roundOneSnapshot} />
-          </Animated.View>
-        ) : null}
-        {!isMultiRound && isRoundOneFrozen ? (
-          <View className="absolute inset-0" pointerEvents="none">
-            <FrozenDotsLayer dots={roundOneSnapshot} />
-          </View>
-        ) : null}
-        {isMultiRound && isRoundTwoFrozen ? (
-          <Animated.View
-            className="absolute inset-0"
-            style={roundTwoFrozenStyle}
-            pointerEvents="none"
-          >
-            <FrozenDotsLayer dots={roundTwoSnapshot} />
-          </Animated.View>
-        ) : null}
-        {isMultiRound &&
-        currentRound === 0 &&
-        isRoundOneFrozen &&
-        !hasShownSwipeHint ? (
-          <View className="absolute right-8 inset-y-0 items-center justify-center">
-            <Animated.View style={arrowStyle}>
-              <Ionicons
-                name="chevron-forward-outline"
-                size={34}
-                color="#0B0B0B"
+            <View className="absolute top-16 right-6 z-10 items-center gap-2">
+              <DialogMorePlayers
+                selectedTeams={game.selectedTeams}
+                onSelectPlayerCount={handleDeclaredPlayerCountSelection}
+                onOpenChange={setIsMorePlayersDialogOpen}
+                plusButtonRectSv={plusButtonRectSv}
               />
-            </Animated.View>
+            </View>
+            {isMultiRound && (
+              <Animated.ScrollView
+                ref={roundScrollRef}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                scrollEnabled={game.isRoundOneFrozen && !isTouching}
+                onScroll={roundScrollHandler}
+                scrollEventThrottle={16}
+                onScrollBeginDrag={() =>
+                  dispatchGame({ type: "roundScrollStarted" })
+                }
+                onScrollEndDrag={(event) => {
+                  if (!event.nativeEvent.velocity?.x) {
+                    dispatchGame({ type: "roundScrollDragEnded" });
+                  }
+                }}
+                onMomentumScrollEnd={(event) => {
+                  const nextRound = Math.round(
+                    event.nativeEvent.contentOffset.x / width,
+                  );
+                  dispatchGame({
+                    type: "roundScrollFinished",
+                    round: nextRound,
+                  });
+                }}
+              >
+                <View style={{ width }}>
+                  <RoundScreen
+                    fingersCount={firstRoundCount}
+                    touchCount={touchCount}
+                    isActive={game.currentRound === 0}
+                    isFrozen={game.isRoundOneFrozen}
+                    allowOverExpected={false}
+                  />
+                </View>
+                <View style={{ width }}>
+                  <RoundScreen
+                    fingersCount={secondRoundCount}
+                    touchCount={touchCount}
+                    isActive={game.currentRound === 1}
+                    isFrozen={game.isRoundTwoFrozen}
+                    allowOverExpected={false}
+                  />
+                </View>
+              </Animated.ScrollView>
+            )}
+            {!isMultiRound ? (
+              <View className="absolute inset-0" pointerEvents="none">
+                <RoundScreen
+                  fingersCount={selectedTeamCount}
+                  touchCount={touchCount}
+                  isActive={true}
+                  isFrozen={game.isRoundOneFrozen}
+                  allowOverExpected={true}
+                />
+              </View>
+            ) : null}
+            {isMultiRound && (
+              <View
+                className="absolute left-0 right-0 items-center"
+                style={{ bottom: 40 }}
+              >
+                <View className="flex-row items-center gap-2">
+                  {Array.from({ length: 2 }, (_, index) => (
+                    <PaginationIndicator
+                      key={index}
+                      index={index}
+                      scrollX={roundScrollX}
+                      itemSize={width}
+                    />
+                  ))}
+                </View>
+              </View>
+            )}
+            {isMultiRound && game.isRoundOneFrozen ? (
+              <Animated.View
+                className="absolute inset-0"
+                style={roundOneFrozenStyle}
+                pointerEvents="none"
+              >
+                <FrozenDotsLayer dots={game.roundOneSnapshot} />
+              </Animated.View>
+            ) : null}
+            {!isMultiRound && game.isRoundOneFrozen ? (
+              <View className="absolute inset-0" pointerEvents="none">
+                <FrozenDotsLayer dots={game.roundOneSnapshot} />
+              </View>
+            ) : null}
+            {isMultiRound && game.isRoundTwoFrozen ? (
+              <Animated.View
+                className="absolute inset-0"
+                style={roundTwoFrozenStyle}
+                pointerEvents="none"
+              >
+                <FrozenDotsLayer dots={game.roundTwoSnapshot} />
+              </Animated.View>
+            ) : null}
+            {isMultiRound &&
+            game.currentRound === 0 &&
+            game.isRoundOneFrozen &&
+            !game.hasShownSwipeHint ? (
+              <View className="absolute right-8 inset-y-0 items-center justify-center">
+                <Animated.View style={arrowStyle}>
+                  <Ionicons
+                    name="chevron-forward-outline"
+                    size={34}
+                    color="#0B0B0B"
+                  />
+                </Animated.View>
+              </View>
+            ) : null}
+            {isMultiRound &&
+            game.currentRound === 1 &&
+            game.isRoundTwoFrozen ? (
+              <View className="absolute left-8 inset-y-0 items-center justify-center">
+                <Animated.View style={arrowLeftStyle}>
+                  <Ionicons
+                    name="chevron-back-outline"
+                    size={34}
+                    color="#0B0B0B"
+                  />
+                </Animated.View>
+              </View>
+            ) : null}
+            {showLiveOverlay && !hideOverlayDuringSwipe ? overlay : null}
+            {backButton}
           </View>
-        ) : null}
-        {isMultiRound && currentRound === 1 && isRoundTwoFrozen ? (
-          <View className="absolute left-8 inset-y-0 items-center justify-center">
-            <Animated.View style={arrowLeftStyle}>
-              <Ionicons name="chevron-back-outline" size={34} color="#0B0B0B" />
-            </Animated.View>
-          </View>
-        ) : null}
-        {showLiveOverlay && !hideOverlayDuringSwipe ? overlay : null}
-        {backButton}
-        <StatusBar style="dark" />
-      </View>
-    </GestureDetector>
+        </GestureDetector>
+      )}
+      <StatusBar style="dark" />
+    </View>
   );
 }
