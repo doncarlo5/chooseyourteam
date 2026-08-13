@@ -233,6 +233,9 @@ export default function useSelectedPlayersLayer(props: {
     Boolean(props.selectedTeams) &&
     (props.isTouchEnabled ?? true) &&
     !(props.isScrollGestureActive ?? false);
+  // Keep the native handler attached while Android is still tracking pointers.
+  // Toggling Gesture.enabled mid-stream schedules an unsafe asynchronous cancel.
+  const canAcceptNewTouches = useSharedValue(isGestureEnabled);
 
   const assignTeams = (touchList: TouchPoint[]) => {
     const assignments: Record<string, TeamNumber> = {};
@@ -671,10 +674,17 @@ export default function useSelectedPlayersLayer(props: {
     }
   }, [props.isScrollGestureActive]);
 
+  useEffect(() => {
+    canAcceptNewTouches.value = isGestureEnabled;
+  }, [canAcceptNewTouches, isGestureEnabled]);
+
   const touchGesture = Gesture.Manual()
-    .enabled(isGestureEnabled)
     .onTouchesDown((event) => {
       "worklet";
+
+      if (!canAcceptNewTouches.value) {
+        return;
+      }
 
       for (const touch of event.changedTouches) {
         const x = touch.absoluteX;
