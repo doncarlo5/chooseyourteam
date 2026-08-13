@@ -154,21 +154,6 @@ export default function DialogMorePlayers(props: {
       >
         <BottomSheetView>
           <View className={cn("px-5 pb-7")}>
-            <AppText
-              accessibilityRole="header"
-              className={cn("text-[#0B0B0B]")}
-              style={{
-                fontFamily: "QuickSand",
-                fontSize: 28,
-                lineHeight: 34,
-                letterSpacing: -0.7,
-              }}
-            >
-              How many players in total?
-            </AppText>
-            <AppText className={cn("mt-1 text-[15px] text-black/55")}>
-              Choose between 6 and 10 players
-            </AppText>
             <View className={cn("mt-6 gap-3")}>
               {[PLAYER_COUNTS.slice(0, 2), PLAYER_COUNTS.slice(2, 4)].map(
                 (row, rowIndex) => (
