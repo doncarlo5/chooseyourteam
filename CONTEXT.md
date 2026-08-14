@@ -9,6 +9,8 @@
 - **Session**: one allocation run, reset by team/count changes or Back.
 - **Fair Allocation**: team sizes differ by at most one per round and overall.
 - **Declared Player Count**: the exact 6–10-player total used for two rounds.
+- **Inséparable**: a hidden, session-only setup mode that forces the second and
+  third players onto the same team.
 
 Team identity is canonical for the lifetime of the app:
 
@@ -23,3 +25,6 @@ minimum held-touch count, and the allocation may grow to the 12-touch slot
 limit. Multi-round sessions use an exact declared count of 6–10 players,
 split into a five-player first round and a second round containing the
 remainder.
+
+Long-pressing the setup heading toggles Inséparable before a team count is
+selected. The mode applies to the current session only and is cleared by Back.

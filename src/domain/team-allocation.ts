@@ -13,6 +13,10 @@ export type MultiRoundAssignmentPlan = {
 
 export type RandomSource = () => number;
 
+export type TeamAllocationOptions = {
+  inseparable?: boolean;
+};
+
 const normalizeRandom = (random: RandomSource) => {
   const value = random();
   if (!Number.isFinite(value)) {
@@ -80,10 +84,52 @@ const selectRandom = <T>(values: T[], random: RandomSource): T => {
   return values[index];
 };
 
+const applyAllocationOptions = (
+  assignment: RoundAssignment,
+  options: TeamAllocationOptions,
+): RoundAssignment => {
+  if (!options.inseparable || assignment.length < 3) {
+    return assignment;
+  }
+
+  const result = [...assignment];
+  const counts = new Map<TeamNumber, number>();
+  result.forEach((teamNumber) => {
+    counts.set(teamNumber, (counts.get(teamNumber) ?? 0) + 1);
+  });
+  const pairTeam =
+    [result[1], result[2]].find(
+      (teamNumber) => (counts.get(teamNumber) ?? 0) >= 2,
+    ) ?? result.find((teamNumber) => (counts.get(teamNumber) ?? 0) >= 2);
+
+  if (!pairTeam) {
+    result[2] = result[1];
+    return result;
+  }
+
+  [1, 2].forEach((targetIndex) => {
+    if (result[targetIndex] === pairTeam) {
+      return;
+    }
+
+    const sourceIndex = result.findIndex(
+      (teamNumber, index) =>
+        teamNumber === pairTeam && index !== 1 && index !== 2,
+    );
+    [result[targetIndex], result[sourceIndex]] = [
+      result[sourceIndex],
+      result[targetIndex],
+    ];
+  });
+
+  return result;
+};
+
 export const planBalancedRoundAssignment = (
   teamCount: number,
   playerCount: number,
   random: RandomSource = Math.random,
+  options: TeamAllocationOptions = {},
 ): RoundAssignment => {
   if (
     !Number.isInteger(playerCount) ||
@@ -101,13 +147,17 @@ export const planBalancedRoundAssignment = (
     random,
   );
 
-  return shuffle(expandCounts(counts, teamNumbers), random);
+  return applyAllocationOptions(
+    shuffle(expandCounts(counts, teamNumbers), random),
+    options,
+  );
 };
 
 export const planMultiRoundAssignments = (
   teamCount: number,
   declaredPlayerCount: number,
   random: RandomSource = Math.random,
+  options: TeamAllocationOptions = {},
 ): MultiRoundAssignmentPlan => {
   if (
     !Number.isInteger(declaredPlayerCount) ||
@@ -135,7 +185,10 @@ export const planMultiRoundAssignments = (
   const selectedPair = selectRandom(validPairs, random);
 
   return {
-    roundOne: shuffle(expandCounts(selectedPair.roundOne, teamNumbers), random),
+    roundOne: applyAllocationOptions(
+      shuffle(expandCounts(selectedPair.roundOne, teamNumbers), random),
+      options,
+    ),
     roundTwo: shuffle(expandCounts(selectedPair.roundTwo, teamNumbers), random),
   };
 };

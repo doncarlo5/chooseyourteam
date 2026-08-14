@@ -2,6 +2,7 @@ import { PaginationIndicator } from "@/src/components/component-presentation/pag
 import MeshGradientBackground from "@/src/app/(home)/components/mesh-gradient-background";
 import type { TouchRect } from "@/src/helpers/types/home-screen";
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { StatusBar } from "expo-status-bar";
 import { cn } from "heroui-native";
 import { useEffect, useReducer, useRef, useState } from "react";
@@ -134,6 +135,14 @@ export default function Home() {
     dispatchGame({ type: "selectTeams", teamCount });
     resetAllocationSession();
   };
+  const handleToggleInseparable = () => {
+    dispatchGame({ type: "toggleInseparable" });
+    void Haptics.notificationAsync(
+      game.isInseparableEnabled
+        ? Haptics.NotificationFeedbackType.Warning
+        : Haptics.NotificationFeedbackType.Success,
+    );
+  };
   const handleDeclaredPlayerCountSelection = (playerCount: number) => {
     if (!game.selectedTeams) {
       return;
@@ -171,6 +180,7 @@ export default function Home() {
           ? game.multiRoundPlan?.roundOne
           : game.multiRoundPlan?.roundTwo
         : undefined,
+      isInseparableEnabled: game.isInseparableEnabled,
       resetKey: game.roundResetKey,
       onBack: handleBack,
     });
@@ -204,6 +214,7 @@ export default function Home() {
           <TeamsSelection
             selectedTeams={game.selectedTeams}
             onSelectTeams={handleTeamSelection}
+            onToggleInseparable={handleToggleInseparable}
           />
           <AppReviewButton />
         </>

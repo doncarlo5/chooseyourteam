@@ -1,5 +1,5 @@
 import { AppText } from "@/src/components/app-text";
-import { cn } from "heroui-native";
+import { PressableFeedback, cn } from "heroui-native";
 import { View } from "react-native";
 import Animated, { Easing, FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -10,6 +10,7 @@ const GROUP_OPTIONS = [2, 3, 4, 5];
 export default function TeamsSelection(props: {
   selectedTeams: number | null;
   onSelectTeams: (teams: number) => void;
+  onToggleInseparable: () => void;
 }) {
   const insets = useSafeAreaInsets();
 
@@ -27,17 +28,24 @@ export default function TeamsSelection(props: {
         entering={FadeInDown.duration(420).easing(Easing.out(Easing.cubic))}
         className={cn("items-center")}
       >
-        <AppText
-          className={cn("text-center text-black/75")}
-          style={{
-            fontFamily: "QuickSand",
-            fontSize: 19,
-            lineHeight: 24,
-            letterSpacing: -0.35,
-          }}
+        <PressableFeedback
+          accessible={false}
+          animation={false}
+          delayLongPress={1200}
+          onLongPress={props.onToggleInseparable}
         >
-          Choose your team
-        </AppText>
+          <AppText
+            className={cn("text-center text-black/75")}
+            style={{
+              fontFamily: "QuickSand",
+              fontSize: 19,
+              lineHeight: 24,
+              letterSpacing: -0.35,
+            }}
+          >
+            Choose your team
+          </AppText>
+        </PressableFeedback>
       </Animated.View>
 
       <View className={cn("flex-1 justify-center")}>

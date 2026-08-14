@@ -125,3 +125,58 @@ describe("flexible single-round allocation", () => {
     }
   }
 });
+
+describe("inséparable allocation", () => {
+  for (const teamCount of [2, 3, 4, 5] as const) {
+    for (
+      let playerCount = Math.max(teamCount, 3);
+      playerCount <= MAX_FLEXIBLE_PLAYER_COUNT;
+      playerCount += 1
+    ) {
+      it(`puts flexible players 2 and 3 together with ${teamCount} teams and ${playerCount} players`, () => {
+        const teamNumbers = getSelectedTeamNumbers(teamCount);
+        const assignments = planBalancedRoundAssignment(
+          teamCount,
+          playerCount,
+          deterministicRandom(teamCount * 100 + playerCount),
+          { inseparable: true },
+        );
+
+        expect(assignments[2]).toBe(assignments[1]);
+        if (playerCount > teamCount) {
+          expectBalanced(countAssignments(assignments, teamNumbers));
+        }
+      });
+    }
+
+    for (let playerCount = 6; playerCount <= 10; playerCount += 1) {
+      it(`puts declared players 2 and 3 together with ${teamCount} teams and ${playerCount} players`, () => {
+        const teamNumbers = getSelectedTeamNumbers(teamCount);
+        const plan = planMultiRoundAssignments(
+          teamCount,
+          playerCount,
+          deterministicRandom(teamCount * 100 + playerCount),
+          { inseparable: true },
+        );
+
+        expect(plan.roundOne[2]).toBe(plan.roundOne[1]);
+        expect(plan.roundTwo).toHaveLength(playerCount - 5);
+        if (teamCount < 5) {
+          expectBalanced(countAssignments(plan.roundOne, teamNumbers));
+        }
+      });
+    }
+  }
+
+  it("does not alter the deterministic normal allocation", () => {
+    const normal = planBalancedRoundAssignment(4, 6, deterministicRandom(17));
+    const disabled = planBalancedRoundAssignment(
+      4,
+      6,
+      deterministicRandom(17),
+      { inseparable: false },
+    );
+
+    expect(disabled).toEqual(normal);
+  });
+});

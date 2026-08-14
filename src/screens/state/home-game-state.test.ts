@@ -5,6 +5,44 @@ import { homeGameReducer, initialHomeGameState } from "./home-game-state";
 const frozenDot: FrozenDot = { x: 100, y: 200, team: 1 };
 
 describe("homeGameReducer", () => {
+  it("enables inséparable only during setup and clears it on Back", () => {
+    const enabledState = homeGameReducer(initialHomeGameState, {
+      type: "toggleInseparable",
+    });
+    const teamState = homeGameReducer(enabledState, {
+      type: "selectTeams",
+      teamCount: 3,
+    });
+    const ignoredToggleState = homeGameReducer(teamState, {
+      type: "toggleInseparable",
+    });
+    const resetState = homeGameReducer(ignoredToggleState, {
+      type: "backToTeamSelection",
+    });
+
+    expect(enabledState.isInseparableEnabled).toBe(true);
+    expect(ignoredToggleState).toBe(teamState);
+    expect(resetState.isInseparableEnabled).toBe(false);
+  });
+
+  it("plans the second and third declared players together when enabled", () => {
+    const enabledState = homeGameReducer(initialHomeGameState, {
+      type: "toggleInseparable",
+    });
+    const teamState = homeGameReducer(enabledState, {
+      type: "selectTeams",
+      teamCount: 4,
+    });
+    const state = homeGameReducer(teamState, {
+      type: "selectPlayerCount",
+      playerCount: 8,
+    });
+
+    expect(state.multiRoundPlan?.roundOne[2]).toBe(
+      state.multiRoundPlan?.roundOne[1],
+    );
+  });
+
   it("starts a clean game when a team count is selected", () => {
     const state = homeGameReducer(initialHomeGameState, {
       type: "selectTeams",

@@ -169,6 +169,7 @@ export default function useSelectedPlayersLayer(props: {
   expectedTouchCount?: number;
   allowOverExpected?: boolean;
   roundAssignment?: RoundAssignment;
+  isInseparableEnabled?: boolean;
   resetKey?: number;
 }): {
   touchGesture: ReturnType<typeof Gesture.Manual>;
@@ -246,7 +247,12 @@ export default function useSelectedPlayersLayer(props: {
     const plannedAssignment =
       props.roundAssignment?.length === touchList.length
         ? props.roundAssignment
-        : planBalancedRoundAssignment(props.selectedTeams, touchList.length);
+        : planBalancedRoundAssignment(
+            props.selectedTeams,
+            touchList.length,
+            Math.random,
+            { inseparable: props.isInseparableEnabled },
+          );
 
     touchList.forEach((touch, index) => {
       assignments[touch.id] = plannedAssignment[index];
