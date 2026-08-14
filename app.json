@@ -2,7 +2,7 @@
   "expo": {
     "name": "Choose Your Team",
     "slug": "chooseyourteam",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "orientation": "portrait",
     "scheme": "chooseyourteam",
     "userInterfaceStyle": "automatic",
