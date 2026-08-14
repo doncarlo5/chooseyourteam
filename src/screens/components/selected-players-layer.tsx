@@ -712,6 +712,7 @@ export default function useSelectedPlayersLayer(props: {
               damping: 40,
               stiffness: 5000,
             });
+            scheduleOnRN(H.touchDown);
             scheduleOnRN(playBubble, slot);
           }
         }
