@@ -1,13 +1,16 @@
 import { AnimatedBlurView } from "@/src/components/animated-blur-view";
 import { AppText } from "@/src/components/app-text";
 import type { TouchRect } from "@/src/helpers/types/home-screen";
+import { msg, plural } from "@lingui/core/macro";
+import { Trans } from "@lingui/react";
+import { useLingui } from "@lingui/react/macro";
 import {
   BottomSheet as ExpoBottomSheet,
   BottomSheetView,
 } from "@expo/ui/community/bottom-sheet";
 import { LinearGradient } from "expo-linear-gradient";
 import { Button, PressableFeedback, cn } from "heroui-native";
-import { useRef, useState } from "react";
+import { createElement, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, {
   Easing,
@@ -18,12 +21,46 @@ import Animated, {
 
 const PLAYER_COUNTS = [6, 7, 8, 9, 10];
 
+function PlayerCountLabel(props: { count: number }) {
+  const descriptor = msg({
+    comment:
+      "Visible player count. Keep number and unit placeholders so their separate styles are preserved.",
+    message: plural(props.count, {
+      one: "<number>#</number><unit>player</unit>",
+      other: "<number>#</number><unit>players</unit>",
+    }),
+  });
+
+  return createElement(Trans, {
+    ...descriptor,
+    components: {
+      number: (
+        <AppText
+          className={cn(
+            "text-5xl font-extrabold leading-none text-[#0B0B0B]",
+          )}
+        />
+      ),
+      unit: <AppText className={cn("pl-0.5 leading-none text-black/60")} />,
+    },
+  });
+}
+
 function PlayerCountOption(props: {
   count: number;
   index: number;
   isCentered?: boolean;
   onPress: () => void;
 }) {
+  const { t } = useLingui();
+  const accessibilityLabel = t({
+    comment: "Accessibility label for choosing the total player count",
+    message: plural(props.count, {
+      one: "Select # player",
+      other: "Select # players",
+    }),
+  });
+
   return (
     <Animated.View
       entering={FadeInDown.delay(props.index * 60)
@@ -37,7 +74,7 @@ function PlayerCountOption(props: {
       <PressableFeedback
         onPress={props.onPress}
         accessibilityRole="button"
-        accessibilityLabel={`Select ${props.count} players`}
+        accessibilityLabel={accessibilityLabel}
         className={cn(
           "h-28 w-full overflow-hidden rounded-3xl border-2 border-white/55 active:opacity-90",
         )}
@@ -60,16 +97,7 @@ function PlayerCountOption(props: {
           className={cn("bg-white/10")}
         />
         <View className={cn("flex-1 justify-end px-4 pb-4")}>
-          <AppText
-            className={cn(
-              "text-5xl font-extrabold leading-none text-[#0B0B0B]",
-            )}
-          >
-            {props.count}
-          </AppText>
-          <AppText className={cn("pl-0.5 leading-none text-black/60")}>
-            players
-          </AppText>
+          <PlayerCountLabel count={props.count} />
         </View>
       </PressableFeedback>
     </Animated.View>
@@ -82,6 +110,7 @@ export default function DialogMorePlayers(props: {
   onOpenChange?: (isOpen: boolean) => void;
   plusButtonRectSv: SharedValue<TouchRect>;
 }) {
+  const { t } = useLingui();
   const [isOpen, setIsOpen] = useState(false);
   const plusButtonRef = useRef<View>(null);
   const blurIntensity = useSharedValue(40);
@@ -114,8 +143,8 @@ export default function DialogMorePlayers(props: {
           },
         }}
         accessibilityRole="button"
-        accessibilityLabel="Add more players"
-        accessibilityHint="Opens the player count picker"
+        accessibilityLabel={t`Add more players`}
+        accessibilityHint={t`Opens the player count picker`}
         onLayout={() => {
           plusButtonRef.current?.measureInWindow((x, y, width, height) => {
             props.plusButtonRectSv.value = {

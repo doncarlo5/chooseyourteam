@@ -50,7 +50,16 @@
       "expo-audio",
       "expo-web-browser",
       "expo-asset",
-      "expo-image"
+      "expo-image",
+      [
+        "expo-localization",
+        {
+          "supportedLocales": {
+            "ios": ["en", "fr"],
+            "android": ["en", "fr"]
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

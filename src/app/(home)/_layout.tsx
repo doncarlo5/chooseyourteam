@@ -1,32 +1,54 @@
 import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { Stack } from "expo-router";
 import { useThemeColor, useToast } from "heroui-native";
-import { useEffect } from "react";
+import { useLingui } from "@lingui/react/macro";
+import { useCallback, useEffect, useRef } from "react";
 import { Platform, View } from "react-native";
 import { useReducedMotion } from "react-native-reanimated";
 import { useAppTheme } from "../../contexts/app-theme-context";
 
 export default function Layout() {
+  const { t } = useLingui();
   const { isDark } = useAppTheme();
   const themeColorForeground = useThemeColor("foreground");
   const themeColorBackground = useThemeColor("background");
 
   const reducedMotion = useReducedMotion();
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (reducedMotion) {
-      toast.show({
-        duration: "persistent",
-        variant: "warning",
-        label: "Reduce motion enabled",
-        description: "All animations will be disabled",
-        actionLabel: "Close",
-        onActionPress: ({ hide }) => hide(),
-      });
+  const hasShownReducedMotionToast = useRef(false);
+  const reducedMotionLabel = t`Reduce motion enabled`;
+  const reducedMotionDescription = t`All animations will be disabled`;
+  const closeLabel = t({
+    context: "dismiss reduced-motion notification",
+    message: "Close",
+  });
+  const showReducedMotionToast = useCallback(() => {
+    if (!reducedMotion) {
+      hasShownReducedMotionToast.current = false;
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reducedMotion]);
+    if (hasShownReducedMotionToast.current) {
+      return;
+    }
+
+    hasShownReducedMotionToast.current = true;
+    toast.show({
+      duration: "persistent",
+      variant: "warning",
+      label: reducedMotionLabel,
+      description: reducedMotionDescription,
+      actionLabel: closeLabel,
+      onActionPress: (props) => props.hide(),
+    });
+  }, [
+    closeLabel,
+    reducedMotion,
+    reducedMotionDescription,
+    reducedMotionLabel,
+    toast,
+  ]);
+
+  useEffect(showReducedMotionToast, [showReducedMotionToast]);
 
   return (
     <View className="flex-1" style={{ backgroundColor: "transparent" }}>

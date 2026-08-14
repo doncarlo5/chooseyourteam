@@ -36,6 +36,7 @@ export default function Home() {
     initialHomeGameState,
   );
   const [isMorePlayersDialogOpen, setIsMorePlayersDialogOpen] = useState(false);
+  const isMultiRound = game.declaredPlayerCount !== null;
 
   const toggleRectSv = useSharedValue<TouchRect>({
     x: 0,
@@ -111,7 +112,6 @@ export default function Home() {
     };
   });
   const selectedTeamCount = game.selectedTeams ?? 0;
-  const isMultiRound = game.declaredPlayerCount !== null;
   const firstRoundCount = isMultiRound ? 5 : selectedTeamCount;
   const secondRoundCount = game.declaredPlayerCount
     ? game.declaredPlayerCount - firstRoundCount
@@ -136,9 +136,9 @@ export default function Home() {
     dispatchGame({ type: "selectTeams", teamCount });
     resetAllocationSession();
   };
-  const handleInseparableChange = (isEnabled: boolean) => {
-    dispatchGame({ type: "setInseparable", isEnabled });
-    void (isEnabled ? H.inseparableOn() : H.inseparableOff());
+  const handlePairingModeChange = (isEnabled: boolean) => {
+    dispatchGame({ type: "setPairingMode", isEnabled });
+    void (isEnabled ? H.pairingModeOn() : H.pairingModeOff());
   };
   const handleDeclaredPlayerCountSelection = (playerCount: number) => {
     if (!game.selectedTeams) {
@@ -177,7 +177,7 @@ export default function Home() {
           ? game.multiRoundPlan?.roundOne
           : game.multiRoundPlan?.roundTwo
         : undefined,
-      isInseparableEnabled: game.isInseparableEnabled,
+      isPairingModeEnabled: game.isPairingModeEnabled,
       resetKey: game.roundResetKey,
       onBack: handleBack,
     });
@@ -210,11 +210,10 @@ export default function Home() {
         <>
           <TeamsSelection
             selectedTeams={game.selectedTeams}
-            isInseparableEnabled={game.isInseparableEnabled}
+            isPairingModeEnabled={game.isPairingModeEnabled}
             onSelectTeams={handleTeamSelection}
-            onInseparableChange={handleInseparableChange}
+            onPairingModeChange={handlePairingModeChange}
           />
-          <AppReviewButton />
           <AppShareButton />
         </>
       ) : (
@@ -361,6 +360,7 @@ export default function Home() {
           </View>
         </GestureDetector>
       )}
+      <AppReviewButton isVisible={!game.selectedTeams} />
       <StatusBar style="dark" />
     </View>
   );

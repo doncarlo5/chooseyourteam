@@ -1,0 +1,131 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-08-14 21:27+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: pseudo\n"
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Plural-Forms: \n"
+
+#. Visible player count. Keep number and unit placeholders so their separate styles are preserved.
+#. placeholder {0}: props.count
+#: src/screens/components/dialog-more-players.tsx:25
+msgid "{0, plural, one {<number>#</number><unit>player</unit>} other {<number>#</number><unit>players</unit>}}"
+msgstr ""
+
+#. Visible team count. Keep number and unit placeholders so their separate styles are preserved.
+#. placeholder {0}: props.count
+#: src/screens/components/player-card.tsx:16
+msgid "{0, plural, one {<number>#</number><unit>team</unit>} other {<number>#</number><unit>teams</unit>}}"
+msgstr ""
+
+#. Accessibility label for choosing the total player count
+#. placeholder {0}: props.count
+#: src/screens/components/dialog-more-players.tsx:56
+msgid "{0, plural, one {Select # player} other {Select # players}}"
+msgstr ""
+
+#. Accessibility label for choosing a number of teams
+#. placeholder {0}: props.count
+#: src/screens/components/player-card.tsx:45
+msgid "{0, plural, one {Select # team} other {Select # teams}}"
+msgstr ""
+
+#. Touch instruction. Keep the waiting, number, and unit elements so each line retains its styling.
+#: src/screens/components/round-screen.tsx:38
+msgid "{count, plural, one {<waiting>Put at least</waiting><number>#</number><unit>finger</unit>} other {<waiting>Put at least</waiting><number>#</number><unit>fingers</unit>}}"
+msgstr ""
+
+#. Touch instruction. Keep the waiting, number, and unit elements so each line retains its styling.
+#: src/screens/components/round-screen.tsx:47
+msgid "{count, plural, one {<waiting>Put</waiting><number>#</number><unit>finger</unit>} other {<waiting>Put</waiting><number>#</number><unit>fingers</unit>}}"
+msgstr ""
+
+#: src/screens/components/dialog-more-players.tsx:146
+msgid "Add more players"
+msgstr ""
+
+#: src/app/(home)/_layout.tsx:20
+msgid "All animations will be disabled"
+msgstr ""
+
+#: src/app/(home)/_layout.tsx:21
+msgctxt "dismiss reduced-motion notification"
+msgid "Close"
+msgstr ""
+
+#: src/screens/components/selected-players-layer.tsx:859
+msgctxt "return from allocation to team selection"
+msgid "Close"
+msgstr ""
+
+#: src/screens/components/app-review-button.tsx:100
+msgid "Give a review"
+msgstr ""
+
+#: src/screens/components/teams-selection.tsx:81
+msgid "How many teams?"
+msgstr ""
+
+#: src/screens/components/pairing-mode-toggle.tsx:34
+msgid "Keeps the second and third players on the same team when fair allocation allows it"
+msgstr ""
+
+#: src/screens/components/selected-players-layer.tsx:295
+msgid "Maximum 5 fingers"
+msgstr ""
+
+#: src/screens/components/pairing-mode-toggle.tsx:28
+msgid "Off"
+msgstr ""
+
+#: src/screens/components/pairing-mode-toggle.tsx:26
+msgid "On · players 2 + 3 together"
+msgstr ""
+
+#: src/screens/components/app-review-button.tsx:87
+msgid "Opens the App Store review page"
+msgstr ""
+
+#: src/screens/components/dialog-more-players.tsx:147
+msgid "Opens the player count picker"
+msgstr ""
+
+#: src/screens/components/app-share-button.tsx:54
+msgid "Opens the share sheet with the App Store link"
+msgstr ""
+
+#: src/screens/components/pairing-mode-toggle.tsx:22
+#: src/screens/components/pairing-mode-toggle.tsx:33
+msgid "Pairing mode"
+msgstr ""
+
+#: src/screens/components/teams-selection.tsx:84
+msgid "Pick a number to get started"
+msgstr ""
+
+#: src/screens/components/app-review-button.tsx:86
+msgid "Rate this app"
+msgstr ""
+
+#: src/app/(home)/_layout.tsx:19
+msgid "Reduce motion enabled"
+msgstr ""
+
+#: src/screens/components/selected-players-layer.tsx:863
+msgid "Returns to team selection"
+msgstr ""
+
+#: src/screens/components/app-share-button.tsx:53
+msgid "Share {brandName}"
+msgstr ""
+
+#: src/screens/components/selected-players-layer.tsx:296
+msgid "Use +5."
+msgstr ""

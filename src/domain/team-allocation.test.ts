@@ -126,14 +126,14 @@ describe("flexible single-round allocation", () => {
   }
 });
 
-describe("inséparable allocation", () => {
+describe("pairing mode allocation", () => {
   for (const teamCount of [2, 3, 4, 5] as const) {
     for (
       let playerCount = Math.max(teamCount, 3);
       playerCount <= MAX_FLEXIBLE_PLAYER_COUNT;
       playerCount += 1
     ) {
-      it(`handles flexible inséparable with ${teamCount} teams and ${playerCount} players`, () => {
+      it(`handles flexible pairing mode with ${teamCount} teams and ${playerCount} players`, () => {
         const teamNumbers = getSelectedTeamNumbers(teamCount);
         const normalAssignments = planBalancedRoundAssignment(
           teamCount,
@@ -144,7 +144,7 @@ describe("inséparable allocation", () => {
           teamCount,
           playerCount,
           deterministicRandom(teamCount * 100 + playerCount),
-          { inseparable: true },
+          { pairingMode: true },
         );
 
         if (playerCount === teamCount) {
@@ -157,7 +157,7 @@ describe("inséparable allocation", () => {
     }
 
     for (let playerCount = 6; playerCount <= 10; playerCount += 1) {
-      it(`handles declared inséparable with ${teamCount} teams and ${playerCount} players`, () => {
+      it(`handles declared pairing mode with ${teamCount} teams and ${playerCount} players`, () => {
         const teamNumbers = getSelectedTeamNumbers(teamCount);
         const normalPlan = planMultiRoundAssignments(
           teamCount,
@@ -168,7 +168,7 @@ describe("inséparable allocation", () => {
           teamCount,
           playerCount,
           deterministicRandom(teamCount * 100 + playerCount),
-          { inseparable: true },
+          { pairingMode: true },
         );
 
         if (teamCount === 5) {
@@ -188,7 +188,7 @@ describe("inséparable allocation", () => {
       4,
       6,
       deterministicRandom(17),
-      { inseparable: false },
+      { pairingMode: false },
     );
 
     expect(disabled).toEqual(normal);

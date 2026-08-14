@@ -1,35 +1,46 @@
-# Domain Context
+# Team Allocation
 
-## Team allocation
+Choose Your Team divides participating Players into visually distinct Teams while preserving fair sizes across one- or two-Round Sessions.
 
-- **Team**: a group receiving players.
-- **Team Identity**: the fixed number, color, and shape representing a team.
-- **Player**: one participating touch.
-- **Round**: up to five players assigned together.
-- **Session**: one allocation run, reset by team/count changes or Back.
-- **Fair Allocation**: team sizes differ by at most one per round and overall.
-- **Declared Player Count**: the exact 6–10-player total used for two rounds.
-- **Inséparable**: a hidden, session-only setup mode that forces the second and
-  third players onto the same team when the pairing preserves Fair Allocation.
+## Language
 
-Team identity is canonical for the lifetime of the app:
+**Team**:
+A group receiving Players during an allocation.
+
+**Team Identity**:
+The fixed number, color, and shape representing a Team for the lifetime of the app.
+
+**Player**:
+One participating touch in an allocation.
+
+**Round**:
+A group of up to five Players allocated together.
+
+**Session**:
+One Team allocation run. Changing the Team or Player count, or returning to Team selection, resets it.
+
+**Fair Allocation**:
+An allocation in which Team sizes differ by at most one within each Round and across the Session.
+
+**Declared Player Count**:
+The exact total of six to ten Players used by a Multi-Round Session.
+
+**Single-Round Session**:
+A Session in which selecting two to five Teams establishes the minimum Player count and allocation may grow to the twelve-Player limit.
+
+**Multi-Round Session**:
+A Session with an exact Declared Player Count, split into a five-Player first Round and a second Round containing the remainder.
+
+**Pairing Mode**:
+A hidden, session-only setup preference that assigns the second and third Players to the same Team when Fair Allocation permits it. It is cleared when returning to Team selection and ignored when every selected Team must receive exactly one Player, such as five Players across five Teams.
+_Avoid_: Inséparable
+
+The Pairing Mode control is available only before selecting a Team count. Long-pressing the setup heading reveals its current state, and enabling or disabling it produces distinct haptic feedback.
+
+## Canonical Team Identities
 
 1. Team 1: `#415679`, spike
 2. Team 2: `#FB7185`, wave
 3. Team 3: `#512663`, hexagon
 4. Team 4: `#E11D48`, diamond
 5. Team 5: `#9D659F`, squircle
-
-Single-round sessions are flexible. Selecting 2–5 teams establishes the
-minimum held-touch count, and the allocation may grow to the 12-touch slot
-limit. Multi-round sessions use an exact declared count of 6–10 players,
-split into a five-player first round and a second round containing the
-remainder.
-
-Long-pressing the setup heading reveals an Inséparable switch before a team
-count is selected. The switch shows the current state and plays distinct
-haptics when enabled or disabled. The mode applies to the current session only
-and is cleared by Back.
-When every selected team must receive exactly one player, such as five players
-across five teams, Inséparable is ignored and the normal fair assignment is
-used.

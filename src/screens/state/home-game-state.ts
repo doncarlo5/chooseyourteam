@@ -5,7 +5,7 @@ import {
 import type { FrozenDot } from "../../helpers/types/home-screen";
 
 export type HomeGameState = {
-  isInseparableEnabled: boolean;
+  isPairingModeEnabled: boolean;
   selectedTeams: number | null;
   declaredPlayerCount: number | null;
   multiRoundPlan: MultiRoundAssignmentPlan | null;
@@ -21,7 +21,7 @@ export type HomeGameState = {
 };
 
 export type HomeGameAction =
-  | { type: "setInseparable"; isEnabled: boolean }
+  | { type: "setPairingMode"; isEnabled: boolean }
   | { type: "selectTeams"; teamCount: number }
   | { type: "selectPlayerCount"; playerCount: number }
   | { type: "backToTeamSelection" }
@@ -32,7 +32,7 @@ export type HomeGameAction =
   | { type: "roundScrollFinished"; round: number };
 
 export const initialHomeGameState: HomeGameState = {
-  isInseparableEnabled: false,
+  isPairingModeEnabled: false,
   selectedTeams: null,
   declaredPlayerCount: null,
   multiRoundPlan: null,
@@ -76,17 +76,17 @@ export const homeGameReducer = (
   state: HomeGameState,
   action: HomeGameAction,
 ): HomeGameState => {
-  if (action.type === "setInseparable") {
+  if (action.type === "setPairingMode") {
     if (
       state.selectedTeams ||
-      state.isInseparableEnabled === action.isEnabled
+      state.isPairingModeEnabled === action.isEnabled
     ) {
       return state;
     }
 
     return {
       ...state,
-      isInseparableEnabled: action.isEnabled,
+      isPairingModeEnabled: action.isEnabled,
     };
   }
 
@@ -112,7 +112,7 @@ export const homeGameReducer = (
         state.selectedTeams,
         action.playerCount,
         Math.random,
-        { inseparable: state.isInseparableEnabled },
+        { pairingMode: state.isPairingModeEnabled },
       ),
       ...resetRoundState(state),
     };
@@ -121,7 +121,7 @@ export const homeGameReducer = (
   if (action.type === "backToTeamSelection") {
     return {
       ...state,
-      isInseparableEnabled: false,
+      isPairingModeEnabled: false,
       selectedTeams: null,
       declaredPlayerCount: null,
       multiRoundPlan: null,

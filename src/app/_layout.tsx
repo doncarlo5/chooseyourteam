@@ -3,11 +3,15 @@ import {
   Inter_500Medium,
   Inter_600SemiBold,
   Inter_700Bold,
-  useFonts,
 } from "@expo-google-fonts/inter";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useFonts } from "expo-font";
 import { Slot } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { HeroUINativeProvider } from "heroui-native";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
@@ -20,11 +24,14 @@ import {
 } from "react-native-reanimated";
 import "../../global.css";
 import { AppThemeProvider } from "../contexts/app-theme-context";
+import { LocalizationProvider } from "../localization/localization-provider";
 
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
   strict: false,
 });
+
+void SplashScreen.preventAutoHideAsync();
 
 /**
  * Component that wraps app content inside KeyboardProvider
@@ -63,23 +70,35 @@ function AppContent() {
 }
 
 export default function Layout() {
-  const fonts = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
     SpaceMono: require("../../assets/fonts/SpaceMono-Regular.ttf"),
     QuickSand: require("../../assets/fonts/Quicksand.ttf"),
+    ...AntDesign.font,
+    ...FontAwesome6.font,
+    ...Ionicons.font,
   });
+  const hideSplashScreenWhenReady = useCallback(() => {
+    if (fontsLoaded || fontError) {
+      void SplashScreen.hideAsync();
+    }
+  }, [fontError, fontsLoaded]);
 
-  if (!fonts) {
+  useEffect(hideSplashScreenWhenReady, [hideSplashScreenWhenReady]);
+
+  if (!fontsLoaded && !fontError) {
     return null;
   }
 
   return (
     <GestureHandlerRootView style={styles.root}>
       <KeyboardProvider>
-        <AppContent />
+        <LocalizationProvider>
+          <AppContent />
+        </LocalizationProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>
   );

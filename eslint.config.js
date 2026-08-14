@@ -3,9 +3,11 @@ const { defineConfig } = require("eslint/config");
 const expoConfig = require("eslint-config-expo/flat");
 
 module.exports = defineConfig([
+  {
+    ignores: ["dist/*", "src/localization/locales/*/messages.ts"],
+  },
   expoConfig,
   {
-    ignores: ["dist/*"],
     rules: {
       // Reanimated shared values and gesture worklets intentionally mutate
       // values that React's compiler-oriented lint rules treat as immutable.

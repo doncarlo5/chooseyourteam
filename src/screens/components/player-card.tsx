@@ -1,6 +1,10 @@
 import { AnimatedBlurView } from "@/src/components/animated-blur-view";
 import type { PlayerCardProps } from "@/src/helpers/types/home-screen";
+import { msg, plural } from "@lingui/core/macro";
+import { Trans } from "@lingui/react";
+import { useLingui } from "@lingui/react/macro";
 import { Card, PressableFeedback, cn } from "heroui-native";
+import { createElement } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, {
   Easing,
@@ -8,9 +12,43 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 
+function TeamCountLabel(props: { count: number }) {
+  const descriptor = msg({
+    comment:
+      "Visible team count. Keep number and unit placeholders so their separate styles are preserved.",
+    message: plural(props.count, {
+      one: "<number>#</number><unit>team</unit>",
+      other: "<number>#</number><unit>teams</unit>",
+    }),
+  });
+
+  return createElement(Trans, {
+    ...descriptor,
+    components: {
+      number: (
+        <Card.Title
+          className={cn(
+            "text-5xl font-extrabold leading-none text-[#0B0B0B]",
+          )}
+        />
+      ),
+      unit: (
+        <Card.Description className="pl-0.5 leading-none text-black/60" />
+      ),
+    },
+  });
+}
+
 export function PlayerCard(props: PlayerCardProps) {
-  const label = props.label ?? "teams";
+  const { t } = useLingui();
   const blurIntensity = useSharedValue(40);
+  const accessibilityLabel = t({
+    comment: "Accessibility label for choosing a number of teams",
+    message: plural(props.count, {
+      one: "Select # team",
+      other: "Select # teams",
+    }),
+  });
 
   return (
     <Animated.View
@@ -24,7 +62,7 @@ export function PlayerCard(props: PlayerCardProps) {
         onPress={props.onPress}
         isDisabled={props.isDisabled}
         accessibilityRole="button"
-        accessibilityLabel={`Select ${props.count} ${label}`}
+        accessibilityLabel={accessibilityLabel}
         className="w-full rounded-3xl active:bg-white/40"
         animation={{
           scale: {
@@ -53,16 +91,7 @@ export function PlayerCard(props: PlayerCardProps) {
           <Card.Body className="h-10" />
           <Card.Footer className="px-3 pb-4 flex-row items-end">
             <View className="flex-1">
-              <Card.Title
-                className={cn(
-                  "text-5xl font-extrabold leading-none text-[#0B0B0B]",
-                )}
-              >
-                {props.count}
-              </Card.Title>
-              <Card.Description className="pl-0.5 leading-none text-black/60">
-                {label}
-              </Card.Description>
+              <TeamCountLabel count={props.count} />
             </View>
           </Card.Footer>
         </Card>

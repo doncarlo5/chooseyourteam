@@ -1,6 +1,8 @@
 import { AppText } from "@/src/components/app-text";
+import { msg, plural } from "@lingui/core/macro";
+import { Trans } from "@lingui/react";
 import { cn } from "heroui-native";
-import { useEffect } from "react";
+import { createElement, useEffect } from "react";
 import { Platform, View } from "react-native";
 import Animated, {
   cancelAnimation,
@@ -20,6 +22,47 @@ const startSkeletonPulse = (progress: SharedValue<number>) => {
   );
 };
 
+function RoundInstruction(props: { count: number; requiresAtLeast: boolean }) {
+  const waitingClassName = cn(
+    "text-4xl font-medium text-center leading-none text-black/25",
+  );
+  const numberClassName = cn(
+    "text-7xl font-medium text-center leading-none mt-3 text-black/30",
+  );
+  const unitClassName = cn(
+    "pb-1 text-4xl font-medium text-center text-black/25",
+  );
+  const sharedStyle = { fontFamily: "QuickSand" };
+  const count = props.count;
+  const descriptor = props.requiresAtLeast
+    ? msg({
+        comment:
+          "Touch instruction. Keep the waiting, number, and unit elements so each line retains its styling.",
+        message: plural(count, {
+          one: "<waiting>Put at least</waiting><number>#</number><unit>finger</unit>",
+          other:
+            "<waiting>Put at least</waiting><number>#</number><unit>fingers</unit>",
+        }),
+      })
+    : msg({
+        comment:
+          "Touch instruction. Keep the waiting, number, and unit elements so each line retains its styling.",
+        message: plural(count, {
+          one: "<waiting>Put</waiting><number>#</number><unit>finger</unit>",
+          other: "<waiting>Put</waiting><number>#</number><unit>fingers</unit>",
+        }),
+      });
+
+  return createElement(Trans, {
+    ...descriptor,
+    components: {
+      waiting: <AppText className={waitingClassName} style={sharedStyle} />,
+      number: <AppText className={numberClassName} style={sharedStyle} />,
+      unit: <AppText className={unitClassName} style={sharedStyle} />,
+    },
+  });
+}
+
 export default function RoundScreen(props: {
   fingersCount: number;
   touchCount: number;
@@ -31,10 +74,7 @@ export default function RoundScreen(props: {
   const isIphone = Platform.OS === "ios" && !Platform.isPad;
   const shouldCapAtFive =
     props.allowOverExpected && isIphone && props.fingersCount === 5;
-  const waitingLabel =
-    props.allowOverExpected && !shouldCapAtFive ? "Put at least" : "Put";
-  const numberLabel = shouldCapAtFive ? "5" : String(props.fingersCount);
-  const fingersLabel = props.fingersCount === 1 ? "finger" : "fingers";
+  const requiresAtLeast = props.allowOverExpected && !shouldCapAtFive;
   const shouldShowLabel =
     !props.isFrozen &&
     (!props.isActive ||
@@ -59,32 +99,10 @@ export default function RoundScreen(props: {
       <View className="items-center gap-3">
         {shouldShowLabel ? (
           <Animated.View className="items-center" style={pulseStyle}>
-            <>
-              <AppText
-                className={cn(
-                  "text-4xl font-medium text-center leading-none text-black/25",
-                )}
-                style={{ fontFamily: "QuickSand" }}
-              >
-                {waitingLabel}
-              </AppText>
-              <AppText
-                className={cn(
-                  "text-7xl font-medium text-center leading-none mt-3 text-black/30",
-                )}
-                style={{ fontFamily: "QuickSand" }}
-              >
-                {numberLabel}
-              </AppText>
-              <AppText
-                className={cn(
-                  "pb-1 text-4xl font-medium text-center text-black/25",
-                )}
-                style={{ fontFamily: "QuickSand" }}
-              >
-                {fingersLabel}
-              </AppText>
-            </>
+            <RoundInstruction
+              count={props.fingersCount}
+              requiresAtLeast={requiresAtLeast}
+            />
           </Animated.View>
         ) : null}
       </View>

@@ -1,22 +1,23 @@
 import { AppText } from "@/src/components/app-text";
+import { Trans } from "@lingui/react/macro";
 import { PressableFeedback, cn } from "heroui-native";
 import { useState } from "react";
 import { View } from "react-native";
 import Animated, { Easing, FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import InseparableToggle from "./inseparable-toggle";
+import PairingModeToggle from "./pairing-mode-toggle";
 import { PlayerCard } from "./player-card";
 
 const GROUP_OPTIONS = [2, 3, 4, 5];
 
 export default function TeamsSelection(props: {
   selectedTeams: number | null;
-  isInseparableEnabled: boolean;
+  isPairingModeEnabled: boolean;
   onSelectTeams: (teams: number) => void;
-  onInseparableChange: (isEnabled: boolean) => void;
+  onPairingModeChange: (isEnabled: boolean) => void;
 }) {
   const insets = useSafeAreaInsets();
-  const [isInseparableToggleVisible, setIsInseparableToggleVisible] =
+  const [isPairingModeToggleVisible, setIsPairingModeToggleVisible] =
     useState(false);
 
   if (props.selectedTeams) return null;
@@ -38,7 +39,7 @@ export default function TeamsSelection(props: {
           animation={false}
           delayLongPress={1200}
           onLongPress={() => {
-            setIsInseparableToggleVisible(true);
+            setIsPairingModeToggleVisible(true);
           }}
         >
           <AppText
@@ -50,13 +51,13 @@ export default function TeamsSelection(props: {
               letterSpacing: -0.35,
             }}
           >
-            Choose your team
+            Choose Your Team
           </AppText>
         </PressableFeedback>
-        {isInseparableToggleVisible ? (
-          <InseparableToggle
-            isEnabled={props.isInseparableEnabled}
-            onValueChange={props.onInseparableChange}
+        {isPairingModeToggleVisible ? (
+          <PairingModeToggle
+            isEnabled={props.isPairingModeEnabled}
+            onValueChange={props.onPairingModeChange}
           />
         ) : null}
       </Animated.View>
@@ -77,10 +78,10 @@ export default function TeamsSelection(props: {
               letterSpacing: -1.15,
             }}
           >
-            How many teams?
+            <Trans>How many teams?</Trans>
           </AppText>
           <AppText className={cn("mt-2 text-center text-base text-black/55")}>
-            Pick a number to get started
+            <Trans>Pick a number to get started</Trans>
           </AppText>
         </Animated.View>
 

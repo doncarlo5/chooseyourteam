@@ -1,95 +1,79 @@
 import { AppText } from "@/src/components/app-text";
+import { Trans, useLingui } from "@lingui/react/macro";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants, { ExecutionEnvironment } from "expo-constants";
 import * as StoreReview from "expo-store-review";
 import { Button, cn } from "heroui-native";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Linking, Platform, View } from "react-native";
 
 const RATE_OPEN_COUNT_KEY = "rate_open_count_v1";
 const RATE_HAS_OPENED_RATING_PAGE_KEY = "rate_has_opened_rating_page_v1";
 
-export default function AppReviewButton(props: {}) {
-  void props;
-  const [storeReviewUrl, setStoreReviewUrl] = useState<string | null>(null);
+const getStoreReviewUrl = () => {
+  try {
+    const baseUrl = StoreReview.storeUrl();
+    if (!baseUrl) {
+      return null;
+    }
+
+    const join = baseUrl.includes("?") ? "&" : "?";
+    return `${baseUrl}${join}action=write-review`;
+  } catch {
+    return null;
+  }
+};
+
+export default function AppReviewButton(props: { isVisible: boolean }) {
+  const { t } = useLingui();
+  const canUseStoreReview =
+    Platform.OS === "ios" &&
+    !__DEV__ &&
+    Constants.executionEnvironment !== ExecutionEnvironment.StoreClient;
+  const [storeReviewUrl] = useState(() =>
+    canUseStoreReview ? getStoreReviewUrl() : null,
+  );
   const [openCount, setOpenCount] = useState(0);
   const [hasOpenedRatingPage, setHasOpenedRatingPage] = useState(false);
+  const isReviewStateMounted = useRef(false);
 
-  useEffect(() => {
-    let mounted = true;
+  const loadReviewState = useCallback(async () => {
+    try {
+      const [countRaw, openedRatingPageRaw] = await Promise.all([
+        AsyncStorage.getItem(RATE_OPEN_COUNT_KEY),
+        AsyncStorage.getItem(RATE_HAS_OPENED_RATING_PAGE_KEY),
+      ]);
 
-    (async () => {
-      try {
-        const [countRaw, openedRatingPageRaw] = await Promise.all([
-          AsyncStorage.getItem(RATE_OPEN_COUNT_KEY),
-          AsyncStorage.getItem(RATE_HAS_OPENED_RATING_PAGE_KEY),
-        ]);
+      const nextCount = (parseInt(countRaw ?? "0", 10) || 0) + 1;
+      const openedRatingPage = openedRatingPageRaw === "1";
 
-        console.log("[AsyncStorage] Read values:", {
-          countRaw,
-          openedRatingPageRaw,
-          RATE_OPEN_COUNT_KEY,
-          RATE_HAS_OPENED_RATING_PAGE_KEY,
-        });
+      await AsyncStorage.setItem(RATE_OPEN_COUNT_KEY, String(nextCount));
 
-        const nextCount = (parseInt(countRaw ?? "0", 10) || 0) + 1;
-        const openedRatingPage = openedRatingPageRaw === "1";
-
-        console.log("[AsyncStorage] Parsed values:", {
-          nextCount,
-          openedRatingPage,
-        });
-
-        await AsyncStorage.setItem(RATE_OPEN_COUNT_KEY, String(nextCount));
-        console.log("[AsyncStorage] Saved count:", nextCount);
-
-        if (!mounted) return;
-        setOpenCount(nextCount);
-        setHasOpenedRatingPage(openedRatingPage);
-      } catch (error) {
-        console.error("[AsyncStorage] Error:", error);
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
+      if (!isReviewStateMounted.current) return;
+      setOpenCount(nextCount);
+      setHasOpenedRatingPage(openedRatingPage);
+    } catch (error) {
+      console.error("[AsyncStorage] Error:", error);
+    }
   }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-    const loadStoreUrl = async () => {
-      try {
-        const baseUrl = StoreReview.storeUrl();
-        if (!baseUrl) {
-          setStoreReviewUrl(null);
-          return;
-        }
-
-        if (!isMounted) {
-          return;
-        }
-        const join = baseUrl.includes("?") ? "&" : "?";
-        if (Platform.OS === "ios") {
-          setStoreReviewUrl(`${baseUrl}${join}action=write-review`);
-        } else if (Platform.OS === "android") {
-          setStoreReviewUrl(`${baseUrl}${join}showAllReviews=true`);
-        } else {
-          setStoreReviewUrl(baseUrl);
-        }
-      } catch {
-        if (isMounted) {
-          setStoreReviewUrl(null);
-        }
-      }
-    };
-    void loadStoreUrl();
-    return () => {
-      isMounted = false;
-    };
+  const cleanupReviewState = useCallback(() => {
+    isReviewStateMounted.current = false;
   }, []);
+  const initializeReviewState = useCallback(() => {
+    if (!canUseStoreReview) {
+      return;
+    }
 
-  if (Platform.OS !== "ios") return null;
+    isReviewStateMounted.current = true;
+    void loadReviewState();
+    return cleanupReviewState;
+  }, [canUseStoreReview, cleanupReviewState, loadReviewState]);
+
+  useEffect(initializeReviewState, [initializeReviewState]);
+
+  if (!props.isVisible) return null;
+  if (!canUseStoreReview) return null;
   if (!storeReviewUrl) return null;
   if (openCount < 5 || hasOpenedRatingPage) return null;
 
@@ -99,35 +83,24 @@ export default function AppReviewButton(props: {}) {
         size="md"
         className={cn("rounded-full px-5 bg-[#0B0B0B]/20")}
         accessibilityRole="button"
-        accessibilityLabel="Rate this app"
-        accessibilityHint="Opens the App Store review page"
+        accessibilityLabel={t`Rate this app`}
+        accessibilityHint={t`Opens the App Store review page`}
         onPress={async () => {
           try {
-            console.log("[AsyncStorage] Opening rating page:", storeReviewUrl);
             await Linking.openURL(storeReviewUrl);
             await AsyncStorage.setItem(RATE_HAS_OPENED_RATING_PAGE_KEY, "1");
-            console.log("[AsyncStorage] Saved hasOpenedRatingPage: true");
             setHasOpenedRatingPage(true);
           } catch (error) {
             console.error("[AsyncStorage] Error opening rating page:", error);
           }
         }}
       >
-        <Button.Label
-          className={cn("text-sm font-semibold flex-row items-center gap-10")}
-        >
-          <View className="flex-row items-center gap-2">
-            <AppText className={cn("text-sm font-semibold text-white/80")}>
-              Give a review
-            </AppText>
-            <FontAwesome6
-              name="smile"
-              size={16}
-              color="#FFFFFF"
-              opacity={0.8}
-            />
-          </View>
-        </Button.Label>
+        <View className={cn("flex-row items-center gap-2")}>
+          <AppText className={cn("text-sm font-semibold text-white/80")}>
+            <Trans>Give a review</Trans>
+          </AppText>
+          <FontAwesome6 name="smile" size={16} color="#FFFFFF" opacity={0.8} />
+        </View>
       </Button>
     </View>
   );

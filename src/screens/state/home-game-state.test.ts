@@ -5,17 +5,17 @@ import { homeGameReducer, initialHomeGameState } from "./home-game-state";
 const frozenDot: FrozenDot = { x: 100, y: 200, team: 1 };
 
 describe("homeGameReducer", () => {
-  it("enables inséparable only during setup and clears it on Back", () => {
+  it("enables pairing mode only during setup and clears it on Back", () => {
     const enabledState = homeGameReducer(initialHomeGameState, {
-      type: "setInseparable",
+      type: "setPairingMode",
       isEnabled: true,
     });
     const disabledState = homeGameReducer(enabledState, {
-      type: "setInseparable",
+      type: "setPairingMode",
       isEnabled: false,
     });
     const reenabledState = homeGameReducer(disabledState, {
-      type: "setInseparable",
+      type: "setPairingMode",
       isEnabled: true,
     });
     const teamState = homeGameReducer(reenabledState, {
@@ -23,22 +23,22 @@ describe("homeGameReducer", () => {
       teamCount: 3,
     });
     const ignoredToggleState = homeGameReducer(teamState, {
-      type: "setInseparable",
+      type: "setPairingMode",
       isEnabled: false,
     });
     const resetState = homeGameReducer(ignoredToggleState, {
       type: "backToTeamSelection",
     });
 
-    expect(enabledState.isInseparableEnabled).toBe(true);
-    expect(disabledState.isInseparableEnabled).toBe(false);
+    expect(enabledState.isPairingModeEnabled).toBe(true);
+    expect(disabledState.isPairingModeEnabled).toBe(false);
     expect(ignoredToggleState).toBe(teamState);
-    expect(resetState.isInseparableEnabled).toBe(false);
+    expect(resetState.isPairingModeEnabled).toBe(false);
   });
 
   it("plans the second and third declared players together when enabled", () => {
     const enabledState = homeGameReducer(initialHomeGameState, {
-      type: "setInseparable",
+      type: "setPairingMode",
       isEnabled: true,
     });
     const teamState = homeGameReducer(enabledState, {

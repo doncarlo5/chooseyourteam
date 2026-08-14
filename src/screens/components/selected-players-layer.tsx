@@ -5,6 +5,7 @@ import type { FrozenDot, TouchRect } from "@/src/helpers/types/home-screen";
 import type { TouchPoint } from "@/src/helpers/types/touch-point";
 import { H, Step, styleChargeBomb } from "@/src/screens/utils/helper";
 import { AntDesign } from "@expo/vector-icons";
+import { useLingui } from "@lingui/react/macro";
 import { Asset } from "expo-asset";
 import {
   setAudioModeAsync,
@@ -169,7 +170,7 @@ export default function useSelectedPlayersLayer(props: {
   expectedTouchCount?: number;
   allowOverExpected?: boolean;
   roundAssignment?: RoundAssignment;
-  isInseparableEnabled?: boolean;
+  isPairingModeEnabled?: boolean;
   resetKey?: number;
 }): {
   touchGesture: ReturnType<typeof Gesture.Manual>;
@@ -179,6 +180,7 @@ export default function useSelectedPlayersLayer(props: {
   isTouching: boolean;
   touchCount: number;
 } {
+  const { t } = useLingui();
   const { toast } = useToast();
   const [isRevealed, setIsRevealed] = useState(false);
   const [isTouching, setIsTouching] = useState(false);
@@ -252,7 +254,7 @@ export default function useSelectedPlayersLayer(props: {
             props.selectedTeams,
             touchList.length,
             Math.random,
-            { inseparable: props.isInseparableEnabled },
+            { pairingMode: props.isPairingModeEnabled },
           );
 
     touchList.forEach((touch, index) => {
@@ -290,8 +292,8 @@ export default function useSelectedPlayersLayer(props: {
     toast.show({
       id: "ios-touch-limit",
       variant: "warning",
-      label: "5 doigts maximum",
-      description: "Utilisez +5.",
+      label: t`Maximum 5 fingers`,
+      description: t`Use +5.`,
     });
   };
 
@@ -854,8 +856,11 @@ export default function useSelectedPlayersLayer(props: {
         },
       }}
       accessibilityRole="button"
-      accessibilityLabel="Close"
-      accessibilityHint="Returns to team selection"
+      accessibilityLabel={t({
+        context: "return from allocation to team selection",
+        message: "Close",
+      })}
+      accessibilityHint={t`Returns to team selection`}
       onPress={handleBack}
       onLayout={() => {
         backRef.current?.measureInWindow((x, y, width, height) => {

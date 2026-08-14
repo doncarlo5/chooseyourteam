@@ -14,7 +14,7 @@ export type MultiRoundAssignmentPlan = {
 export type RandomSource = () => number;
 
 export type TeamAllocationOptions = {
-  inseparable?: boolean;
+  pairingMode?: boolean;
 };
 
 const normalizeRandom = (random: RandomSource) => {
@@ -88,7 +88,7 @@ const applyAllocationOptions = (
   assignment: RoundAssignment,
   options: TeamAllocationOptions,
 ): RoundAssignment => {
-  if (!options.inseparable || assignment.length < 3) {
+  if (!options.pairingMode || assignment.length < 3) {
     return assignment;
   }
 

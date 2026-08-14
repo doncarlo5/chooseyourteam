@@ -5,12 +5,12 @@ const isAndroid = Platform.OS === "android";
 
 export const H = {
   // Distinct toggle feedback: confirmation when enabled, crisp stop when disabled.
-  inseparableOn: () =>
+  pairingModeOn: () =>
     isAndroid
       ? Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Toggle_On)
       : Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success),
 
-  inseparableOff: () =>
+  pairingModeOff: () =>
     isAndroid
       ? Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Toggle_Off)
       : Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid),
