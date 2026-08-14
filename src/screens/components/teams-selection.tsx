@@ -42,7 +42,7 @@ export default function TeamsSelection(props: {
           }}
         >
           <AppText
-            className={cn("text-center text-black/75")}
+            className={cn("px-0.5 text-center text-black/75")}
             style={{
               fontFamily: "QuickSand",
               fontSize: 19,

@@ -78,7 +78,7 @@ export default function RoundScreen(props: {
               </AppText>
               <AppText
                 className={cn(
-                  "text-4xl font-medium text-center leading-none text-black/25",
+                  "pb-1 text-4xl font-medium text-center text-black/25",
                 )}
                 style={{ fontFamily: "QuickSand" }}
               >
