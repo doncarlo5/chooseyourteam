@@ -1,18 +1,23 @@
 import { AppText } from "@/src/components/app-text";
 import { PressableFeedback, cn } from "heroui-native";
+import { useState } from "react";
 import { View } from "react-native";
 import Animated, { Easing, FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import InseparableToggle from "./inseparable-toggle";
 import { PlayerCard } from "./player-card";
 
 const GROUP_OPTIONS = [2, 3, 4, 5];
 
 export default function TeamsSelection(props: {
   selectedTeams: number | null;
+  isInseparableEnabled: boolean;
   onSelectTeams: (teams: number) => void;
-  onToggleInseparable: () => void;
+  onInseparableChange: (isEnabled: boolean) => void;
 }) {
   const insets = useSafeAreaInsets();
+  const [isInseparableToggleVisible, setIsInseparableToggleVisible] =
+    useState(false);
 
   if (props.selectedTeams) return null;
 
@@ -32,7 +37,9 @@ export default function TeamsSelection(props: {
           accessible={false}
           animation={false}
           delayLongPress={1200}
-          onLongPress={props.onToggleInseparable}
+          onLongPress={() => {
+            setIsInseparableToggleVisible(true);
+          }}
         >
           <AppText
             className={cn("text-center text-black/75")}
@@ -46,6 +53,12 @@ export default function TeamsSelection(props: {
             Choose your team
           </AppText>
         </PressableFeedback>
+        {isInseparableToggleVisible ? (
+          <InseparableToggle
+            isEnabled={props.isInseparableEnabled}
+            onValueChange={props.onInseparableChange}
+          />
+        ) : null}
       </Animated.View>
 
       <View className={cn("flex-1 justify-center")}>

@@ -7,27 +7,39 @@ const frozenDot: FrozenDot = { x: 100, y: 200, team: 1 };
 describe("homeGameReducer", () => {
   it("enables inséparable only during setup and clears it on Back", () => {
     const enabledState = homeGameReducer(initialHomeGameState, {
-      type: "toggleInseparable",
+      type: "setInseparable",
+      isEnabled: true,
     });
-    const teamState = homeGameReducer(enabledState, {
+    const disabledState = homeGameReducer(enabledState, {
+      type: "setInseparable",
+      isEnabled: false,
+    });
+    const reenabledState = homeGameReducer(disabledState, {
+      type: "setInseparable",
+      isEnabled: true,
+    });
+    const teamState = homeGameReducer(reenabledState, {
       type: "selectTeams",
       teamCount: 3,
     });
     const ignoredToggleState = homeGameReducer(teamState, {
-      type: "toggleInseparable",
+      type: "setInseparable",
+      isEnabled: false,
     });
     const resetState = homeGameReducer(ignoredToggleState, {
       type: "backToTeamSelection",
     });
 
     expect(enabledState.isInseparableEnabled).toBe(true);
+    expect(disabledState.isInseparableEnabled).toBe(false);
     expect(ignoredToggleState).toBe(teamState);
     expect(resetState.isInseparableEnabled).toBe(false);
   });
 
   it("plans the second and third declared players together when enabled", () => {
     const enabledState = homeGameReducer(initialHomeGameState, {
-      type: "toggleInseparable",
+      type: "setInseparable",
+      isEnabled: true,
     });
     const teamState = homeGameReducer(enabledState, {
       type: "selectTeams",

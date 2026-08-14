@@ -26,8 +26,10 @@ limit. Multi-round sessions use an exact declared count of 6–10 players,
 split into a five-player first round and a second round containing the
 remainder.
 
-Long-pressing the setup heading toggles Inséparable before a team count is
-selected. The mode applies to the current session only and is cleared by Back.
+Long-pressing the setup heading reveals an Inséparable switch before a team
+count is selected. The switch shows the current state and plays distinct
+haptics when enabled or disabled. The mode applies to the current session only
+and is cleared by Back.
 When every selected team must receive exactly one player, such as five players
 across five teams, Inséparable is ignored and the normal fair assignment is
 used.

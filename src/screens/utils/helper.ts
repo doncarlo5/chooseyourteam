@@ -4,6 +4,17 @@ import { Platform } from "react-native";
 const isAndroid = Platform.OS === "android";
 
 export const H = {
+  // Distinct toggle feedback: confirmation when enabled, crisp stop when disabled.
+  inseparableOn: () =>
+    isAndroid
+      ? Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Toggle_On)
+      : Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success),
+
+  inseparableOff: () =>
+    isAndroid
+      ? Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Toggle_Off)
+      : Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid),
+
   // Strong “I registered your first touch”
   touchDown: () =>
     isAndroid

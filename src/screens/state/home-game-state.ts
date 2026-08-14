@@ -21,7 +21,7 @@ export type HomeGameState = {
 };
 
 export type HomeGameAction =
-  | { type: "toggleInseparable" }
+  | { type: "setInseparable"; isEnabled: boolean }
   | { type: "selectTeams"; teamCount: number }
   | { type: "selectPlayerCount"; playerCount: number }
   | { type: "backToTeamSelection" }
@@ -76,14 +76,17 @@ export const homeGameReducer = (
   state: HomeGameState,
   action: HomeGameAction,
 ): HomeGameState => {
-  if (action.type === "toggleInseparable") {
-    if (state.selectedTeams) {
+  if (action.type === "setInseparable") {
+    if (
+      state.selectedTeams ||
+      state.isInseparableEnabled === action.isEnabled
+    ) {
       return state;
     }
 
     return {
       ...state,
-      isInseparableEnabled: !state.isInseparableEnabled,
+      isInseparableEnabled: action.isEnabled,
     };
   }
 

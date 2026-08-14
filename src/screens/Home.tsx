@@ -2,7 +2,6 @@ import { PaginationIndicator } from "@/src/components/component-presentation/pag
 import MeshGradientBackground from "@/src/app/(home)/components/mesh-gradient-background";
 import type { TouchRect } from "@/src/helpers/types/home-screen";
 import { Ionicons } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
 import { StatusBar } from "expo-status-bar";
 import { cn } from "heroui-native";
 import { useEffect, useReducer, useRef, useState } from "react";
@@ -26,6 +25,7 @@ import RoundScreen from "./components/round-screen";
 import useSelectedPlayersLayer from "./components/selected-players-layer";
 import TeamsSelection from "./components/teams-selection";
 import { homeGameReducer, initialHomeGameState } from "./state/home-game-state";
+import { H } from "./utils/helper";
 
 export default function Home() {
   const { width } = useWindowDimensions();
@@ -135,13 +135,9 @@ export default function Home() {
     dispatchGame({ type: "selectTeams", teamCount });
     resetAllocationSession();
   };
-  const handleToggleInseparable = () => {
-    dispatchGame({ type: "toggleInseparable" });
-    void Haptics.notificationAsync(
-      game.isInseparableEnabled
-        ? Haptics.NotificationFeedbackType.Warning
-        : Haptics.NotificationFeedbackType.Success,
-    );
+  const handleInseparableChange = (isEnabled: boolean) => {
+    dispatchGame({ type: "setInseparable", isEnabled });
+    void (isEnabled ? H.inseparableOn() : H.inseparableOff());
   };
   const handleDeclaredPlayerCountSelection = (playerCount: number) => {
     if (!game.selectedTeams) {
@@ -213,8 +209,9 @@ export default function Home() {
         <>
           <TeamsSelection
             selectedTeams={game.selectedTeams}
+            isInseparableEnabled={game.isInseparableEnabled}
             onSelectTeams={handleTeamSelection}
-            onToggleInseparable={handleToggleInseparable}
+            onInseparableChange={handleInseparableChange}
           />
           <AppReviewButton />
         </>
