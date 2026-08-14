@@ -11,7 +11,7 @@ import {
   useAudioPlayer,
   useAudioPlayerStatus,
 } from "expo-audio";
-import { Button, cn } from "heroui-native";
+import { Button, cn, useToast } from "heroui-native";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
@@ -179,6 +179,7 @@ export default function useSelectedPlayersLayer(props: {
   isTouching: boolean;
   touchCount: number;
 } {
+  const { toast } = useToast();
   const [isRevealed, setIsRevealed] = useState(false);
   const [isTouching, setIsTouching] = useState(false);
   const [touchCount, setTouchCount] = useState(0);
@@ -283,6 +284,15 @@ export default function useSelectedPlayersLayer(props: {
   const resetAllSlots = () => {
     resetAllSlotsJS();
     scheduleOnUI(hardResetSlotsWorklet);
+  };
+
+  const showIosTouchLimitToast = () => {
+    toast.show({
+      id: "ios-touch-limit",
+      variant: "warning",
+      label: "5 doigts maximum",
+      description: "Utilisez +5.",
+    });
   };
 
   const hardResetSlotsWorklet = () => {
@@ -811,6 +821,16 @@ export default function useSelectedPlayersLayer(props: {
 
     .onTouchesCancelled((event, stateManager) => {
       "worklet";
+
+      const reachedIosTouchLimit =
+        Platform.OS === "ios" &&
+        (props.allowOverExpected ?? false) &&
+        isRevealedSv.value === 0 &&
+        countVisibleTouches() === 5;
+
+      if (reachedIosTouchLimit) {
+        scheduleOnRN(showIosTouchLimitToast);
+      }
 
       hardResetSlotsWorklet();
       scheduleOnRN(resetAllSlotsJS);

@@ -133,8 +133,13 @@ describe("inséparable allocation", () => {
       playerCount <= MAX_FLEXIBLE_PLAYER_COUNT;
       playerCount += 1
     ) {
-      it(`puts flexible players 2 and 3 together with ${teamCount} teams and ${playerCount} players`, () => {
+      it(`handles flexible inséparable with ${teamCount} teams and ${playerCount} players`, () => {
         const teamNumbers = getSelectedTeamNumbers(teamCount);
+        const normalAssignments = planBalancedRoundAssignment(
+          teamCount,
+          playerCount,
+          deterministicRandom(teamCount * 100 + playerCount),
+        );
         const assignments = planBalancedRoundAssignment(
           teamCount,
           playerCount,
@@ -142,16 +147,23 @@ describe("inséparable allocation", () => {
           { inseparable: true },
         );
 
-        expect(assignments[2]).toBe(assignments[1]);
-        if (playerCount > teamCount) {
-          expectBalanced(countAssignments(assignments, teamNumbers));
+        if (playerCount === teamCount) {
+          expect(assignments).toEqual(normalAssignments);
+        } else {
+          expect(assignments[2]).toBe(assignments[1]);
         }
+        expectBalanced(countAssignments(assignments, teamNumbers));
       });
     }
 
     for (let playerCount = 6; playerCount <= 10; playerCount += 1) {
-      it(`puts declared players 2 and 3 together with ${teamCount} teams and ${playerCount} players`, () => {
+      it(`handles declared inséparable with ${teamCount} teams and ${playerCount} players`, () => {
         const teamNumbers = getSelectedTeamNumbers(teamCount);
+        const normalPlan = planMultiRoundAssignments(
+          teamCount,
+          playerCount,
+          deterministicRandom(teamCount * 100 + playerCount),
+        );
         const plan = planMultiRoundAssignments(
           teamCount,
           playerCount,
@@ -159,11 +171,13 @@ describe("inséparable allocation", () => {
           { inseparable: true },
         );
 
-        expect(plan.roundOne[2]).toBe(plan.roundOne[1]);
-        expect(plan.roundTwo).toHaveLength(playerCount - 5);
-        if (teamCount < 5) {
-          expectBalanced(countAssignments(plan.roundOne, teamNumbers));
+        if (teamCount === 5) {
+          expect(plan).toEqual(normalPlan);
+        } else {
+          expect(plan.roundOne[2]).toBe(plan.roundOne[1]);
         }
+        expect(plan.roundTwo).toHaveLength(playerCount - 5);
+        expectBalanced(countAssignments(plan.roundOne, teamNumbers));
       });
     }
   }

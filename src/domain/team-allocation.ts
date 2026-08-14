@@ -103,8 +103,7 @@ const applyAllocationOptions = (
     ) ?? result.find((teamNumber) => (counts.get(teamNumber) ?? 0) >= 2);
 
   if (!pairTeam) {
-    result[2] = result[1];
-    return result;
+    return assignment;
   }
 
   [1, 2].forEach((targetIndex) => {
