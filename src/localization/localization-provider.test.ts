@@ -63,4 +63,13 @@ describe("subscribeToLocaleChanges", () => {
     expect(subscribeToLocaleChanges()).toBeUndefined();
     expect(appState.listener).toBeUndefined();
   });
+
+  it("does not replace a manual locale when Android returns to foreground", () => {
+    const unsubscribe = subscribeToLocaleChanges(() => "fr");
+
+    appState.listener?.("active");
+
+    expect(activateLocale).not.toHaveBeenCalled();
+    unsubscribe?.();
+  });
 });

@@ -11,6 +11,20 @@ describe("localization catalogs", () => {
     expect(i18n._("LNZ6mg")).toBe("Combien d’équipes ?");
   });
 
+  it("localizes the About sheet while preserving language autonyms", () => {
+    const i18n = createAppI18n("en");
+
+    expect(i18n._("uyJsf6")).toBe("About");
+    expect(i18n._("MRfUhu")).toBe("Ideas or suggestions?");
+    expect(i18n._("D-NlUC")).toBe("System");
+
+    i18n.activate("fr");
+    expect(i18n._("uyJsf6")).toBe("À propos");
+    expect(i18n._("MRfUhu")).toBe("Une idée, suggestions ?");
+    expect(i18n._("D-NlUC")).toBe("Système");
+    expect(i18n._("lYGfRP")).toBe("English");
+  });
+
   it("formats English and French plurals", () => {
     const i18n = createAppI18n("en");
     expect(i18n._("C1flRB", { 0: 1 })).toBe("Select 1 team");
@@ -68,9 +82,9 @@ describe("localization catalogs", () => {
   it("preserves the brand in the pseudolocalized share label", () => {
     const i18n = createAppI18n("pseudo");
 
-    expect(
-      i18n._("KiD1T8", { brandName: "Choose Your Team" }),
-    ).toContain("Choose Your Team");
+    expect(i18n._("KiD1T8", { brandName: "Choose Your Team" })).toContain(
+      "Choose Your Team",
+    );
   });
 
   it("formats missing French translations with the English fallback", () => {

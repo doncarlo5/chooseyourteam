@@ -10,9 +10,9 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFonts } from "expo-font";
 import { Slot } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { HeroUINativeProvider } from "heroui-native";
+import { cn, HeroUINativeProvider } from "heroui-native";
 import { useCallback, useEffect } from "react";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   KeyboardAvoidingView,
@@ -24,7 +24,10 @@ import {
 } from "react-native-reanimated";
 import "../../global.css";
 import { AppThemeProvider } from "../contexts/app-theme-context";
-import { LocalizationProvider } from "../localization/localization-provider";
+import {
+  LocalizationProvider,
+  useLocalization,
+} from "../localization/localization-provider";
 
 configureReanimatedLogger({
   level: ReanimatedLogLevel.warn,
@@ -37,7 +40,8 @@ void SplashScreen.preventAutoHideAsync();
  * Component that wraps app content inside KeyboardProvider
  * Contains the contentWrapper and HeroUINativeProvider configuration
  */
-function AppContent() {
+function AppContent(props: { fontsReady: boolean }) {
+  const { isReady: localizationReady } = useLocalization();
   const contentWrapper = useCallback(
     (children: React.ReactNode) => (
       <KeyboardAvoidingView
@@ -51,6 +55,17 @@ function AppContent() {
     ),
     [],
   );
+  const hideSplashScreenWhenReady = useCallback(() => {
+    if (props.fontsReady && localizationReady) {
+      void SplashScreen.hideAsync();
+    }
+  }, [localizationReady, props.fontsReady]);
+
+  useEffect(hideSplashScreenWhenReady, [hideSplashScreenWhenReady]);
+
+  if (!props.fontsReady || !localizationReady) {
+    return null;
+  }
 
   return (
     <AppThemeProvider>
@@ -61,7 +76,7 @@ function AppContent() {
           },
         }}
       >
-        <View style={{ flex: 1, backgroundColor: "transparent" }}>
+        <View className={cn("flex-1 bg-transparent")}>
           <Slot />
         </View>
       </HeroUINativeProvider>
@@ -81,31 +96,15 @@ export default function Layout() {
     ...FontAwesome6.font,
     ...Ionicons.font,
   });
-  const hideSplashScreenWhenReady = useCallback(() => {
-    if (fontsLoaded || fontError) {
-      void SplashScreen.hideAsync();
-    }
-  }, [fontError, fontsLoaded]);
-
-  useEffect(hideSplashScreenWhenReady, [hideSplashScreenWhenReady]);
-
-  if (!fontsLoaded && !fontError) {
-    return null;
-  }
+  const fontsReady = fontsLoaded || Boolean(fontError);
 
   return (
-    <GestureHandlerRootView style={styles.root}>
+    <GestureHandlerRootView className={cn("flex-1")}>
       <KeyboardProvider>
         <LocalizationProvider>
-          <AppContent />
+          <AppContent fontsReady={fontsReady} />
         </LocalizationProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-});

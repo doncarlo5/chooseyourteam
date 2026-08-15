@@ -14,7 +14,7 @@
     "test": "vitest run",
     "i18n:extract": "lingui extract --clean",
     "i18n:compile": "lingui compile --strict --typescript",
-    "i18n:check": "npm run i18n:extract && npm run i18n:compile && test -z \"$(git status --porcelain --untracked-files=all -- src/localization/locales)\"",
+    "i18n:check": "node ./scripts/check-i18n-catalogs.mjs",
     "verify": "npm run typecheck && npm run lint && npm run i18n:check && npm test"
   },
   "expo": {

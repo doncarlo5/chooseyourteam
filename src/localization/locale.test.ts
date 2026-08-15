@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  isLocalePreference,
+  parseLocalePreference,
+  resolveAppLocale,
   resolveDevelopmentLocaleOverride,
   resolveSupportedLocale,
 } from "./locale";
@@ -28,6 +31,39 @@ describe("resolveSupportedLocale", () => {
   it("falls back to English for unsupported or empty preferences", () => {
     expect(resolveSupportedLocale([{ languageTag: "es-ES" }])).toBe("en");
     expect(resolveSupportedLocale([])).toBe("en");
+  });
+});
+
+describe("locale preference", () => {
+  it.each(["system", "en", "fr"] as const)(
+    "accepts %s as a user preference",
+    (localePreference) => {
+      expect(isLocalePreference(localePreference)).toBe(true);
+      expect(parseLocalePreference(localePreference)).toBe(localePreference);
+    },
+  );
+
+  it("treats missing and invalid stored values as system", () => {
+    expect(parseLocalePreference(null)).toBe("system");
+    expect(parseLocalePreference("pseudo")).toBe("system");
+    expect(parseLocalePreference("es")).toBe("system");
+  });
+
+  it("gives the development override priority over user and device locales", () => {
+    expect(resolveAppLocale("fr", [{ languageTag: "en-US" }], "pseudo")).toBe(
+      "pseudo",
+    );
+  });
+
+  it("keeps a manual preference ahead of the device locale", () => {
+    expect(resolveAppLocale("fr", [{ languageTag: "en-US" }], null)).toBe("fr");
+    expect(resolveAppLocale("en", [{ languageTag: "fr-FR" }], null)).toBe("en");
+  });
+
+  it("uses the device locale only for the system preference", () => {
+    expect(resolveAppLocale("system", [{ languageTag: "fr-CA" }], null)).toBe(
+      "fr",
+    );
   });
 });
 

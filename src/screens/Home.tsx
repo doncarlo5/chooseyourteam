@@ -19,6 +19,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import AppReviewButton from "./components/app-review-button";
+import AppInfoButton from "./components/app-info-button";
 import AppShareButton from "./components/app-share-button";
 import DialogMorePlayers from "./components/dialog-more-players";
 import FrozenDotsLayer from "./components/frozen-dots-layer";
@@ -214,6 +215,7 @@ export default function Home() {
             onSelectTeams={handleTeamSelection}
             onPairingModeChange={handlePairingModeChange}
           />
+          <AppInfoButton />
           <AppShareButton />
         </>
       ) : (
