@@ -1,11 +1,9 @@
 import { AppText } from "@/src/components/app-text";
 import { Trans } from "@lingui/react/macro";
 import { PressableFeedback, cn } from "heroui-native";
-import { useState } from "react";
 import { View } from "react-native";
 import Animated, { Easing, FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import PairingModeToggle from "./pairing-mode-toggle";
 import { PlayerCard } from "./player-card";
 
 const GROUP_OPTIONS = [2, 3, 4, 5];
@@ -17,8 +15,6 @@ export default function TeamsSelection(props: {
   onPairingModeChange: (isEnabled: boolean) => void;
 }) {
   const insets = useSafeAreaInsets();
-  const [isPairingModeToggleVisible, setIsPairingModeToggleVisible] =
-    useState(false);
 
   if (props.selectedTeams) return null;
 
@@ -39,7 +35,7 @@ export default function TeamsSelection(props: {
           animation={false}
           delayLongPress={1200}
           onLongPress={() => {
-            setIsPairingModeToggleVisible(true);
+            props.onPairingModeChange(!props.isPairingModeEnabled);
           }}
         >
           <AppText
@@ -54,12 +50,6 @@ export default function TeamsSelection(props: {
             Choose Your Team
           </AppText>
         </PressableFeedback>
-        {isPairingModeToggleVisible ? (
-          <PairingModeToggle
-            isEnabled={props.isPairingModeEnabled}
-            onValueChange={props.onPairingModeChange}
-          />
-        ) : null}
       </Animated.View>
 
       <View className={cn("flex-1 justify-center")}>
