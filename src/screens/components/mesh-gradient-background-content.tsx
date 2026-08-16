@@ -7,15 +7,13 @@ import {
   Paint,
   Rect,
   Vertices,
-  useColorBuffer,
-  usePointBuffer,
   vec,
 } from "@shopify/react-native-skia";
 import { useIsFocused } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { AppState, StyleSheet, View, useWindowDimensions } from "react-native";
 import {
-  type SharedValue,
+  useDerivedValue,
   useFrameCallback,
   useSharedValue,
 } from "react-native-reanimated";
@@ -73,6 +71,14 @@ const hexToRgb01 = (hex: string): RGB => {
 const clamp = (v: number, min: number, max: number) => {
   "worklet";
   return Math.max(min, Math.min(max, v));
+};
+
+const rgbaToString = (r: number, g: number, b: number, a: number) => {
+  "worklet";
+  const red = Math.round(clamp(r, 0, 1) * 255);
+  const green = Math.round(clamp(g, 0, 1) * 255);
+  const blue = Math.round(clamp(b, 0, 1) * 255);
+  return `rgba(${red},${green},${blue},${clamp(a, 0, 1)})`;
 };
 
 const lerp = (a: number, b: number, t: number) => {
@@ -222,93 +228,103 @@ export default function MeshGradientBackground(props: {
 
   // Animate ONLY inner vertices (pin edges to avoid gaps).
   // Motion is coherent: depends on UV coords + time for a soft mesh drift.
-  const animatedVertices = usePointBuffer(baseVertices.length, (point, i) => {
+  // Keep Point[]/string[] shared values here: those are the documented Vertices
+  // inputs. Skia 2.11 buffer hooks did not produce a visible Vertices draw.
+  const animatedVertices = useDerivedValue(() => {
     "worklet";
-    const mutablePoint = point as { x: number; y: number };
     const t = clock.get() * speed;
     const stride = cols + 1;
-    const basePoint = baseVertices[i];
-    const xi = i % stride;
-    const yi = Math.floor(i / stride);
-    const isEdge = xi === 0 || yi === 0 || xi === cols || yi === rows;
-    if (isEdge) {
-      mutablePoint.x = basePoint.x;
-      mutablePoint.y = basePoint.y;
-      return;
-    }
 
-    const u = xi / cols;
-    const v = yi / rows;
-    const uvx = u * 2 - 1;
-    const uvy = v * 2 - 1;
-    const edge = 0.14;
-    const edgeFade =
-      smoothstep(0, edge, u) *
-      smoothstep(0, edge, 1 - u) *
-      smoothstep(0, edge, v) *
-      smoothstep(0, edge, 1 - v);
-    const fx = 2.25;
-    const fy = 3.15;
-    const n1 = noise2D(uvx * fx + t * 0.35, uvy * fy + t * 0.18, 10.0);
-    const n2 = noise2D(
-      uvx * fx - t * 0.22 + 9.3,
-      uvy * fy + t * 0.28 + 2.1,
-      42.0,
-    );
+    return baseVertices.map((basePoint, i) => {
+      const xi = i % stride;
+      const yi = Math.floor(i / stride);
+      const isEdge = xi === 0 || yi === 0 || xi === cols || yi === rows;
+      if (isEdge) return basePoint;
 
-    mutablePoint.x = basePoint.x + amplitude * 0.35 * n1 * edgeFade;
-    mutablePoint.y = basePoint.y + amplitude * n2 * edgeFade;
+      const u = xi / cols;
+      const v = yi / rows;
+      const uvx = u * 2 - 1;
+      const uvy = v * 2 - 1;
+      const edge = 0.14;
+      const edgeFade =
+        smoothstep(0, edge, u) *
+        smoothstep(0, edge, 1 - u) *
+        smoothstep(0, edge, v) *
+        smoothstep(0, edge, 1 - v);
+      const fx = 2.25;
+      const fy = 3.15;
+      const n1 = noise2D(
+        uvx * fx + t * 0.35,
+        uvy * fy + t * 0.18,
+        10.0,
+      );
+      const n2 = noise2D(
+        uvx * fx - t * 0.22 + 9.3,
+        uvy * fy + t * 0.28 + 2.1,
+        42.0,
+      );
+
+      return {
+        x: basePoint.x + amplitude * 0.35 * n1 * edgeFade,
+        y: basePoint.y + amplitude * n2 * edgeFade,
+      };
+    });
   });
 
   // Layered color blending:
   // baseColor acts as a calm backdrop; each layer uses smoothstep + pow falloff.
-  const animatedColors = useColorBuffer(baseVertices.length, (color, i) => {
+  const animatedColors = useDerivedValue(() => {
     "worklet";
     const t = clock.get() * speed;
     const stride = cols + 1;
     const baseIdx = Math.min(2, paletteRgb.length - 1);
     const base = paletteRgb[baseIdx] ?? ([0.44, 0.07, 0.95] as const);
-    const xi = i % stride;
-    const yi = Math.floor(i / stride);
-    const u = xi / cols;
-    const v = yi / rows;
-    const uvx = u * 2 - 1;
-    const uvy = v * 2 - 1;
-    const band = 1 - clamp(Math.abs(uvy), 0, 1);
-    const bandFade = useBandFade
-      ? lerp(1, band * band, clamp(bandFadeStrength, 0, 1))
-      : 1;
-    let r = base[0];
-    let g = base[1];
-    let b = base[2];
 
-    for (let k = 0; k < layerOrder.length; k += 1) {
-      const idx = layerOrder[k];
-      const paletteColor = paletteRgb[idx] ?? base;
-      const freqX = 1.6 + k * 0.55;
-      const freqY = 2.2 + k * 0.45;
-      const flowX = 0.2 + k * 0.07;
-      const flowY = 0.12 + k * 0.05;
-      const seed = 100 + k * 37.7;
-      const raw = noise2D(
-        uvx * freqX + t * flowX + seed,
-        uvy * freqY - t * flowY + seed * 0.33,
-        seed,
+    return baseVertices.map((_, i) => {
+      const xi = i % stride;
+      const yi = Math.floor(i / stride);
+      const u = xi / cols;
+      const v = yi / rows;
+      const uvx = u * 2 - 1;
+      const uvy = v * 2 - 1;
+      const band = 1 - clamp(Math.abs(uvy), 0, 1);
+      const bandFade = useBandFade
+        ? lerp(1, band * band, clamp(bandFadeStrength, 0, 1))
+        : 1;
+      let r = base[0];
+      let g = base[1];
+      let b = base[2];
+
+      for (let k = 0; k < layerOrder.length; k += 1) {
+        const idx = layerOrder[k];
+        const paletteColor = paletteRgb[idx] ?? base;
+        const freqX = 1.6 + k * 0.55;
+        const freqY = 2.2 + k * 0.45;
+        const flowX = 0.2 + k * 0.07;
+        const flowY = 0.12 + k * 0.05;
+        const seed = 100 + k * 37.7;
+        const raw = noise2D(
+          uvx * freqX + t * flowX + seed,
+          uvy * freqY - t * flowY + seed * 0.33,
+          seed,
+        );
+        const noise = raw * 0.5 + 0.5;
+        const weight = smoothstep(0.22, 0.66 + 0.06 * k, noise);
+        const layerWeight = idx === 3 ? clamp(yellowWeight, 0, 1) : 1;
+        const opacity = Math.pow(weight, 4) * bandFade * layerWeight;
+        r = lerp(r, paletteColor[0], opacity);
+        g = lerp(g, paletteColor[1], opacity);
+        b = lerp(b, paletteColor[2], opacity);
+      }
+
+      const darken = clamp(colorDarken, 0, 1);
+      return rgbaToString(
+        r * darken,
+        g * darken,
+        b * darken,
+        vertexAlpha,
       );
-      const noise = raw * 0.5 + 0.5;
-      const weight = smoothstep(0.22, 0.66 + 0.06 * k, noise);
-      const layerWeight = idx === 3 ? clamp(yellowWeight, 0, 1) : 1;
-      const opacity = Math.pow(weight, 4) * bandFade * layerWeight;
-      r = lerp(r, paletteColor[0], opacity);
-      g = lerp(g, paletteColor[1], opacity);
-      b = lerp(b, paletteColor[2], opacity);
-    }
-
-    const darken = clamp(colorDarken, 0, 1);
-    color[0] = clamp(r * darken, 0, 1);
-    color[1] = clamp(g * darken, 0, 1);
-    color[2] = clamp(b * darken, 0, 1);
-    color[3] = clamp(vertexAlpha, 0, 1);
+    });
   });
 
   return (
@@ -327,9 +343,7 @@ export default function MeshGradientBackground(props: {
           <Vertices
             vertices={animatedVertices}
             indices={indices}
-            colors={
-              animatedColors as unknown as SharedValue<string[] | undefined>
-            }
+            colors={animatedColors}
           />
         </Group>
 

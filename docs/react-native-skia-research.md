@@ -52,7 +52,7 @@ Impact on this app:
 - 2.7.0 added on-screen high-color-depth support and improved WebGL context management ([2.7.0 release](https://github.com/Shopify/react-native-skia/releases/tag/v2.7.0)).
 - 2.8.0 fixed WASM memory consumption in the React Native Web reconciler ([2.8.0 release](https://github.com/Shopify/react-native-skia/releases/tag/v2.8.0)).
 - 2.10.0 moved host objects to native states ([2.10.0 release](https://github.com/Shopify/react-native-skia/releases/tag/v2.10.0)).
-- 2.11.0 upgrades the bundled native Skia milestone to 152 and exposes the preallocated point and color buffers used by the animated mesh.
+- 2.11.0 upgrades the bundled native Skia milestone to 152 and exposes preallocated point and color buffer hooks. The animated mesh does not use them because `Vertices` documents `Point[]` and `string[]` inputs, and the buffer-backed integration produced no visible mesh on iOS or Android.
 
 These are worthwhile improvements, but none replaces the need to minimize Canvas count on web.
 
@@ -120,7 +120,7 @@ For a more expressive reveal, normalize paths and animate a circle-to-team-shape
 
 1. Explicit stroke joins/miter limits and visual snapshots at base/reveal sizes.
 2. Smooth cubic squircle and wave paths, with tests for bounds and non-empty output.
-3. Profile the consolidated allocation Canvas and preallocated mesh buffers on representative devices.
+3. Profile the consolidated allocation Canvas and animated mesh on representative devices. Revisit mesh buffers only after a supported `Vertices` integration is documented and visually validated.
 4. Optional `highBitDepth` trial on the consolidated canvas, comparing gradient banding and frame/memory cost on real iOS/Android hardware.
 5. Optional reveal morph after all team shapes share compatible commands.
 6. Optional path effects as art direction, not as a substitute for correct clipping geometry.
@@ -132,7 +132,7 @@ For a more expressive reveal, normalize paths and animate a circle-to-team-shape
 | Mounted allocation artwork canvases     |                      12 live, up to 5 additional frozen |                                                    1 total |
 | Scroll-to-JavaScript visibility updates |                             Up to once per scroll frame |    One swipe-hint event per Session plus scroll completion |
 | Reveal snapshot reads                   |     Repeated JavaScript reads across slot shared values |            One UI-thread snapshot array sent to JavaScript |
-| Mesh vertex/color construction          | New point objects, arrays, and color strings each frame | Preallocated `usePointBuffer` and `useColorBuffer` entries |
+| Mesh vertex/color construction          | New point objects, arrays, and color strings each frame | Unchanged; buffer-backed `Vertices` rendered only the fallback fill, so the documented arrays were retained |
 | Inactive mesh clock                     |                         Continued running while mounted |           Paused when the route or application is inactive |
 
 Five deterministic Playwright states verify unrevealed, countdown, revealed, frozen, and mid-scroll rendering. Every fixture asserts one Canvas and fails on browser page errors.
