@@ -2,8 +2,8 @@
 
 ## Coding rules
 
-- For styling, use the `cn` utility from `@heroui`.
-- For UI, use components from the `components` folder.
+- For styling, use the `cn` utility from `@heroui` (not mandatory)
+- For UI, use components from the `components` folder (not mandatory)
 - Define props types inside the component when possible; move them outside only if reused.
 - Always name the function parameter `props` to make prop usage obvious in the file.
 - Never destructure `props`; access via `props.*` explicitly.
