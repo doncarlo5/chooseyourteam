@@ -18,43 +18,99 @@ import Animated, {
 import { scheduleOnRN } from "react-native-worklets";
 import {
   canNavigateRounds,
+  createRoundNavigationReset,
   didDragSettleWithoutMomentum,
-  roundForSettledOffset,
+  shouldEmitRoundSwipeThreshold,
+  settleRoundNavigation,
 } from "../round-navigation";
 import RoundScreen from "./round-screen";
 
 export default function AllocationRoundNavigation(props: {
-  isMultiRound: boolean;
-  currentRound: AllocationRound;
-  firstRoundCount: number;
-  secondRoundCount: number;
-  touchCount: number;
-  isTouching: boolean;
-  isRoundOneFrozen: boolean;
-  isRoundTwoFrozen: boolean;
-  hasShownSwipeHint: boolean;
-  resetKey: number;
-  onSwipeHintSeen: () => void;
-  onNavigationStarted: () => void;
-  onNavigationCancelled: () => void;
-  onNavigationSettled: (round: AllocationRound) => void;
+  state: {
+    isMultiRound: boolean;
+    currentRound: AllocationRound;
+    playerCounts: {
+      firstRound: number;
+      secondRound: number;
+      touching: number;
+    };
+    isTouching: boolean;
+    frozenRounds: {
+      roundOne: boolean;
+      roundTwo: boolean;
+    };
+    hasShownSwipeHint: boolean;
+    resetKey: number;
+  };
+  operations: {
+    onSwipeHintSeen: () => void;
+    onSettled: (round: AllocationRound) => void;
+  };
   children: (
-    roundScrollX: SharedValue<number>,
+    navigation: {
+      scrollX: SharedValue<number>;
+      isIdle: SharedValue<boolean>;
+    },
     navigationLayer: ReactNode,
   ) => ReactNode;
 }) {
   const { width } = useWindowDimensions();
   const roundScrollX = useSharedValue(0);
+  const isRoundNavigationIdle = useSharedValue(true);
   const hasCrossedThreshold = useSharedValue(false);
   const arrowBounce = useSharedValue(0);
   const scrollRef = useRef<ScrollView>(null);
-  const handleSwipeHintSeen = () => props.onSwipeHintSeen();
-  const scrollHandler = useAnimatedScrollHandler((event) => {
-    roundScrollX.set(event.contentOffset.x);
-    if (event.contentOffset.x >= width * 0.5 && !hasCrossedThreshold.get()) {
-      hasCrossedThreshold.set(true);
-      scheduleOnRN(handleSwipeHintSeen);
-    }
+  const handleSwipeHintSeen = () => props.operations.onSwipeHintSeen();
+  const handleNavigationSettled = (offset: number) => {
+    "worklet";
+    const settled = settleRoundNavigation(offset, width);
+    isRoundNavigationIdle.set(settled.isIdle);
+    scheduleOnRN(props.operations.onSettled, settled.round);
+  };
+  const startArrowBounce = () => {
+    arrowBounce.set(
+      withRepeat(
+        withTiming(1, {
+          duration: 700,
+          easing: Easing.inOut(Easing.quad),
+        }),
+        -1,
+        true,
+      ),
+    );
+  };
+  const resetNavigation = () => {
+    const reset = createRoundNavigationReset();
+    roundScrollX.set(reset.offset);
+    isRoundNavigationIdle.set(reset.isIdle);
+    hasCrossedThreshold.set(reset.threshold.hasEmitted);
+    scrollRef.current?.scrollTo({ x: reset.offset, animated: false });
+  };
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      roundScrollX.set(event.contentOffset.x);
+      if (
+        shouldEmitRoundSwipeThreshold(
+          hasCrossedThreshold.get(),
+          event.contentOffset.x,
+          width,
+        )
+      ) {
+        hasCrossedThreshold.set(true);
+        scheduleOnRN(handleSwipeHintSeen);
+      }
+    },
+    onBeginDrag: () => {
+      isRoundNavigationIdle.set(false);
+    },
+    onEndDrag: (event) => {
+      if (didDragSettleWithoutMomentum(event.velocity?.x)) {
+        handleNavigationSettled(event.contentOffset.x);
+      }
+    },
+    onMomentumEnd: (event) => {
+      handleNavigationSettled(event.contentOffset.x);
+    },
   });
   const rightArrowStyle = useAnimatedStyle(() => ({
     opacity: interpolate(
@@ -79,28 +135,18 @@ export default function AllocationRoundNavigation(props: {
     ],
   }));
 
-  useEffect(() => {
-    arrowBounce.set(
-      withRepeat(
-        withTiming(1, {
-          duration: 700,
-          easing: Easing.inOut(Easing.quad),
-        }),
-        -1,
-        true,
-      ),
-    );
-  }, [arrowBounce]);
+  useEffect(startArrowBounce, [arrowBounce]);
 
-  useEffect(() => {
-    roundScrollX.set(0);
-    hasCrossedThreshold.set(false);
-    scrollRef.current?.scrollTo({ x: 0, animated: false });
-  }, [hasCrossedThreshold, props.resetKey, roundScrollX]);
+  useEffect(resetNavigation, [
+    hasCrossedThreshold,
+    isRoundNavigationIdle,
+    props.state.resetKey,
+    roundScrollX,
+  ]);
 
   const navigationLayer = (
     <>
-      {props.isMultiRound ? (
+      {props.state.isMultiRound ? (
         <>
           <Animated.ScrollView
             ref={scrollRef}
@@ -108,44 +154,27 @@ export default function AllocationRoundNavigation(props: {
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             scrollEnabled={canNavigateRounds(
-              props.isRoundOneFrozen,
-              props.isTouching,
+              props.state.frozenRounds.roundOne,
+              props.state.isTouching,
             )}
             onScroll={scrollHandler}
             scrollEventThrottle={16}
-            onScrollBeginDrag={props.onNavigationStarted}
-            onScrollEndDrag={(event) => {
-              if (didDragSettleWithoutMomentum(event.nativeEvent.velocity?.x)) {
-                props.onNavigationCancelled();
-                props.onNavigationSettled(
-                  roundForSettledOffset(
-                    event.nativeEvent.contentOffset.x,
-                    width,
-                  ),
-                );
-              }
-            }}
-            onMomentumScrollEnd={(event) => {
-              props.onNavigationSettled(
-                roundForSettledOffset(event.nativeEvent.contentOffset.x, width),
-              );
-            }}
           >
             <View style={{ width }}>
               <RoundScreen
-                fingersCount={props.firstRoundCount}
-                touchCount={props.touchCount}
-                isActive={props.currentRound === 0}
-                isFrozen={props.isRoundOneFrozen}
+                fingersCount={props.state.playerCounts.firstRound}
+                touchCount={props.state.playerCounts.touching}
+                isActive={props.state.currentRound === 0}
+                isFrozen={props.state.frozenRounds.roundOne}
                 allowOverExpected={false}
               />
             </View>
             <View style={{ width }}>
               <RoundScreen
-                fingersCount={props.secondRoundCount}
-                touchCount={props.touchCount}
-                isActive={props.currentRound === 1}
-                isFrozen={props.isRoundTwoFrozen}
+                fingersCount={props.state.playerCounts.secondRound}
+                touchCount={props.state.playerCounts.touching}
+                isActive={props.state.currentRound === 1}
+                isFrozen={props.state.frozenRounds.roundTwo}
                 allowOverExpected={false}
               />
             </View>
@@ -165,9 +194,9 @@ export default function AllocationRoundNavigation(props: {
               ))}
             </View>
           </View>
-          {props.currentRound === 0 &&
-          props.isRoundOneFrozen &&
-          !props.hasShownSwipeHint ? (
+          {props.state.currentRound === 0 &&
+          props.state.frozenRounds.roundOne &&
+          !props.state.hasShownSwipeHint ? (
             <View
               className={cn(
                 "absolute right-8 inset-y-0 items-center justify-center",
@@ -182,7 +211,8 @@ export default function AllocationRoundNavigation(props: {
               </Animated.View>
             </View>
           ) : null}
-          {props.currentRound === 1 && props.isRoundTwoFrozen ? (
+          {props.state.currentRound === 1 &&
+          props.state.frozenRounds.roundTwo ? (
             <View
               className={cn(
                 "absolute left-8 inset-y-0 items-center justify-center",
@@ -201,10 +231,10 @@ export default function AllocationRoundNavigation(props: {
       ) : (
         <View className={cn("absolute inset-0")} pointerEvents="none">
           <RoundScreen
-            fingersCount={props.firstRoundCount}
-            touchCount={props.touchCount}
+            fingersCount={props.state.playerCounts.firstRound}
+            touchCount={props.state.playerCounts.touching}
             isActive
-            isFrozen={props.isRoundOneFrozen}
+            isFrozen={props.state.frozenRounds.roundOne}
             allowOverExpected
           />
         </View>
@@ -212,5 +242,8 @@ export default function AllocationRoundNavigation(props: {
     </>
   );
 
-  return props.children(roundScrollX, navigationLayer);
+  return props.children(
+    { scrollX: roundScrollX, isIdle: isRoundNavigationIdle },
+    navigationLayer,
+  );
 }

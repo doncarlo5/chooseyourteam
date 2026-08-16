@@ -1,4 +1,9 @@
 import { H, type Step, styleChargeBomb } from "@/src/screens/utils/helper";
+import {
+  cancelTouchAllocationFeedback,
+  scheduleTouchAllocationFeedback,
+  systemTouchAllocationTimer,
+} from "@/src/screens/touch-allocation-feedback-scheduler";
 import { useLingui } from "@lingui/react/macro";
 import { Asset } from "expo-asset";
 import {
@@ -135,7 +140,10 @@ export default function useTouchAllocationFeedback(props: {
   const shakeDirectionRef = useRef(1);
 
   const clearPreRevealHaptics = () => {
-    preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
+    cancelTouchAllocationFeedback(
+      preRevealHapticsRef.current,
+      systemTouchAllocationTimer,
+    );
     preRevealHapticsRef.current = [];
   };
 
@@ -240,15 +248,15 @@ export default function useTouchAllocationFeedback(props: {
       props.shakeX.set(withSequence(...sequence));
     };
 
-    steps.forEach((step) => {
-      if (step.t < 0 || step.t > windowMs) {
-        return;
-      }
-      const timerId = setTimeout(() => {
-        kickShake(step.t / windowMs, step.fn);
-        void step.fn();
-      }, startAfterMs + step.t);
-      preRevealHapticsRef.current.push(timerId);
+    preRevealHapticsRef.current = scheduleTouchAllocationFeedback({
+      steps: steps.map((step) => ({ atMs: step.t, value: step.fn })),
+      startAfterMs,
+      windowMs,
+      timer: systemTouchAllocationTimer,
+      feedback: (fn, progress) => {
+        kickShake(progress, fn);
+        void fn();
+      },
     });
   };
 

@@ -13,7 +13,6 @@ export type AllocationSessionState = {
   isRoundTwoFrozen: boolean;
   roundResetKey: number;
   navigationResetKey: number;
-  isRoundScrolling: boolean;
   hasShownSwipeHint: boolean;
 };
 
@@ -29,9 +28,8 @@ export type AllocationSessionAction =
       players: RevealedPlayer[];
     }
   | { type: "swipeHintSeen" }
-  | { type: "navigationStarted" }
-  | { type: "navigationCancelled" }
-  | { type: "navigationSettled"; round: number };
+  | { type: "navigationSettled"; round: number }
+  | { type: "exitCompleted" };
 
 export const createAllocationSessionState = (): AllocationSessionState => ({
   declaredPlayerCount: null,
@@ -43,7 +41,6 @@ export const createAllocationSessionState = (): AllocationSessionState => ({
   isRoundTwoFrozen: false,
   roundResetKey: 0,
   navigationResetKey: 0,
-  isRoundScrolling: false,
   hasShownSwipeHint: false,
 });
 
@@ -58,7 +55,6 @@ const resetRounds = (
   | "isRoundTwoFrozen"
   | "roundResetKey"
   | "navigationResetKey"
-  | "isRoundScrolling"
   | "hasShownSwipeHint"
 > => ({
   currentRound: 0,
@@ -68,7 +64,6 @@ const resetRounds = (
   isRoundTwoFrozen: false,
   roundResetKey: state.roundResetKey + 1,
   navigationResetKey: state.navigationResetKey + 1,
-  isRoundScrolling: false,
   hasShownSwipeHint: false,
 });
 
@@ -79,6 +74,10 @@ export const allocationSessionReducer = (
   state: AllocationSessionState,
   action: AllocationSessionAction,
 ): AllocationSessionState => {
+  if (action.type === "exitCompleted") {
+    return createAllocationSessionState();
+  }
+
   if (action.type === "selectPlayerCount") {
     return {
       ...state,
@@ -113,23 +112,9 @@ export const allocationSessionReducer = (
     return { ...state, hasShownSwipeHint: true };
   }
 
-  if (action.type === "navigationStarted") {
-    if (state.isRoundScrolling) {
-      return state;
-    }
-    return { ...state, isRoundScrolling: true };
-  }
-
-  if (action.type === "navigationCancelled") {
-    if (!state.isRoundScrolling) {
-      return state;
-    }
-    return { ...state, isRoundScrolling: false };
-  }
-
   if (action.type === "navigationSettled") {
     const round = clampAllocationRound(action.round);
-    if (round === state.currentRound && !state.isRoundScrolling) {
+    if (round === state.currentRound) {
       return state;
     }
     return {
@@ -139,7 +124,6 @@ export const allocationSessionReducer = (
         round === state.currentRound
           ? state.roundResetKey
           : state.roundResetKey + 1,
-      isRoundScrolling: false,
     };
   }
 

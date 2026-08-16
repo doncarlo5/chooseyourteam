@@ -52,6 +52,7 @@ export type TouchAllocationSceneProps = {
     roundTwo: RevealedPlayer[];
   };
   roundScrollX: SharedValue<number>;
+  isRoundNavigationIdle: SharedValue<boolean>;
   isMultiRound: boolean;
   onReveal: (event: { round: 0 | 1; players: RevealedPlayer[] }) => void;
   onTouchStateChange: (state: { count: number; isTouching: boolean }) => void;
@@ -341,6 +342,7 @@ export default function TouchAllocationScene(props: TouchAllocationSceneProps) {
       props.onReveal({ round: props.configuration.round, players });
     },
     acceptsNewTouches: props.configuration.acceptsNewTouches,
+    isRoundNavigationIdle: props.isRoundNavigationIdle,
     expectedTouchCount: props.configuration.expectedTouchCount,
     allowOverExpected: props.configuration.allowOverExpected,
     roundAssignment: props.configuration.roundAssignment,

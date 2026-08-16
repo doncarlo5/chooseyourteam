@@ -5,6 +5,7 @@ import {
   countTrackedTouches,
   countVisibleTouches,
   createRevealedPlayers,
+  emitTouchAllocationLifecycleEffects,
   findTouchSlot,
   isCurrentToken,
   isExitReady,
@@ -12,6 +13,7 @@ import {
   meetsExpectedTouchCount,
   transitionTouchAllocationLifecycle,
   type TouchAllocationLifecycleResult,
+  type TouchAllocationLifecycleEffect,
   type TouchAllocationLifecycleStore,
   type TouchSlotStore,
   type TouchSnapshot,
@@ -50,6 +52,7 @@ export default function useTouchAllocationController(props: {
   excludedRects: SharedValue<TouchRect>[];
   onReveal: (players: RevealedPlayer[]) => void;
   acceptsNewTouches: boolean;
+  isRoundNavigationIdle: SharedValue<boolean>;
   expectedTouchCount?: number;
   allowOverExpected?: boolean;
   roundAssignment?: RoundAssignment;
@@ -300,36 +303,39 @@ export default function useTouchAllocationController(props: {
               lifecycleConfiguration,
               { type: "countdownCompleted", token },
             );
-            if (result.snapshot) {
-              scheduleOnRN(handleReveal, token, result.snapshot);
-            }
+            applyLifecycleResult(result);
           }
         }),
       ),
     );
   };
 
-  const applyLifecycleResult = (result: TouchAllocationLifecycleResult) => {
+  const applyLifecycleEffect = (effect: TouchAllocationLifecycleEffect) => {
     "worklet";
-    if (!result.countChanged) {
-      if (result.exitReady) {
-        scheduleOnRN(notifyExitReady);
-      }
+    if (effect.type === "exitReady") {
+      scheduleOnRN(notifyExitReady);
       return;
     }
-    const token = revealToken.get();
-    scheduleOnRN(handleCountChange, result.visibleCount, token);
-    if (result.countdownToken === null) {
+
+    if (effect.type === "revealReady") {
+      scheduleOnRN(handleReveal, revealToken.get(), effect.snapshot);
+      return;
+    }
+
+    scheduleOnRN(handleCountChange, effect.count, revealToken.get());
+    if (effect.countdownToken === null) {
       cancelAnimation(revealProgress);
       revealProgress.set(0);
       cancelAnimation(shakeX);
       shakeX.set(0);
     } else {
-      startCountdown(result.visibleCount, result.countdownToken);
+      startCountdown(effect.count, effect.countdownToken);
     }
-    if (result.exitReady) {
-      scheduleOnRN(notifyExitReady);
-    }
+  };
+
+  const applyLifecycleResult = (result: TouchAllocationLifecycleResult) => {
+    "worklet";
+    emitTouchAllocationLifecycleEffects(result, applyLifecycleEffect);
   };
   const resetAllSlotsEvent = useEffectEvent(resetAllSlots);
 
@@ -353,9 +359,7 @@ export default function useTouchAllocationController(props: {
       lifecycleConfiguration,
       { type: "requestExit" },
     );
-    if (result.exitReady) {
-      scheduleOnRN(notifyExitReady);
-    }
+    applyLifecycleResult(result);
   };
 
   const resetIfNoTrackedTouches = () => {
@@ -402,7 +406,7 @@ export default function useTouchAllocationController(props: {
     .onTouchesDown((event) => {
       "worklet";
 
-      if (!canAcceptNewTouches.get()) {
+      if (!canAcceptNewTouches.get() || !props.isRoundNavigationIdle.get()) {
         return;
       }
 
@@ -430,7 +434,8 @@ export default function useTouchAllocationController(props: {
             x,
             y,
             isIgnored: ignored,
-            acceptsNewTouches: canAcceptNewTouches.get(),
+            acceptsNewTouches:
+              canAcceptNewTouches.get() && props.isRoundNavigationIdle.get(),
           },
         );
         const slot = result.slotIndex;
@@ -456,7 +461,6 @@ export default function useTouchAllocationController(props: {
     })
     .onTouchesMove((event) => {
       "worklet";
-      let visibilityChanged = false;
       for (const touch of event.changedTouches) {
         const slot = findTouchSlot(slotStore, touch.id);
         if (slot === -1) {
@@ -471,7 +475,6 @@ export default function useTouchAllocationController(props: {
             lifecycleConfiguration,
             { type: "move", touchId: touch.id, x, y, isIgnored: ignored },
           );
-          visibilityChanged ||= result.visibilityChanged;
           if (result.visibilityChanged) {
             applyLifecycleResult(result);
           }
@@ -480,7 +483,6 @@ export default function useTouchAllocationController(props: {
           slotY[slot].set(y);
         }
       }
-      void visibilityChanged;
     })
     .onTouchesUp((event, stateManager) => {
       "worklet";
@@ -561,11 +563,9 @@ export default function useTouchAllocationController(props: {
         lifecycleConfiguration,
         { type: "cancel" },
       );
+      applyLifecycleResult(result);
       hardResetSlotsWorklet();
       scheduleOnRN(resetAllSlotsJS);
-      if (result.exitReady) {
-        scheduleOnRN(notifyExitReady);
-      }
       stateManager.end();
     });
 

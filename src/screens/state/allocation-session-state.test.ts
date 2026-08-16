@@ -65,10 +65,7 @@ describe("allocationSessionReducer", () => {
   });
 
   it("clamps Round settlement and ignores duplicate settled events", () => {
-    const scrolling = allocationSessionReducer(createAllocationSessionState(), {
-      type: "navigationStarted",
-    });
-    const settled = allocationSessionReducer(scrolling, {
+    const settled = allocationSessionReducer(createAllocationSessionState(), {
       type: "navigationSettled",
       round: 8,
     });
@@ -83,18 +80,29 @@ describe("allocationSessionReducer", () => {
     expect(duplicate).toBe(settled);
   });
 
-  it("records the swipe hint only once and cancels a drag semantically", () => {
+  it("records the swipe hint only once", () => {
     const seen = allocationSessionReducer(createAllocationSessionState(), {
       type: "swipeHintSeen",
     });
     expect(allocationSessionReducer(seen, { type: "swipeHintSeen" })).toBe(
       seen,
     );
-    const scrolling = allocationSessionReducer(seen, {
-      type: "navigationStarted",
+  });
+
+  it("resets the complete Session when exit finishes", () => {
+    const selected = allocationSessionReducer(createAllocationSessionState(), {
+      type: "selectPlayerCount",
+      playerCount: 8,
+      plan: multiRoundPlan,
     });
+    const revealed = allocationSessionReducer(selected, {
+      type: "revealCompleted",
+      round: 0,
+      players: [revealedPlayer],
+    });
+
     expect(
-      allocationSessionReducer(scrolling, { type: "navigationCancelled" }),
-    ).toMatchObject({ isRoundScrolling: false });
+      allocationSessionReducer(revealed, { type: "exitCompleted" }),
+    ).toEqual(createAllocationSessionState());
   });
 });

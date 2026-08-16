@@ -21,11 +21,6 @@ export type AllocationSessionConfiguration = {
   isPairingModeEnabled: boolean;
 };
 
-export type AllocationSessionScreenProps = {
-  configuration: AllocationSessionConfiguration;
-  onExit: () => void;
-};
-
 const emptyTouchRect = (): TouchRect => ({
   x: 0,
   y: 0,
@@ -34,9 +29,10 @@ const emptyTouchRect = (): TouchRect => ({
   isReady: false,
 });
 
-export default function AllocationSessionScreen(
-  props: AllocationSessionScreenProps,
-) {
+export default function AllocationSessionScreen(props: {
+  configuration: AllocationSessionConfiguration;
+  onExit: () => void;
+}) {
   const [session, dispatchSession] = useReducer(
     allocationSessionReducer,
     undefined,
@@ -59,10 +55,7 @@ export default function AllocationSessionScreen(
     props.configuration.selectedTeams,
   );
   const acceptsNewTouches =
-    !currentRound.isFrozen &&
-    !session.isRoundScrolling &&
-    !isPlayerCountDialogOpen &&
-    !isExitRequested;
+    !currentRound.isFrozen && !isPlayerCountDialogOpen && !isExitRequested;
 
   const handlePlayerCountSelection = (playerCount: number) => {
     const plan = planMultiRoundAssignments(
@@ -96,31 +89,35 @@ export default function AllocationSessionScreen(
   );
   const handleExitReady = () => {
     setIsExitRequested(false);
+    dispatchSession({ type: "exitCompleted" });
     props.onExit();
   };
 
   return (
     <AllocationRoundNavigation
-      isMultiRound={currentRound.isMultiRound}
-      currentRound={currentRound.round}
-      firstRoundCount={currentRound.firstRoundCount}
-      secondRoundCount={currentRound.secondRoundCount}
-      touchCount={touchState.count}
-      isTouching={touchState.isTouching}
-      isRoundOneFrozen={session.isRoundOneFrozen}
-      isRoundTwoFrozen={session.isRoundTwoFrozen}
-      hasShownSwipeHint={session.hasShownSwipeHint}
-      resetKey={session.navigationResetKey}
-      onSwipeHintSeen={() => dispatchSession({ type: "swipeHintSeen" })}
-      onNavigationStarted={() => dispatchSession({ type: "navigationStarted" })}
-      onNavigationCancelled={() =>
-        dispatchSession({ type: "navigationCancelled" })
-      }
-      onNavigationSettled={(round) =>
-        dispatchSession({ type: "navigationSettled", round })
-      }
+      state={{
+        isMultiRound: currentRound.isMultiRound,
+        currentRound: currentRound.round,
+        playerCounts: {
+          firstRound: currentRound.firstRoundCount,
+          secondRound: currentRound.secondRoundCount,
+          touching: touchState.count,
+        },
+        isTouching: touchState.isTouching,
+        frozenRounds: {
+          roundOne: session.isRoundOneFrozen,
+          roundTwo: session.isRoundTwoFrozen,
+        },
+        hasShownSwipeHint: session.hasShownSwipeHint,
+        resetKey: session.navigationResetKey,
+      }}
+      operations={{
+        onSwipeHintSeen: () => dispatchSession({ type: "swipeHintSeen" }),
+        onSettled: (round) =>
+          dispatchSession({ type: "navigationSettled", round }),
+      }}
     >
-      {(roundScrollX, navigationLayer) => (
+      {(navigation, navigationLayer) => (
         <TouchAllocationScene
           configuration={{
             selectedTeams: props.configuration.selectedTeams,
@@ -137,7 +134,8 @@ export default function AllocationSessionScreen(
             roundOne: session.roundOneSnapshot,
             roundTwo: session.roundTwoSnapshot,
           }}
-          roundScrollX={roundScrollX}
+          roundScrollX={navigation.scrollX}
+          isRoundNavigationIdle={navigation.isIdle}
           isMultiRound={currentRound.isMultiRound}
           onReveal={handleReveal}
           onTouchStateChange={handleTouchStateChange}

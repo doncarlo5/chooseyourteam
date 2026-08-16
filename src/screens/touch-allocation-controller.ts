@@ -72,6 +72,19 @@ export type TouchAllocationLifecycleResult = {
   exitReady: boolean;
 };
 
+export type TouchAllocationLifecycleEffect =
+  | {
+      type: "touchCountChanged";
+      count: number;
+      countdownToken: number | null;
+    }
+  | { type: "revealReady"; snapshot: TouchSnapshot[] }
+  | { type: "exitReady" };
+
+export type TouchAllocationLifecycleEffectAdapter = (
+  effect: TouchAllocationLifecycleEffect,
+) => void;
+
 export const isPointInsideRect = (x: number, y: number, rect: TouchRect) => {
   "worklet";
   return (
@@ -261,6 +274,31 @@ const updateLifecycleCount = (
     )
   ) {
     result.countdownToken = null;
+  }
+};
+
+/**
+ * This is the internal effect seam shared by the production UI-thread adapter
+ * and deterministic tests. The transition owns decisions; adapters own timing,
+ * animation, feedback, and thread crossings.
+ */
+export const emitTouchAllocationLifecycleEffects = (
+  result: TouchAllocationLifecycleResult,
+  adapter: TouchAllocationLifecycleEffectAdapter,
+) => {
+  "worklet";
+  if (result.countChanged) {
+    adapter({
+      type: "touchCountChanged",
+      count: result.visibleCount,
+      countdownToken: result.countdownToken,
+    });
+  }
+  if (result.snapshot) {
+    adapter({ type: "revealReady", snapshot: result.snapshot });
+  }
+  if (result.exitReady) {
+    adapter({ type: "exitReady" });
   }
 };
 

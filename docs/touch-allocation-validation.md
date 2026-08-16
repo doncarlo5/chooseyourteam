@@ -8,9 +8,10 @@
 - Expo Doctor and the web production export are part of the release verification pass.
 - Debug native builds complete for the iOS simulator and Android with Java 17. Android Studio's bundled Java 25 runtime is not compatible with this native toolchain.
 
-On 16 August 2026, an unsigned generic iOS Release build and Android Debug
-build completed successfully. The paired iPhone 17 was offline and no Android
-device was attached, so the physical matrix below remains a merge gate.
+On 16 August 2026, an iPhone 17 simulator Release build and Android Debug build
+completed successfully. The Release simulator app launched without logged
+errors. The paired iPhone 17 was offline and `adb devices -l` reported no
+Android device, so the physical matrix below remains a merge gate.
 
 These checks reduce regression risk but do not replace multi-pointer or assistive-technology testing on native devices.
 

@@ -1,10 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createRevealedPlayers,
+  emitTouchAllocationLifecycleEffects,
   isPointInsideRect,
   transitionTouchAllocationLifecycle,
   type MutableCell,
   type TouchAllocationLifecycleConfiguration,
+  type TouchAllocationLifecycleEffect,
+  type TouchAllocationLifecycleEvent,
   type TouchAllocationLifecycleStore,
 } from "./touch-allocation-controller";
 
@@ -48,7 +51,60 @@ const admit = (
     acceptsNewTouches: true,
   });
 
+const createDeterministicLifecycleHarness = (
+  configuration: TouchAllocationLifecycleConfiguration,
+) => {
+  const store = createLifecycle();
+  const feedback: TouchAllocationLifecycleEffect[] = [];
+  let countdownHandle: ReturnType<typeof setTimeout> | null = null;
+  const dispatch = (event: TouchAllocationLifecycleEvent) => {
+    const result = transitionTouchAllocationLifecycle(
+      store,
+      configuration,
+      event,
+    );
+    emitTouchAllocationLifecycleEffects(result, (effect) => {
+      feedback.push(effect);
+      if (effect.type !== "touchCountChanged") {
+        return;
+      }
+      if (countdownHandle !== null) {
+        clearTimeout(countdownHandle);
+        countdownHandle = null;
+      }
+      if (effect.countdownToken !== null) {
+        countdownHandle = setTimeout(() => {
+          dispatch({
+            type: "countdownCompleted",
+            token: effect.countdownToken!,
+          });
+        }, 3000);
+      }
+    });
+    return result;
+  };
+  const admitTouch = (touchId: number) =>
+    dispatch({
+      type: "admit",
+      touchId,
+      x: touchId * 10,
+      y: touchId * 20,
+      isIgnored: false,
+      acceptsNewTouches: true,
+    });
+
+  return { store, feedback, dispatch, admitTouch };
+};
+
 describe("touch allocation lifecycle", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("owns admission, stable slot identity, and slot exhaustion", () => {
     const store = createLifecycle(2);
     expect(admit(store, 1).wasAllocated).toBe(true);
@@ -108,24 +164,30 @@ describe("touch allocation lifecycle", () => {
     expect(visible).toMatchObject({ visibilityChanged: true, visibleCount: 1 });
   });
 
-  it("starts, invalidates, and restarts an exact-count countdown", () => {
-    const store = createLifecycle();
-    expect(admit(store, 1).countdownToken).toBeNull();
-    const started = admit(store, 2);
+  it("drives countdown invalidation and restart through the production effect seam", () => {
+    const harness = createDeterministicLifecycleHarness(exactTwo);
+    expect(harness.admitTouch(1).countdownToken).toBeNull();
+    const started = harness.admitTouch(2);
     expect(started.countdownToken).toBe(2);
-    const invalidated = admit(store, 3);
+    const invalidated = harness.admitTouch(3);
     expect(invalidated.countdownToken).toBeNull();
+    vi.advanceTimersByTime(3000);
     expect(
-      transitionTouchAllocationLifecycle(store, exactTwo, {
-        type: "countdownCompleted",
-        token: started.countdownToken!,
-      }).snapshot,
-    ).toBeNull();
-    const restarted = transitionTouchAllocationLifecycle(store, exactTwo, {
+      harness.feedback.some((effect) => effect.type === "revealReady"),
+    ).toBe(false);
+    const restarted = harness.dispatch({
       type: "release",
       touchId: 3,
     });
     expect(restarted.countdownToken).toBe(4);
+    vi.advanceTimersByTime(2999);
+    expect(
+      harness.feedback.some((effect) => effect.type === "revealReady"),
+    ).toBe(false);
+    vi.advanceTimersByTime(1);
+    expect(
+      harness.feedback.filter((effect) => effect.type === "revealReady"),
+    ).toHaveLength(1);
   });
 
   it("allows over-count in flexible mode and creates one ordered snapshot", () => {

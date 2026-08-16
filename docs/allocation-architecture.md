@@ -37,9 +37,9 @@ flowchart TD
 | --------------------------------------------------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Shopify examples: one Canvas for live and revealed artwork      | Implemented                                    | Twelve possible live slots and both Round snapshots share one allocation Canvas and one shimmer clock. The independent mesh remains separate.                                       |
 | Shopify examples: continuous values on the UI thread            | Implemented                                    | Position, visibility, scale, countdown, reveal, shake, and scroll transforms use shared values/worklets.                                                                            |
-| Shopify examples: semantic JavaScript crossings                 | Implemented                                    | JavaScript receives discrete count, reveal, swipe-hint, navigation-settled, feedback, and exit-ready events; scrolling does not dispatch per frame.                                 |
+| Shopify examples: semantic JavaScript crossings                 | Implemented                                    | JavaScript receives discrete count, reveal, swipe-hint, navigation-settled, feedback, and exit-ready events; drag lifecycle and scrolling remain on the UI thread.                  |
 | Shopify examples: deterministic reducer and injected planning   | Implemented                                    | Multi-Round planning occurs before the Session action; replaying the completed plan is deterministic.                                                                               |
-| Shopify examples: a deeper allocation module                    | Implemented                                    | The active flow is behind `AllocationSessionScreen`; the production gesture adapter and tests use the same token-bearing lifecycle transition.                                      |
+| Shopify examples: a deeper allocation module                    | Implemented                                    | The active flow is behind `AllocationSessionScreen`; production and deterministic fake-clock tests use the same token-bearing transition and lifecycle-effect seam.                 |
 | Shopify examples: visual regression                             | Implemented                                    | Five deterministic baselines assert one Canvas; additional assertions cover both settled accessibility projections and duplicate-label absence.                                     |
 | Medium: hybrid React Native/Skia screen                         | Implemented                                    | React Native owns controls, navigation, instructions, and accessibility; Skia owns artwork. ADR 0003 remains authoritative for this seam.                                           |
 | Medium: use a frame callback only for continuous work           | Implemented                                    | Allocation remains event-driven. Only the continuously animated mesh uses a pausable frame callback.                                                                                |
@@ -53,14 +53,22 @@ flowchart TD
 | Third-party skill: measure full-screen blur                     | Fixture implemented; device evidence pending   | Environment-gated routes compare the unchanged mesh with blur, the identical overscanned mesh without blur, and a paused clock.                                                     |
 | Third-party skill: `.get()`/`.set()` consistency                | Implemented in scope                           | Allocation Session, Round navigation, scene/controller, feedback animation, and mesh code use compiler-facing accessors where supported. Unrelated modules are deferred.            |
 
+## Implementation references
+
+- React effects follow the official `useEffect` setup/cleanup and dependency guidance: <https://react.dev/reference/react/useEffect>.
+- Shared values use the React Compiler-compatible accessors documented by Reanimated: <https://docs.swmansion.com/react-native-reanimated/docs/core/useSharedValue/>.
+- Round drag and momentum phases follow React Native's `ScrollView` event model: <https://reactnative.dev/docs/scrollview>.
+- The permanently mounted manual gesture follows Gesture Handler's UI-thread lifecycle model: <https://docs.swmansion.com/react-native-gesture-handler/docs/fundamentals/state-manager/>.
+- Deterministic scheduling tests use Vitest's documented fake-timer controls: <https://vitest.dev/guide/mocking/timers>.
+
 ## Architecture-review candidates
 
-| Candidate from the temporary review | Resolution                                                                                                                                                                                                            |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Deepen Player allocation lifecycle  | Implemented. One transition owns admission, identity, visibility/count policy, tokens, snapshots, reset/cancel, and deferred exit. Reanimated cells are the production adapter; in-memory cells are the test adapter. |
-| Deepen Session progression          | Implemented. Session rules and current-Round projection moved out of `Home`.                                                                                                                                          |
-| Deepen Revealed Player presentation | Retained from PR #2. Live/frozen artwork and React Native labels use the shared scene projection, with settled-Round accessibility tests.                                                                             |
-| Deepen Round navigation             | Implemented. Offset, threshold, reset, arrows, pagination, drag/momentum settlement, and gating are private to the Session.                                                                                           |
+| Candidate from the temporary review | Resolution                                                                                                                                                                                                                                                          |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Deepen Player allocation lifecycle  | Implemented. One transition owns admission, identity, visibility/count policy, tokens, snapshots, reset/cancel, and deferred exit. Reanimated cells/effects are the production adapters; in-memory cells, a fake clock, and recorded effects are the test adapters. |
+| Deepen Session progression          | Implemented. Session rules and current-Round projection moved out of `Home`.                                                                                                                                                                                        |
+| Deepen Revealed Player presentation | Retained from PR #2. Live/frozen artwork and React Native labels use the shared scene projection, with settled-Round accessibility tests.                                                                                                                           |
+| Deepen Round navigation             | Implemented. Offset, threshold, reset, arrows, pagination, drag/momentum settlement, and gating are private to the Session; only threshold and settlement cross to JavaScript.                                                                                      |
 
 ## Mesh benchmark protocol
 
@@ -74,14 +82,14 @@ The no-blur scenario retains the production 28-point overscan so blur is the onl
 
 ## Evidence status
 
-| Evidence                                                                 | Status                                                                                                                   |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
-| TypeScript, lint, localization, unit tests                               | Passed on 16 August 2026. Lint retained six pre-existing warnings in unrelated showcase controls and reported no errors. |
-| Five Playwright baselines and accessibility assertions                   | Six checks passed on Desktop Chrome at a 390 × 844 viewport.                                                             |
-| Expo Doctor and web export                                               | Expo Doctor passed 21/21 checks; static web export completed.                                                            |
-| iOS and Android native builds                                            | Unsigned generic iOS Release and Android Debug builds completed successfully.                                            |
-| Physical iPhone 17 matrix and profiling                                  | Blocked: the paired iPhone 17 was offline during this pass.                                                              |
-| Physical Android matrix, TalkBack, three-pointer ordering, and profiling | Blocked until the user-supplied device is connected.                                                                     |
+| Evidence                                                                 | Status                                                                                                                          |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| TypeScript, lint, localization, 218 unit tests                           | Passed on 16 August 2026. Lint retained six pre-existing warnings in unrelated showcase controls and reported no errors.        |
+| Five Playwright baselines and accessibility assertions                   | Six checks passed on Desktop Chrome at a 390 × 844 viewport.                                                                    |
+| Expo Doctor and web export                                               | Expo Doctor passed 21/21 checks; static web export completed.                                                                   |
+| iOS and Android native builds                                            | iPhone 17 simulator Release and Android Debug builds completed successfully; the iOS build also launched without logged errors. |
+| Physical iPhone 17 matrix and profiling                                  | Blocked: the paired iPhone 17 remained offline when device discovery was repeated after the fixes.                              |
+| Physical Android matrix, TalkBack, three-pointer ordering, and profiling | Blocked: `adb devices -l` reported no attached Android device after the fixes.                                                  |
 
 The physical-device rows are a merge gate, not inferred from simulator, build, or screenshot success.
 

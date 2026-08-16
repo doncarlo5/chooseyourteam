@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   canNavigateRounds,
+  createRoundNavigationReset,
   didDragSettleWithoutMomentum,
   observeRoundSwipeThreshold,
   roundForSettledOffset,
+  settleRoundNavigation,
 } from "./round-navigation";
 
 describe("Round navigation", () => {
@@ -32,5 +34,20 @@ describe("Round navigation", () => {
     expect(canNavigateRounds(true, false)).toBe(true);
     expect(canNavigateRounds(true, true)).toBe(false);
     expect(canNavigateRounds(false, false)).toBe(false);
+  });
+
+  it("settles momentum to a semantic Round and restores interaction", () => {
+    expect(settleRoundNavigation(100, 100)).toEqual({
+      round: 1,
+      isIdle: true,
+    });
+  });
+
+  it("resets offset, interaction, and threshold state together", () => {
+    expect(createRoundNavigationReset()).toEqual({
+      offset: 0,
+      isIdle: true,
+      threshold: { hasEmitted: false },
+    });
   });
 });
