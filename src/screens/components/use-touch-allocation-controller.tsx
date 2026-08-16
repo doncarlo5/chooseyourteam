@@ -23,7 +23,6 @@ import { Platform } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import {
   cancelAnimation,
-  makeMutable,
   SharedValue,
   useSharedValue,
   withDelay,
@@ -31,6 +30,7 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import { scheduleOnRN, scheduleOnUI } from "react-native-worklets";
+import useSlotSharedValues from "./use-slot-shared-values";
 import useTouchAllocationFeedback from "./use-touch-allocation-feedback";
 
 const HIGHLIGHT_DELAY_MS = 3000;
@@ -88,38 +88,14 @@ export default function useTouchAllocationController(props: {
   const exitPendingSv = useSharedValue(false);
   const shakeX = useSharedValue(0);
   const feedback = useTouchAllocationFeedback({ shakeX });
-  const slotActive = useMemo(
-    () => Array.from({ length: MAX_SLOTS }, () => makeMutable(0)),
-    [],
-  );
-  const slotX = useMemo(
-    () => Array.from({ length: MAX_SLOTS }, () => makeMutable(0)),
-    [],
-  );
-  const slotY = useMemo(
-    () => Array.from({ length: MAX_SLOTS }, () => makeMutable(0)),
-    [],
-  );
-  const slotOpacity = useMemo(
-    () => Array.from({ length: MAX_SLOTS }, () => makeMutable(0)),
-    [],
-  );
-  const slotScale = useMemo(
-    () => Array.from({ length: MAX_SLOTS }, () => makeMutable(1)),
-    [],
-  );
-  const slotTouchId = useMemo(
-    () => Array.from({ length: MAX_SLOTS }, () => makeMutable(-1)),
-    [],
-  );
-  const slotRevealTeams = useMemo(
-    () => Array.from({ length: MAX_SLOTS }, () => makeMutable(0)),
-    [],
-  );
-  const slotRevealProgress = useMemo(
-    () => Array.from({ length: MAX_SLOTS }, () => makeMutable(0)),
-    [],
-  );
+  const slotActive = useSlotSharedValues(0);
+  const slotX = useSlotSharedValues(0);
+  const slotY = useSlotSharedValues(0);
+  const slotOpacity = useSlotSharedValues(0);
+  const slotScale = useSlotSharedValues(1);
+  const slotTouchId = useSlotSharedValues(-1);
+  const slotRevealTeams = useSlotSharedValues(0);
+  const slotRevealProgress = useSlotSharedValues(0);
   const slotStore = useMemo<TouchSlotStore>(
     () => ({
       touchIds: slotTouchId,

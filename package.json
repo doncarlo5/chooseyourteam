@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:visual": "playwright test",
+    "test:native-allocation": "node scripts/check-native-dynamic-allocation.mjs",
     "i18n:extract": "lingui extract --clean",
     "i18n:compile": "lingui compile --strict --typescript",
     "i18n:check": "node ./scripts/check-i18n-catalogs.mjs",
@@ -86,6 +87,7 @@
     "@types/react": "~19.2.18",
     "eslint": "^9.39.5",
     "eslint-config-expo": "~57.0.1",
+    "pngjs": "^7.0.0",
     "prettier": "^3.9.6",
     "typescript": "~6.0.3",
     "vitest": "^4.1.10"

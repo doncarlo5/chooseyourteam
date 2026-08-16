@@ -7,11 +7,13 @@ import {
   RevealedPlayerLabelLayer,
 } from "@/src/screens/components/touch-allocation-scene-content";
 import RevealedPlayerLabel from "@/src/screens/components/revealed-player-label";
+import useSlotSharedValues from "@/src/screens/components/use-slot-shared-values";
 import { useLocalSearchParams } from "expo-router";
 import { cn } from "heroui-native";
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
-import { makeMutable } from "react-native-reanimated";
+import { makeMutable, withTiming } from "react-native-reanimated";
+import { scheduleOnUI } from "react-native-worklets";
 
 const activePositions = [
   { x: 92, y: 300 },
@@ -27,6 +29,8 @@ export default function TouchAllocationVisualFixture() {
   const isRevealed = fixtureState === "revealed";
   const isFrozen = fixtureState === "frozen";
   const isScrolling = fixtureState === "scrolling";
+  const isDynamic = fixtureState === "dynamic";
+  const slotOpacity = useSlotSharedValues(isDynamic ? 0 : 1);
   const holdProgress = fixtureState === "countdown" ? 0.72 : 0.18;
   const activeRound = params.round === "1" ? 1 : 0;
   const slots = useMemo<AllocationLiveSlot[]>(
@@ -35,18 +39,36 @@ export default function TouchAllocationVisualFixture() {
         const position = activePositions[index] ?? { x: 0, y: 0 };
         return {
           active: makeMutable(
-            index < activePositions.length && !isFrozen && !isScrolling ? 1 : 0,
+            index < activePositions.length &&
+              !isFrozen &&
+              !isScrolling &&
+              !isDynamic
+              ? 1
+              : 0,
           ),
           x: makeMutable(position.x),
           y: makeMutable(position.y),
-          opacity: makeMutable(1),
+          opacity: slotOpacity[index],
           scale: makeMutable(1),
           team: makeMutable(isRevealed ? (revealedTeams[index] ?? 0) : 0),
           revealProgress: makeMutable(isRevealed ? 1 : 0),
         };
       }),
-    [isFrozen, isRevealed, isScrolling],
+    [isDynamic, isFrozen, isRevealed, isScrolling, slotOpacity],
   );
+  const activateDynamicSlots = useCallback(() => {
+    "worklet";
+    for (let index = 0; index < 2; index += 1) {
+      slots[index].active.set(1);
+      slots[index].opacity.set(0);
+      slots[index].opacity.set(withTiming(1, { duration: 120 }));
+    }
+  }, [slots]);
+  useEffect(() => {
+    if (isDynamic) {
+      scheduleOnUI(activateDynamicSlots);
+    }
+  }, [activateDynamicSlots, isDynamic]);
   const frozenRounds = useMemo<{
     roundOne: RevealedPlayer[];
     roundTwo: RevealedPlayer[];
