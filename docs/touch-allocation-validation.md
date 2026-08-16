@@ -12,9 +12,12 @@
 On 16 August 2026, an iPhone 17 simulator Release build and Android Debug build
 completed successfully. Native simulator validation found and fixed two UI
 runtime defects: a non-worklet lifecycle helper crashed when the Session
-mounted, and animated component-owned `makeMutable` slot cells rendered only
-the first unrevealed ring. The final Release build mounts and exits a Session,
-and the dynamic two-ring fixture passes. The paired iPhone 17 was offline and
+mounted, and mounting the full revealed artwork for all 12 inactive slots
+exhausted Skia's native animated-variable recorder budget before the second
+unrevealed ring. Revealed artwork now mounts only for assigned slots. The
+native command also verifies that the intended fixture route actually opened
+before evaluating ring pixels. The final Release build mounts and exits a
+Session, and the dynamic two-ring fixture passes. The paired iPhone 17 was offline and
 `adb devices -l` reported no Android device, so the physical matrix below
 remains a merge gate.
 
