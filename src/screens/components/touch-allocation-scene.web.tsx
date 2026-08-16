@@ -1,5 +1,6 @@
 import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
 import { View } from "react-native";
+import { cn } from "heroui-native";
 import type { TouchAllocationSceneProps } from "./touch-allocation-scene-content";
 
 export type {
@@ -13,7 +14,7 @@ export default function TouchAllocationScene(props: TouchAllocationSceneProps) {
       getComponent={() => import("./touch-allocation-scene-content")}
       componentProps={props}
       opts={{ locateFile: () => "/canvaskit.wasm" }}
-      fallback={<View className="flex-1" />}
+      fallback={<View className={cn("flex-1")} />}
     />
   );
 }

@@ -36,9 +36,7 @@ function PlayerCountLabel(props: { count: number }) {
     components: {
       number: (
         <AppText
-          className={cn(
-            "text-5xl font-extrabold leading-none text-[#0B0B0B]",
-          )}
+          className={cn("text-5xl font-extrabold leading-none text-[#0B0B0B]")}
         />
       ),
       unit: <AppText className={cn("pl-0.5 leading-none text-black/60")} />,
@@ -147,13 +145,13 @@ export default function DialogMorePlayers(props: {
         accessibilityHint={t`Opens the player count picker`}
         onLayout={() => {
           plusButtonRef.current?.measureInWindow((x, y, width, height) => {
-            props.plusButtonRectSv.value = {
+            props.plusButtonRectSv.set({
               x,
               y,
               width,
               height,
               isReady: true,
-            };
+            });
           });
         }}
         ref={plusButtonRef}
@@ -169,7 +167,7 @@ export default function DialogMorePlayers(props: {
         <View
           pointerEvents="none"
           style={StyleSheet.absoluteFill}
-          className="bg-white/15"
+          className={cn("bg-white/15")}
         />
         <Button.Label className={cn("text-base font-semibold")}>
           +5

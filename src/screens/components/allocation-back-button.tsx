@@ -56,7 +56,7 @@ export default function AllocationBackButton(props: {
       <View
         pointerEvents="none"
         style={StyleSheet.absoluteFill}
-        className="bg-white/15"
+        className={cn("bg-white/15")}
       />
       <Button.Label>
         <AntDesign name="close" size={20} color="rgba(0,0,0,0.8)" />

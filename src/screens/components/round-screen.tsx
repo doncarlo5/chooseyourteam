@@ -15,10 +15,12 @@ import Animated, {
 } from "react-native-reanimated";
 
 const startSkeletonPulse = (progress: SharedValue<number>) => {
-  progress.value = withRepeat(
-    withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.quad) }),
-    -1,
-    true,
+  progress.set(
+    withRepeat(
+      withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.quad) }),
+      -1,
+      true,
+    ),
   );
 };
 
@@ -82,12 +84,12 @@ export default function RoundScreen(props: {
         ? props.touchCount < props.fingersCount
         : props.touchCount !== props.fingersCount));
   const pulseStyle = useAnimatedStyle(() => ({
-    opacity: pulseProgress.value,
+    opacity: pulseProgress.get(),
   }));
 
   useEffect(() => {
     cancelAnimation(pulseProgress);
-    pulseProgress.value = 0.35;
+    pulseProgress.set(0.35);
     if (!props.allowOverExpected) {
       return;
     }
@@ -95,10 +97,10 @@ export default function RoundScreen(props: {
   }, [props.allowOverExpected, pulseProgress]);
 
   return (
-    <View className="flex-1 items-center justify-center px-8">
-      <View className="items-center gap-3">
+    <View className={cn("flex-1 items-center justify-center px-8")}>
+      <View className={cn("items-center gap-3")}>
         {shouldShowLabel ? (
-          <Animated.View className="items-center" style={pulseStyle}>
+          <Animated.View className={cn("items-center")} style={pulseStyle}>
             <RoundInstruction
               count={props.fingersCount}
               requiresAtLeast={requiresAtLeast}

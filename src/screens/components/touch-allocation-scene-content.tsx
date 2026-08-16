@@ -12,6 +12,7 @@ import {
   vec,
 } from "@shopify/react-native-skia";
 import { useEffect, useMemo, type ReactNode } from "react";
+import { cn } from "heroui-native";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -419,7 +420,7 @@ export default function TouchAllocationScene(props: TouchAllocationSceneProps) {
 
   return (
     <GestureDetector gesture={controller.touchGesture}>
-      <View className="flex-1" style={{ backgroundColor: "transparent" }}>
+      <View className={cn("flex-1")} style={{ backgroundColor: "transparent" }}>
         {props.children}
         <AllocationSceneCanvas
           slots={liveSlots}

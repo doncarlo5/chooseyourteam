@@ -27,7 +27,7 @@ msgstr ""
 
 #. Accessibility label for choosing the total player count
 #. placeholder {0}: props.count
-#: src/screens/components/dialog-more-players.tsx:56
+#: src/screens/components/dialog-more-players.tsx:54
 msgid "{0, plural, one {Select # player} other {Select # players}}"
 msgstr ""
 
@@ -38,12 +38,12 @@ msgid "{0, plural, one {Select # team} other {Select # teams}}"
 msgstr ""
 
 #. Touch instruction. Keep the waiting, number, and unit elements so each line retains its styling.
-#: src/screens/components/round-screen.tsx:38
+#: src/screens/components/round-screen.tsx:40
 msgid "{count, plural, one {<waiting>Put at least</waiting><number>#</number><unit>finger</unit>} other {<waiting>Put at least</waiting><number>#</number><unit>fingers</unit>}}"
 msgstr ""
 
 #. Touch instruction. Keep the waiting, number, and unit elements so each line retains its styling.
-#: src/screens/components/round-screen.tsx:47
+#: src/screens/components/round-screen.tsx:49
 msgid "{count, plural, one {<waiting>Put</waiting><number>#</number><unit>finger</unit>} other {<waiting>Put</waiting><number>#</number><unit>fingers</unit>}}"
 msgstr ""
 
@@ -53,7 +53,7 @@ msgstr ""
 msgid "About"
 msgstr ""
 
-#: src/screens/components/dialog-more-players.tsx:146
+#: src/screens/components/dialog-more-players.tsx:144
 msgid "Add more players"
 msgstr ""
 
@@ -131,7 +131,7 @@ msgstr ""
 msgid "Opens the App Store review page"
 msgstr ""
 
-#: src/screens/components/dialog-more-players.tsx:147
+#: src/screens/components/dialog-more-players.tsx:145
 msgid "Opens the player count picker"
 msgstr ""
 
@@ -149,7 +149,7 @@ msgid "Pick a number to get started"
 msgstr ""
 
 #. placeholder {0}: props.team
-#: src/screens/components/revealed-player-label.tsx:38
+#: src/screens/components/revealed-player-label.tsx:43
 msgid "Player assigned to Team {0}"
 msgstr ""
 
