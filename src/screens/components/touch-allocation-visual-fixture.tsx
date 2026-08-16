@@ -8,6 +8,7 @@ import {
 } from "@/src/screens/components/touch-allocation-scene-content";
 import RevealedPlayerLabel from "@/src/screens/components/revealed-player-label";
 import { useLocalSearchParams } from "expo-router";
+import { cn } from "heroui-native";
 import { useMemo } from "react";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import { makeMutable } from "react-native-reanimated";
@@ -20,13 +21,14 @@ const activePositions = [
 const revealedTeams: TeamNumber[] = [1, 2, 3];
 
 export default function TouchAllocationVisualFixture() {
-  const params = useLocalSearchParams<{ state?: string }>();
+  const params = useLocalSearchParams<{ state?: string; round?: string }>();
   const { width } = useWindowDimensions();
   const fixtureState = params.state ?? "unrevealed";
   const isRevealed = fixtureState === "revealed";
   const isFrozen = fixtureState === "frozen";
   const isScrolling = fixtureState === "scrolling";
   const holdProgress = fixtureState === "countdown" ? 0.72 : 0.18;
+  const activeRound = params.round === "1" ? 1 : 0;
   const slots = useMemo<AllocationLiveSlot[]>(
     () =>
       Array.from({ length: 12 }, (_, index) => {
@@ -52,35 +54,42 @@ export default function TouchAllocationVisualFixture() {
     if (!isFrozen && !isScrolling) {
       return { roundOne: [], roundTwo: [] };
     }
+    const roundTwo = [
+      { x: 95, y: 300, team: 4 as const },
+      { x: 285, y: 420, team: 5 as const },
+    ];
     return {
       roundOne: [
         { x: 90, y: 310, team: 1 },
         { x: 195, y: 430, team: 2 },
         { x: 300, y: 320, team: 3 },
       ],
-      roundTwo: isScrolling
-        ? [
-            { x: 95, y: 300, team: 4 },
-            { x: 285, y: 420, team: 5 },
-          ]
-        : [],
+      roundTwo: isScrolling || activeRound === 1 ? roundTwo : [],
     };
-  }, [isFrozen, isScrolling]);
+  }, [activeRound, isFrozen, isScrolling]);
   const buffers = useMemo(() => {
-    const scrollOffset = isScrolling ? width * 0.5 : 0;
+    const scrollOffset = isScrolling
+      ? width * 0.5
+      : activeRound === 1
+        ? width
+        : 0;
     return {
       roundOneTransform: makeMutable([{ translateX: -scrollOffset }]),
       roundTwoTransform: makeMutable([
         { translateX: isScrolling ? width - scrollOffset : width },
       ]),
-      roundOneOpacity: makeMutable(isScrolling ? 0.5 : 1),
-      roundTwoOpacity: makeMutable(isScrolling ? 0.5 : 0),
+      roundOneOpacity: makeMutable(
+        isScrolling ? 0.5 : activeRound === 0 ? 1 : 0,
+      ),
+      roundTwoOpacity: makeMutable(
+        isScrolling ? 0.5 : activeRound === 1 ? 1 : 0,
+      ),
       liveSceneOpacity: makeMutable(1),
       shakeX: makeMutable(0),
       holdProgress: makeMutable(holdProgress),
       shimmerClock: makeMutable(450),
     };
-  }, [holdProgress, isScrolling, width]);
+  }, [activeRound, holdProgress, isScrolling, width]);
 
   const visiblePlayers = isRevealed
     ? activePositions.map((position, index) => ({
@@ -90,8 +99,11 @@ export default function TouchAllocationVisualFixture() {
     : [];
 
   return (
-    <View testID="allocation-scene-fixture" className="flex-1 bg-emerald-200">
-      <AppText className="pt-20 text-center text-3xl text-black/70">
+    <View
+      testID="allocation-scene-fixture"
+      className={cn("flex-1 bg-emerald-200")}
+    >
+      <AppText className={cn("pt-20 text-center text-3xl text-black/70")}>
         Allocation scene: {fixtureState}
       </AppText>
       <AllocationSceneCanvas
@@ -128,14 +140,14 @@ export default function TouchAllocationVisualFixture() {
             players={frozenRounds.roundOne}
             transform={buffers.roundOneTransform}
             opacity={buffers.roundOneOpacity}
-            isAccessibilityVisible
+            isAccessibilityVisible={activeRound === 0}
           />
           <RevealedPlayerLabelLayer
             testID="fixture-round-two-labels"
             players={frozenRounds.roundTwo}
             transform={buffers.roundTwoTransform}
             opacity={buffers.roundTwoOpacity}
-            isAccessibilityVisible={false}
+            isAccessibilityVisible={activeRound === 1}
           />
         </>
       ) : null}
