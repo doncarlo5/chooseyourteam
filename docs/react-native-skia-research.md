@@ -138,6 +138,12 @@ For a more expressive reveal, normalize paths and animate a circle-to-team-shape
 | Mesh vertex/color construction          |                  New point objects, arrays, and color strings each frame | Unchanged; buffer-backed `Vertices` rendered only the fallback fill, so the documented arrays were retained |
 | Inactive mesh clock                     |                                          Continued running while mounted |                                                            Paused when the route or application is inactive |
 
-Five deterministic Playwright states verify unrevealed, countdown, revealed, frozen, and mid-scroll rendering. Every fixture asserts one Canvas and fails on browser page errors. The frozen and mid-scroll fixtures also verify that only the current revealed-result layer remains in the accessibility tree.
+The supported `Vertices` implementation still recreates `Point[]`, point
+objects, color arrays, and color strings on the application side. The native
+benchmark fixture at `/__performance__/mesh` measures the unchanged blurred
+mesh, an identical no-blur mesh, and a paused clock; it does not make a
+zero-allocation claim.
+
+Five deterministic Playwright states verify unrevealed, countdown, revealed, frozen, and mid-scroll rendering. Every fixture asserts one Canvas and fails on browser page errors. The frozen and mid-scroll fixtures also verify that only the current revealed-result layer remains in the accessibility tree, including both settled Round positions.
 
 The final development-build smoke test rendered the allocation screen on iOS and an active touch on Android without a visible stall or runtime error. This is a qualitative regression check, not an FPS claim; sustained multi-touch behavior and accessibility still require the physical-device matrix in `docs/touch-allocation-validation.md`.

@@ -2,11 +2,15 @@
 
 ## Automated coverage
 
-- `npm run verify` covers type checking, linting, localization catalogs, and 208 unit tests.
-- The controller tests call the same worklet-compatible slot, exclusion, token, snapshot, reset, and exit-readiness primitives used by the production manual gesture.
+- `npm run verify` covers type checking, linting, localization catalogs, and the current unit-test suite.
+- The controller tests call the same worklet-compatible lifecycle transition used by the production manual gesture for admission, visibility, count policy, countdown tokens, snapshots, reset/cancel, and exit readiness.
 - `npm run test:visual` covers five deterministic allocation states, asserts one dot Canvas, and checks that inactive revealed-result layers are hidden from accessibility.
 - Expo Doctor and the web production export are part of the release verification pass.
 - Debug native builds complete for the iOS simulator and Android with Java 17. Android Studio's bundled Java 25 runtime is not compatible with this native toolchain.
+
+On 16 August 2026, an unsigned generic iOS Release build and Android Debug
+build completed successfully. The paired iPhone 17 was offline and no Android
+device was attached, so the physical matrix below remains a merge gate.
 
 These checks reduce regression risk but do not replace multi-pointer or assistive-technology testing on native devices.
 

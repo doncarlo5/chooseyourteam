@@ -1,0 +1,3 @@
+# Keep active allocation behind a deep Session screen
+
+The setup-only `Home` screen mounts an allocation-specific Session module with an immutable Team count and Pairing Mode, while that module owns Player-count planning, touch lifecycle, Round progression, result snapshots, and safe exit. We rejected keeping `Home` as a coordinator because it duplicated Single- and Multi-Round rules across UI and reducer code; we also rejected a generic game engine because no second game has demonstrated a shared interface. Internal lifecycle and Round-navigation seams keep deterministic tests and platform adapters local without expanding the Session's external interface.
