@@ -25,6 +25,53 @@ export type TouchSlotStore = {
   y: MutableCell<number>[];
 };
 
+export type TouchAllocationLifecycleStore = TouchSlotStore & {
+  stableCount: MutableCell<number>;
+  countdownToken: MutableCell<number>;
+  isRevealed: MutableCell<number>;
+  exitPending: MutableCell<boolean>;
+};
+
+export type TouchAllocationLifecycleConfiguration = {
+  expectedTouchCount: number;
+  allowOverExpected: boolean;
+};
+
+export type TouchAllocationLifecycleEvent =
+  | {
+      type: "admit";
+      touchId: number;
+      x: number;
+      y: number;
+      isIgnored: boolean;
+      acceptsNewTouches: boolean;
+    }
+  | {
+      type: "move";
+      touchId: number;
+      x: number;
+      y: number;
+      isIgnored: boolean;
+    }
+  | { type: "release"; touchId: number }
+  | { type: "cancel" }
+  | { type: "reset" }
+  | { type: "requestExit" }
+  | { type: "synchronize" }
+  | { type: "countdownCompleted"; token: number };
+
+export type TouchAllocationLifecycleResult = {
+  slotIndex: number;
+  wasAllocated: boolean;
+  visibilityChanged: boolean;
+  visibleCount: number;
+  trackedCount: number;
+  countChanged: boolean;
+  countdownToken: number | null;
+  snapshot: TouchSnapshot[] | null;
+  exitReady: boolean;
+};
+
 export const isPointInsideRect = (x: number, y: number, rect: TouchRect) => {
   "worklet";
   return (
@@ -173,6 +220,150 @@ export const meetsExpectedTouchCount = (
 ) => {
   "worklet";
   return allowOverExpected ? count >= expectedCount : count === expectedCount;
+};
+
+const createLifecycleResult = (
+  store: TouchAllocationLifecycleStore,
+): TouchAllocationLifecycleResult => ({
+  slotIndex: -1,
+  wasAllocated: false,
+  visibilityChanged: false,
+  visibleCount: countVisibleTouches(store),
+  trackedCount: countTrackedTouches(store),
+  countChanged: false,
+  countdownToken: null,
+  snapshot: null,
+  exitReady: false,
+});
+
+const updateLifecycleCount = (
+  store: TouchAllocationLifecycleStore,
+  configuration: TouchAllocationLifecycleConfiguration,
+  result: TouchAllocationLifecycleResult,
+) => {
+  "worklet";
+  if (
+    store.isRevealed.get() === 1 ||
+    result.visibleCount === store.stableCount.get()
+  ) {
+    return;
+  }
+
+  store.stableCount.set(result.visibleCount);
+  result.countChanged = true;
+  result.countdownToken = invalidateToken(store.countdownToken);
+  if (
+    result.visibleCount < 1 ||
+    !meetsExpectedTouchCount(
+      result.visibleCount,
+      configuration.expectedTouchCount,
+      configuration.allowOverExpected,
+    )
+  ) {
+    result.countdownToken = null;
+  }
+};
+
+/**
+ * The production Gesture Handler adapter and deterministic tests both cross
+ * this seam. It owns pointer identity, visibility/count policy, countdown
+ * validity, snapshot creation, cancellation/reset, and deferred exit.
+ */
+export const transitionTouchAllocationLifecycle = (
+  store: TouchAllocationLifecycleStore,
+  configuration: TouchAllocationLifecycleConfiguration,
+  event: TouchAllocationLifecycleEvent,
+): TouchAllocationLifecycleResult => {
+  "worklet";
+  const result = createLifecycleResult(store);
+
+  if (event.type === "reset" || event.type === "cancel") {
+    clearTouchSlots(store);
+    store.stableCount.set(0);
+    store.isRevealed.set(0);
+    invalidateToken(store.countdownToken);
+    result.visibleCount = 0;
+    result.trackedCount = 0;
+    result.countChanged = true;
+    result.exitReady = store.exitPending.get();
+    if (result.exitReady) {
+      store.exitPending.set(false);
+    }
+    return result;
+  }
+
+  if (event.type === "requestExit") {
+    store.exitPending.set(true);
+    result.exitReady = countTrackedTouches(store) === 0;
+    if (result.exitReady) {
+      store.exitPending.set(false);
+    }
+    return result;
+  }
+
+  if (event.type === "countdownCompleted") {
+    if (
+      !isCurrentToken(store.countdownToken, event.token) ||
+      store.isRevealed.get() === 1
+    ) {
+      return result;
+    }
+    const snapshot = createTouchSnapshot(store);
+    if (
+      !meetsExpectedTouchCount(
+        snapshot.length,
+        configuration.expectedTouchCount,
+        configuration.allowOverExpected,
+      )
+    ) {
+      return result;
+    }
+    store.isRevealed.set(1);
+    result.snapshot = snapshot;
+    return result;
+  }
+
+  if (event.type === "admit") {
+    if (!event.acceptsNewTouches || event.isIgnored) {
+      return result;
+    }
+    const existingSlot = findTouchSlot(store, event.touchId);
+    result.slotIndex = allocateTouchSlot(
+      store,
+      event.touchId,
+      event.x,
+      event.y,
+    );
+    result.wasAllocated = existingSlot === -1 && result.slotIndex !== -1;
+    if (result.slotIndex !== -1) {
+      moveTouchSlot(store, event.touchId, event.x, event.y, true);
+    }
+  }
+
+  if (event.type === "move") {
+    const moved = moveTouchSlot(
+      store,
+      event.touchId,
+      event.x,
+      event.y,
+      !event.isIgnored,
+    );
+    result.slotIndex = moved.slotIndex;
+    result.visibilityChanged = moved.visibilityChanged;
+  }
+
+  if (event.type === "release") {
+    result.slotIndex = releaseTouchSlot(store, event.touchId);
+  }
+
+  result.visibleCount = countVisibleTouches(store);
+  result.trackedCount = countTrackedTouches(store);
+  updateLifecycleCount(store, configuration, result);
+  if (store.exitPending.get() && result.trackedCount === 0) {
+    store.exitPending.set(false);
+    result.exitReady = true;
+  }
+  return result;
 };
 
 export const createRevealedPlayers = (

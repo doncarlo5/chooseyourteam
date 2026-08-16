@@ -2,20 +2,17 @@ import type { RevealedPlayer } from "@/src/domain/revealed-player";
 import type { RoundAssignment, TeamNumber } from "@/src/domain/team-identity";
 import type { TouchRect } from "@/src/helpers/types/home-screen";
 import {
-  allocateTouchSlot,
-  clearTouchSlots,
   countTrackedTouches,
   countVisibleTouches,
   createRevealedPlayers,
-  createTouchSnapshot,
   findTouchSlot,
-  invalidateToken,
   isCurrentToken,
   isExitReady,
   isPointInsideRect,
   meetsExpectedTouchCount,
-  moveTouchSlot,
-  releaseTouchSlot,
+  transitionTouchAllocationLifecycle,
+  type TouchAllocationLifecycleResult,
+  type TouchAllocationLifecycleStore,
   type TouchSlotStore,
   type TouchSnapshot,
 } from "@/src/screens/touch-allocation-controller";
@@ -84,7 +81,6 @@ export default function useTouchAllocationController(props: {
   >([]);
   const isRevealedSv = useSharedValue(0);
   const stableCountSv = useSharedValue(0);
-  const countTokenSv = useSharedValue(0);
   const revealProgress = useSharedValue(0);
   const revealToken = useSharedValue(0);
   const exitPendingSv = useSharedValue(false);
@@ -131,6 +127,23 @@ export default function useTouchAllocationController(props: {
     }),
     [slotActive, slotTouchId, slotX, slotY],
   );
+  const lifecycleStore = useMemo<TouchAllocationLifecycleStore>(
+    () => ({
+      ...slotStore,
+      stableCount: stableCountSv,
+      countdownToken: revealToken,
+      isRevealed: isRevealedSv,
+      exitPending: exitPendingSv,
+    }),
+    [exitPendingSv, isRevealedSv, revealToken, slotStore, stableCountSv],
+  );
+  const lifecycleConfiguration = useMemo(
+    () => ({
+      expectedTouchCount: props.expectedTouchCount ?? 2,
+      allowOverExpected: props.allowOverExpected ?? false,
+    }),
+    [props.allowOverExpected, props.expectedTouchCount],
+  );
   const isGestureEnabled = props.acceptsNewTouches;
   // Keep the native handler attached while Android is still tracking pointers.
   // Toggling Gesture.enabled mid-stream schedules an unsafe asynchronous cancel.
@@ -140,7 +153,7 @@ export default function useTouchAllocationController(props: {
     setIsRevealed(false);
     setRevealedAssignments([]);
     cancelAnimation(shakeX);
-    shakeX.value = 0;
+    shakeX.set(0);
     feedback.clearPreRevealHaptics();
   };
 
@@ -159,29 +172,27 @@ export default function useTouchAllocationController(props: {
     "worklet";
 
     cancelAnimation(revealProgress);
-    revealProgress.value = 0;
+    revealProgress.set(0);
 
     cancelAnimation(shakeX);
-    shakeX.value = 0;
+    shakeX.set(0);
 
-    invalidateToken(revealToken);
-    invalidateToken(countTokenSv);
-    isRevealedSv.set(0);
-    stableCountSv.set(0);
-    clearTouchSlots(slotStore);
+    transitionTouchAllocationLifecycle(lifecycleStore, lifecycleConfiguration, {
+      type: "reset",
+    });
 
     for (let i = 0; i < MAX_SLOTS; i += 1) {
       cancelAnimation(slotOpacity[i]);
       cancelAnimation(slotScale[i]);
-      slotOpacity[i].value = 0;
-      slotScale[i].value = 1;
+      slotOpacity[i].set(0);
+      slotScale[i].set(1);
       slotRevealTeams[i].set(0);
       slotRevealProgress[i].set(0);
     }
   };
 
   const handleCountChange = (count: number, token?: number) => {
-    if (token !== undefined && !isCurrentToken(countTokenSv, token)) {
+    if (token !== undefined && !isCurrentToken(revealToken, token)) {
       return;
     }
     const expectedCount = props.expectedTouchCount ?? 2;
@@ -272,64 +283,53 @@ export default function useTouchAllocationController(props: {
     return false;
   };
 
-  const startCountdown = (count: number) => {
+  const startCountdown = (count: number, token: number) => {
     "worklet";
     cancelAnimation(revealProgress);
-    revealProgress.value = 0;
+    revealProgress.set(0);
     cancelAnimation(shakeX);
-    shakeX.value = 0;
-    const token = invalidateToken(revealToken);
+    shakeX.set(0);
 
-    const expectedCount = props.expectedTouchCount ?? 2;
-    const allowOverExpected = props.allowOverExpected ?? false;
-    scheduleOnRN(handleCountChange, count, countTokenSv.get());
-    const meetsExpected = meetsExpectedTouchCount(
-      count,
-      expectedCount,
-      allowOverExpected,
-    );
-    if (count < 1 || !meetsExpected) {
-      return;
-    }
-
-    revealProgress.value = withDelay(
-      HIGHLIGHT_DELAY_MS,
-      withTiming(1, { duration: 0 }, (finished) => {
-        if (finished && isCurrentToken(revealToken, token)) {
-          const snapshot = createTouchSnapshot(slotStore);
-          isRevealedSv.set(1);
-          scheduleOnRN(handleReveal, token, snapshot);
-        }
-      }),
+    revealProgress.set(
+      withDelay(
+        HIGHLIGHT_DELAY_MS,
+        withTiming(1, { duration: 0 }, (finished) => {
+          if (finished) {
+            const result = transitionTouchAllocationLifecycle(
+              lifecycleStore,
+              lifecycleConfiguration,
+              { type: "countdownCompleted", token },
+            );
+            if (result.snapshot) {
+              scheduleOnRN(handleReveal, token, result.snapshot);
+            }
+          }
+        }),
+      ),
     );
   };
 
-  const updateStableCount = (count: number) => {
+  const applyLifecycleResult = (result: TouchAllocationLifecycleResult) => {
     "worklet";
-    if (isRevealedSv.get() === 1) {
+    if (!result.countChanged) {
+      if (result.exitReady) {
+        scheduleOnRN(notifyExitReady);
+      }
       return;
     }
-    const expectedCount = props.expectedTouchCount ?? 2;
-    const allowOverExpected = props.allowOverExpected ?? false;
-    if (!allowOverExpected && count > expectedCount) {
+    const token = revealToken.get();
+    scheduleOnRN(handleCountChange, result.visibleCount, token);
+    if (result.countdownToken === null) {
       cancelAnimation(revealProgress);
-      revealProgress.value = 0;
-
+      revealProgress.set(0);
       cancelAnimation(shakeX);
-      shakeX.value = 0;
-
-      invalidateToken(revealToken);
-      stableCountSv.set(count);
-      const countToken = invalidateToken(countTokenSv);
-      scheduleOnRN(handleCountChange, count, countToken);
-      return;
+      shakeX.set(0);
+    } else {
+      startCountdown(result.visibleCount, result.countdownToken);
     }
-    if (count === stableCountSv.get()) {
-      return;
+    if (result.exitReady) {
+      scheduleOnRN(notifyExitReady);
     }
-    stableCountSv.set(count);
-    invalidateToken(countTokenSv);
-    startCountdown(count);
   };
   const resetAllSlotsEvent = useEffectEvent(resetAllSlots);
 
@@ -339,8 +339,8 @@ export default function useTouchAllocationController(props: {
 
   const completeExitIfReady = () => {
     "worklet";
-    if (isExitReady(slotStore, exitPendingSv.get())) {
-      exitPendingSv.set(false);
+    if (isExitReady(lifecycleStore, lifecycleStore.exitPending.get())) {
+      lifecycleStore.exitPending.set(false);
       scheduleOnRN(notifyExitReady);
     }
   };
@@ -348,13 +348,19 @@ export default function useTouchAllocationController(props: {
   const requestExit = () => {
     "worklet";
     canAcceptNewTouches.set(false);
-    exitPendingSv.set(true);
-    completeExitIfReady();
+    const result = transitionTouchAllocationLifecycle(
+      lifecycleStore,
+      lifecycleConfiguration,
+      { type: "requestExit" },
+    );
+    if (result.exitReady) {
+      scheduleOnRN(notifyExitReady);
+    }
   };
 
   const resetIfNoTrackedTouches = () => {
     "worklet";
-    if (countTrackedTouches(slotStore) === 0) {
+    if (countTrackedTouches(lifecycleStore) === 0) {
       hardResetSlotsWorklet();
       scheduleOnRN(resetAllSlotsJS);
     }
@@ -415,30 +421,38 @@ export default function useTouchAllocationController(props: {
         if (ignored) {
           continue;
         }
-        let slot = findTouchSlot(slotStore, touch.id);
-        if (slot === -1) {
-          slot = allocateTouchSlot(slotStore, touch.id, x, y);
-          if (slot !== -1) {
-            slotOpacity[slot].value = 0;
-            slotScale[slot].value = 0.7;
-            slotOpacity[slot].value = withTiming(1, { duration: 120 });
-            slotScale[slot].value = withSpring(1, {
+        const result = transitionTouchAllocationLifecycle(
+          lifecycleStore,
+          lifecycleConfiguration,
+          {
+            type: "admit",
+            touchId: touch.id,
+            x,
+            y,
+            isIgnored: ignored,
+            acceptsNewTouches: canAcceptNewTouches.get(),
+          },
+        );
+        const slot = result.slotIndex;
+        if (result.wasAllocated && slot !== -1) {
+          slotOpacity[slot].set(0);
+          slotScale[slot].set(0.7);
+          slotOpacity[slot].set(withTiming(1, { duration: 120 }));
+          slotScale[slot].set(
+            withSpring(1, {
               damping: 40,
               stiffness: 5000,
-            });
-            scheduleOnRN(H.touchDown);
-            scheduleOnRN(feedback.playBubble, slot);
-          }
+            }),
+          );
+          scheduleOnRN(H.touchDown);
+          scheduleOnRN(feedback.playBubble, slot);
         }
-        if (slot !== -1) {
-          moveTouchSlot(slotStore, touch.id, x, y, !ignored);
-        }
+        applyLifecycleResult(result);
       }
-
-      const afterCount = countVisibleTouches(slotStore);
-
-      scheduleOnRN(handleTrackedTouchChange, countTrackedTouches(slotStore));
-      updateStableCount(afterCount);
+      scheduleOnRN(
+        handleTrackedTouchChange,
+        countTrackedTouches(lifecycleStore),
+      );
     })
     .onTouchesMove((event) => {
       "worklet";
@@ -450,32 +464,46 @@ export default function useTouchAllocationController(props: {
         }
         const x = touch.absoluteX;
         const y = touch.absoluteY;
-        slotX[slot].set(x);
-        slotY[slot].set(y);
         if (isRevealedSv.get() === 0) {
           const ignored = isTouchIgnored(x, y);
-          const result = moveTouchSlot(slotStore, touch.id, x, y, !ignored);
+          const result = transitionTouchAllocationLifecycle(
+            lifecycleStore,
+            lifecycleConfiguration,
+            { type: "move", touchId: touch.id, x, y, isIgnored: ignored },
+          );
           visibilityChanged ||= result.visibilityChanged;
+          if (result.visibilityChanged) {
+            applyLifecycleResult(result);
+          }
+        } else {
+          slotX[slot].set(x);
+          slotY[slot].set(y);
         }
       }
-      if (visibilityChanged) {
-        updateStableCount(countVisibleTouches(slotStore));
-      }
+      void visibilityChanged;
     })
     .onTouchesUp((event, stateManager) => {
       "worklet";
 
       // Always process cleanup; if disabled mid-gesture, we still must clear visuals.
       for (const touch of event.changedTouches) {
-        const slot = releaseTouchSlot(slotStore, touch.id);
+        const result = transitionTouchAllocationLifecycle(
+          lifecycleStore,
+          lifecycleConfiguration,
+          { type: "release", touchId: touch.id },
+        );
+        const slot = result.slotIndex;
         if (slot === -1) continue;
 
-        slotOpacity[slot].value = withTiming(0, { duration: 140 }, (done) => {
-          if (done && slotTouchId[slot].get() === -1) {
-            slotActive[slot].value = 0;
-            slotScale[slot].value = 1;
-          }
-        });
+        slotOpacity[slot].set(
+          withTiming(0, { duration: 140 }, (done) => {
+            if (done && slotTouchId[slot].get() === -1) {
+              slotActive[slot].set(0);
+              slotScale[slot].set(1);
+            }
+          }),
+        );
+        applyLifecycleResult(result);
       }
 
       const isStillDown = (id: number) => {
@@ -490,14 +518,19 @@ export default function useTouchAllocationController(props: {
         const id = slotTouchId[i].get();
         if (id !== -1 && !isStillDown(id)) {
           slotTouchId[i].set(-1);
-          slotActive[i].value = 0;
-          slotOpacity[i].value = 0;
-          slotScale[i].value = 1;
+          slotActive[i].set(0);
+          slotOpacity[i].set(0);
+          slotScale[i].set(1);
         }
       }
 
-      const remainingVisible = countVisibleTouches(slotStore);
-      const remainingTracked = countTrackedTouches(slotStore);
+      const synchronized = transitionTouchAllocationLifecycle(
+        lifecycleStore,
+        lifecycleConfiguration,
+        { type: "synchronize" },
+      );
+      applyLifecycleResult(synchronized);
+      const remainingTracked = synchronized.trackedCount;
       scheduleOnRN(handleTrackedTouchChange, remainingTracked);
 
       // If there are no more touches, do an immediate UI-thread reset.
@@ -508,9 +541,6 @@ export default function useTouchAllocationController(props: {
         stateManager.end();
         return;
       }
-
-      // Otherwise continue normal logic.
-      updateStableCount(remainingVisible);
     })
 
     .onTouchesCancelled((event, stateManager) => {
@@ -526,9 +556,16 @@ export default function useTouchAllocationController(props: {
         scheduleOnRN(feedback.showIosTouchLimitToast);
       }
 
+      const result = transitionTouchAllocationLifecycle(
+        lifecycleStore,
+        lifecycleConfiguration,
+        { type: "cancel" },
+      );
       hardResetSlotsWorklet();
       scheduleOnRN(resetAllSlotsJS);
-      completeExitIfReady();
+      if (result.exitReady) {
+        scheduleOnRN(notifyExitReady);
+      }
       stateManager.end();
     });
 

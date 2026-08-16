@@ -1,21 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
-  allocateTouchSlot,
-  clearTouchSlots,
-  countTrackedTouches,
-  countVisibleTouches,
   createRevealedPlayers,
-  createTouchSnapshot,
-  findTouchSlot,
-  invalidateToken,
-  isCurrentToken,
-  isExitReady,
   isPointInsideRect,
-  meetsExpectedTouchCount,
-  moveTouchSlot,
-  releaseTouchSlot,
+  transitionTouchAllocationLifecycle,
   type MutableCell,
-  type TouchSlotStore,
+  type TouchAllocationLifecycleConfiguration,
+  type TouchAllocationLifecycleStore,
 } from "./touch-allocation-controller";
 
 const createCell = <T>(initialValue: T): MutableCell<T> => {
@@ -28,78 +18,206 @@ const createCell = <T>(initialValue: T): MutableCell<T> => {
   };
 };
 
-const createStore = (slotCount: number): TouchSlotStore => ({
+const createLifecycle = (slotCount = 12): TouchAllocationLifecycleStore => ({
   touchIds: Array.from({ length: slotCount }, () => createCell(-1)),
   active: Array.from({ length: slotCount }, () => createCell(0)),
   x: Array.from({ length: slotCount }, () => createCell(0)),
   y: Array.from({ length: slotCount }, () => createCell(0)),
+  stableCount: createCell(0),
+  countdownToken: createCell(0),
+  isRevealed: createCell(0),
+  exitPending: createCell(false),
 });
 
-describe("touch allocation controller", () => {
-  it("allocates, moves, hides, and releases a touch slot", () => {
-    const store = createStore(2);
-    expect(allocateTouchSlot(store, 7, 10, 20)).toBe(0);
-    expect(createTouchSnapshot(store)).toEqual([
-      { slotIndex: 0, touchId: 7, x: 10, y: 20 },
-    ]);
-    expect(moveTouchSlot(store, 7, 30, 40, true)).toEqual({
-      slotIndex: 0,
-      visibilityChanged: false,
-    });
-    expect(createTouchSnapshot(store)[0]).toMatchObject({ x: 30, y: 40 });
-    expect(moveTouchSlot(store, 7, 50, 60, false).visibilityChanged).toBe(true);
-    expect(createTouchSnapshot(store)).toEqual([]);
-    expect(countVisibleTouches(store)).toBe(0);
-    expect(countTrackedTouches(store)).toBe(1);
-    expect(releaseTouchSlot(store, 7)).toBe(0);
-    expect(findTouchSlot(store, 7)).toBe(-1);
+const exactTwo: TouchAllocationLifecycleConfiguration = {
+  expectedTouchCount: 2,
+  allowOverExpected: false,
+};
+
+const admit = (
+  store: TouchAllocationLifecycleStore,
+  touchId: number,
+  configuration = exactTwo,
+) =>
+  transitionTouchAllocationLifecycle(store, configuration, {
+    type: "admit",
+    touchId,
+    x: touchId * 10,
+    y: touchId * 20,
+    isIgnored: false,
+    acceptsNewTouches: true,
   });
 
-  it("ignores control regions and refuses touches when slots are full", () => {
+describe("touch allocation lifecycle", () => {
+  it("owns admission, stable slot identity, and slot exhaustion", () => {
+    const store = createLifecycle(2);
+    expect(admit(store, 1).wasAllocated).toBe(true);
+    expect(admit(store, 1).wasAllocated).toBe(false);
+    expect(admit(store, 2).slotIndex).toBe(1);
+    expect(admit(store, 3).slotIndex).toBe(-1);
+  });
+
+  it("ignores excluded/control touches and disabled admission", () => {
+    const store = createLifecycle(1);
     const rect = { x: 5, y: 5, width: 20, height: 20, isReady: true };
     expect(isPointInsideRect(10, 10, rect)).toBe(true);
-    expect(isPointInsideRect(30, 30, rect)).toBe(false);
-
-    const store = createStore(1);
-    expect(allocateTouchSlot(store, 1, 30, 30)).toBe(0);
-    expect(allocateTouchSlot(store, 2, 40, 40)).toBe(-1);
-    expect(countTrackedTouches(store)).toBe(1);
-    expect(countVisibleTouches(store)).toBe(1);
+    expect(
+      transitionTouchAllocationLifecycle(store, exactTwo, {
+        type: "admit",
+        touchId: 1,
+        x: 10,
+        y: 10,
+        isIgnored: true,
+        acceptsNewTouches: true,
+      }).trackedCount,
+    ).toBe(0);
+    expect(
+      transitionTouchAllocationLifecycle(store, exactTwo, {
+        type: "admit",
+        touchId: 2,
+        x: 40,
+        y: 40,
+        isIgnored: false,
+        acceptsNewTouches: false,
+      }).trackedCount,
+    ).toBe(0);
   });
 
-  it("invalidates stale reveal tokens on changes, cancellation, and reset", () => {
-    const store = createStore(2);
-    const token = createCell(0);
-    allocateTouchSlot(store, 1, 10, 20);
-    const countdownToken = invalidateToken(token);
-    expect(isCurrentToken(token, countdownToken)).toBe(true);
-    clearTouchSlots(store);
-    invalidateToken(token);
-    expect(isCurrentToken(token, countdownToken)).toBe(false);
-    expect(createTouchSnapshot(store)).toEqual([]);
+  it("tracks movement visibility separately from native pointer ownership", () => {
+    const store = createLifecycle();
+    admit(store, 1);
+    const hidden = transitionTouchAllocationLifecycle(store, exactTwo, {
+      type: "move",
+      touchId: 1,
+      x: 80,
+      y: 90,
+      isIgnored: true,
+    });
+    expect(hidden).toMatchObject({
+      visibilityChanged: true,
+      visibleCount: 0,
+      trackedCount: 1,
+    });
+    const visible = transitionTouchAllocationLifecycle(store, exactTwo, {
+      type: "move",
+      touchId: 1,
+      x: 90,
+      y: 100,
+      isIgnored: false,
+    });
+    expect(visible).toMatchObject({ visibilityChanged: true, visibleCount: 1 });
   });
 
-  it("defers exit until every tracked touch is released or cancelled", () => {
-    const store = createStore(2);
-    allocateTouchSlot(store, 1, 10, 20);
-    allocateTouchSlot(store, 2, 30, 40);
-
-    expect(isExitReady(store, true)).toBe(false);
-    releaseTouchSlot(store, 1);
-    expect(isExitReady(store, true)).toBe(false);
-    releaseTouchSlot(store, 2);
-    expect(isExitReady(store, true)).toBe(true);
-    expect(isExitReady(store, false)).toBe(false);
+  it("starts, invalidates, and restarts an exact-count countdown", () => {
+    const store = createLifecycle();
+    expect(admit(store, 1).countdownToken).toBeNull();
+    const started = admit(store, 2);
+    expect(started.countdownToken).toBe(2);
+    const invalidated = admit(store, 3);
+    expect(invalidated.countdownToken).toBeNull();
+    expect(
+      transitionTouchAllocationLifecycle(store, exactTwo, {
+        type: "countdownCompleted",
+        token: started.countdownToken!,
+      }).snapshot,
+    ).toBeNull();
+    const restarted = transitionTouchAllocationLifecycle(store, exactTwo, {
+      type: "release",
+      touchId: 3,
+    });
+    expect(restarted.countdownToken).toBe(4);
   });
 
-  it("supports exact and at-least touch-count policies", () => {
-    expect(meetsExpectedTouchCount(3, 3, false)).toBe(true);
-    expect(meetsExpectedTouchCount(4, 3, false)).toBe(false);
-    expect(meetsExpectedTouchCount(4, 3, true)).toBe(true);
-    expect(meetsExpectedTouchCount(2, 3, true)).toBe(false);
+  it("allows over-count in flexible mode and creates one ordered snapshot", () => {
+    const store = createLifecycle();
+    const flexible = { expectedTouchCount: 2, allowOverExpected: true };
+    admit(store, 1, flexible);
+    admit(store, 2, flexible);
+    const third = admit(store, 3, flexible);
+    const completed = transitionTouchAllocationLifecycle(store, flexible, {
+      type: "countdownCompleted",
+      token: third.countdownToken!,
+    });
+    expect(completed.snapshot).toEqual([
+      { slotIndex: 0, touchId: 1, x: 10, y: 20 },
+      { slotIndex: 1, touchId: 2, x: 20, y: 40 },
+      { slotIndex: 2, touchId: 3, x: 30, y: 60 },
+    ]);
+    expect(
+      transitionTouchAllocationLifecycle(store, flexible, {
+        type: "countdownCompleted",
+        token: third.countdownToken!,
+      }).snapshot,
+    ).toBeNull();
   });
 
-  it("uses a planned assignment and can deterministically finalize a flexible one", () => {
+  it("resets and cancels countdown state", () => {
+    const store = createLifecycle();
+    admit(store, 1);
+    admit(store, 2);
+    const token = store.countdownToken.get();
+    const reset = transitionTouchAllocationLifecycle(store, exactTwo, {
+      type: "reset",
+    });
+    expect(reset).toMatchObject({ visibleCount: 0, trackedCount: 0 });
+    expect(store.countdownToken.get()).not.toBe(token);
+  });
+
+  it("defers exit through three-plus-pointer release ordering", () => {
+    const store = createLifecycle(4);
+    [1, 2, 3, 4].forEach((touchId) => admit(store, touchId));
+    expect(
+      transitionTouchAllocationLifecycle(store, exactTwo, {
+        type: "requestExit",
+      }).exitReady,
+    ).toBe(false);
+    [3, 1, 4].forEach((touchId) => {
+      expect(
+        transitionTouchAllocationLifecycle(store, exactTwo, {
+          type: "release",
+          touchId,
+        }).exitReady,
+      ).toBe(false);
+    });
+    expect(
+      transitionTouchAllocationLifecycle(store, exactTwo, {
+        type: "release",
+        touchId: 2,
+      }).exitReady,
+    ).toBe(true);
+  });
+
+  it("reconciles pointers omitted from a native changed-touch batch", () => {
+    const store = createLifecycle(4);
+    [1, 2, 3].forEach((touchId) => admit(store, touchId));
+    store.touchIds[2].set(-1);
+    store.active[2].set(0);
+
+    const synchronized = transitionTouchAllocationLifecycle(store, exactTwo, {
+      type: "synchronize",
+    });
+    expect(synchronized).toMatchObject({
+      visibleCount: 2,
+      trackedCount: 2,
+      countChanged: true,
+    });
+    expect(synchronized.countdownToken).not.toBeNull();
+  });
+
+  it("completes a pending exit on cancellation", () => {
+    const store = createLifecycle();
+    admit(store, 1);
+    transitionTouchAllocationLifecycle(store, exactTwo, {
+      type: "requestExit",
+    });
+    expect(
+      transitionTouchAllocationLifecycle(store, exactTwo, {
+        type: "cancel",
+      }).exitReady,
+    ).toBe(true);
+  });
+
+  it("uses planned assignment and deterministic flexible allocation", () => {
     const snapshot = [
       { slotIndex: 0, touchId: 10, x: 100, y: 200 },
       { slotIndex: 1, touchId: 11, x: 300, y: 400 },
@@ -114,7 +232,6 @@ describe("touch allocation controller", () => {
       { x: 100, y: 200, team: 2 },
       { x: 300, y: 400, team: 1 },
     ]);
-
     const random = () => 0;
     expect(
       createRevealedPlayers(snapshot, {
