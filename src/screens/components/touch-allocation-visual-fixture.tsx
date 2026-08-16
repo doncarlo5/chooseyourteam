@@ -12,7 +12,7 @@ import { useLocalSearchParams } from "expo-router";
 import { cn } from "heroui-native";
 import { useCallback, useEffect, useMemo } from "react";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
-import { makeMutable, withTiming } from "react-native-reanimated";
+import { makeMutable, withSpring, withTiming } from "react-native-reanimated";
 import { scheduleOnUI } from "react-native-worklets";
 
 const activePositions = [
@@ -30,7 +30,13 @@ export default function TouchAllocationVisualFixture() {
   const isFrozen = fixtureState === "frozen";
   const isScrolling = fixtureState === "scrolling";
   const isDynamic = fixtureState === "dynamic";
+  const slotActive = useSlotSharedValues(0);
+  const slotX = useSlotSharedValues(0);
+  const slotY = useSlotSharedValues(0);
   const slotOpacity = useSlotSharedValues(isDynamic ? 0 : 1);
+  const slotScale = useSlotSharedValues(1);
+  const slotTeam = useSlotSharedValues(0);
+  const slotRevealProgress = useSlotSharedValues(0);
   const holdProgress = fixtureState === "countdown" ? 0.72 : 0.18;
   const activeRound = params.round === "1" ? 1 : 0;
   const slots = useMemo<AllocationLiveSlot[]>(
@@ -38,30 +44,56 @@ export default function TouchAllocationVisualFixture() {
       Array.from({ length: 12 }, (_, index) => {
         const position = activePositions[index] ?? { x: 0, y: 0 };
         return {
-          active: makeMutable(
-            index < activePositions.length &&
-              !isFrozen &&
-              !isScrolling &&
-              !isDynamic
-              ? 1
-              : 0,
-          ),
-          x: makeMutable(position.x),
-          y: makeMutable(position.y),
+          active: isDynamic
+            ? slotActive[index]
+            : makeMutable(
+                index < activePositions.length && !isFrozen && !isScrolling
+                  ? 1
+                  : 0,
+              ),
+          x: isDynamic ? slotX[index] : makeMutable(position.x),
+          y: isDynamic ? slotY[index] : makeMutable(position.y),
           opacity: slotOpacity[index],
-          scale: makeMutable(1),
-          team: makeMutable(isRevealed ? (revealedTeams[index] ?? 0) : 0),
-          revealProgress: makeMutable(isRevealed ? 1 : 0),
+          scale: slotScale[index],
+          team: isDynamic
+            ? slotTeam[index]
+            : makeMutable(isRevealed ? (revealedTeams[index] ?? 0) : 0),
+          revealProgress: isDynamic
+            ? slotRevealProgress[index]
+            : makeMutable(isRevealed ? 1 : 0),
         };
       }),
-    [isDynamic, isFrozen, isRevealed, isScrolling, slotOpacity],
+    [
+      isDynamic,
+      isFrozen,
+      isRevealed,
+      isScrolling,
+      slotActive,
+      slotOpacity,
+      slotRevealProgress,
+      slotScale,
+      slotTeam,
+      slotX,
+      slotY,
+    ],
   );
   const activateDynamicSlots = useCallback(() => {
     "worklet";
     for (let index = 0; index < 2; index += 1) {
+      slots[index].x.set(activePositions[index].x);
+      slots[index].y.set(activePositions[index].y);
+      slots[index].team.set(0);
+      slots[index].revealProgress.set(0);
       slots[index].active.set(1);
       slots[index].opacity.set(0);
+      slots[index].scale.set(0.7);
       slots[index].opacity.set(withTiming(1, { duration: 120 }));
+      slots[index].scale.set(
+        withSpring(1, {
+          damping: 40,
+          stiffness: 5000,
+        }),
+      );
     }
   }, [slots]);
   useEffect(() => {
@@ -139,6 +171,7 @@ export default function TouchAllocationVisualFixture() {
         shakeX={buffers.shakeX}
         holdProgress={buffers.holdProgress}
         shimmerClock={buffers.shimmerClock}
+        revealedSlotIndexes={isRevealed ? [0, 1, 2] : []}
       />
       {visiblePlayers.map((player, index) => (
         <RevealedPlayerLabel

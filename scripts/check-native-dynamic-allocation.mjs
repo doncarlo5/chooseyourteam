@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { PNG } from "pngjs";
 
 const screenshotPath = join(tmpdir(), "touch-allocation-dynamic-check.png");
-const route = "chooseyourteam://__visual__/touch-allocation?state=dynamic";
+const route = "chooseyourteam:///__visual__/touch-allocation?state=dynamic";
 const bundleIdentifier = "com.doncarlos.chooseyourteam";
 const appPath = execFileSync(
   "xcrun",
@@ -40,9 +40,8 @@ try {
     },
   );
   execFileSync("xcrun", ["simctl", "terminate", "booted", bundleIdentifier]);
-  execFileSync("xcrun", ["simctl", "launch", "booted", bundleIdentifier]);
   execFileSync("xcrun", ["simctl", "openurl", "booted", route]);
-  await new Promise((resolve) => setTimeout(resolve, 1500));
+  await new Promise((resolve) => setTimeout(resolve, 6000));
   execFileSync("xcrun", [
     "simctl",
     "io",
@@ -58,14 +57,38 @@ try {
 
 const screenshot = PNG.sync.read(await readFile(screenshotPath));
 const scale = screenshot.width / 390;
+const fixturePixelOffset =
+  (Math.round(200 * scale) * screenshot.width + Math.round(20 * scale)) * 4;
+const fixturePixel = {
+  red: screenshot.data[fixturePixelOffset],
+  green: screenshot.data[fixturePixelOffset + 1],
+  blue: screenshot.data[fixturePixelOffset + 2],
+};
+if (
+  fixturePixel.green <= fixturePixel.red ||
+  fixturePixel.green <= fixturePixel.blue
+) {
+  console.error(
+    `Visual fixture did not open: unexpected background ${JSON.stringify(fixturePixel)}`,
+  );
+  process.exit(1);
+}
 const countBrightRingPixels = (x, y) => {
   let count = 0;
   const centerX = x * scale;
   const centerY = y * scale;
   const innerRadius = 46 * scale;
   const outerRadius = 64 * scale;
-  for (let row = Math.floor(centerY - outerRadius); row <= centerY + outerRadius; row += 1) {
-    for (let column = Math.floor(centerX - outerRadius); column <= centerX + outerRadius; column += 1) {
+  for (
+    let row = Math.floor(centerY - outerRadius);
+    row <= centerY + outerRadius;
+    row += 1
+  ) {
+    for (
+      let column = Math.floor(centerX - outerRadius);
+      column <= centerX + outerRadius;
+      column += 1
+    ) {
       const distance = Math.hypot(column - centerX, row - centerY);
       if (distance < innerRadius || distance > outerRadius) continue;
       const offset = (row * screenshot.width + column) * 4;

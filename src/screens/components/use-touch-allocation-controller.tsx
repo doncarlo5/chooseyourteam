@@ -415,6 +415,11 @@ export default function useTouchAllocationController(props: {
         );
         const slot = result.slotIndex;
         if (result.wasAllocated && slot !== -1) {
+          cancelAnimation(slotOpacity[slot]);
+          cancelAnimation(slotScale[slot]);
+          cancelAnimation(slotRevealProgress[slot]);
+          slotRevealTeams[slot].set(0);
+          slotRevealProgress[slot].set(0);
           slotOpacity[slot].set(0);
           slotScale[slot].set(0.7);
           slotOpacity[slot].set(withTiming(1, { duration: 120 }));

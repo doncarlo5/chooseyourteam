@@ -73,6 +73,7 @@ function LiveDotArtwork(props: {
   shimmerClock: SharedValue<number>;
   team: SharedValue<number>;
   revealProgress: SharedValue<number>;
+  showRevealedArtwork: boolean;
 }) {
   const ringThickness = BASE_CIRCLE_SIZE * 0.08;
   const ringRadius = BASE_CIRCLE_SIZE / 2 - ringThickness / 2;
@@ -163,13 +164,18 @@ function LiveDotArtwork(props: {
           end={props.holdProgress}
         />
       </Group>
-      <Group
-        origin={vec(REVEAL_CIRCLE_SIZE / 2, REVEAL_CIRCLE_SIZE / 2)}
-        transform={revealedTransform}
-        opacity={revealedOpacity}
-      >
-        <SharedTeamResultArtwork size={REVEAL_CIRCLE_SIZE} team={props.team} />
-      </Group>
+      {props.showRevealedArtwork ? (
+        <Group
+          origin={vec(REVEAL_CIRCLE_SIZE / 2, REVEAL_CIRCLE_SIZE / 2)}
+          transform={revealedTransform}
+          opacity={revealedOpacity}
+        >
+          <SharedTeamResultArtwork
+            size={REVEAL_CIRCLE_SIZE}
+            team={props.team}
+          />
+        </Group>
+      ) : null}
     </>
   );
 }
@@ -290,9 +296,11 @@ export function AllocationSceneCanvas(props: {
   shakeX: SharedValue<number>;
   holdProgress: SharedValue<number>;
   shimmerClock?: SharedValue<number>;
+  revealedSlotIndexes?: number[];
 }) {
   const liveShimmerClock = useClock();
   const shimmerClock = props.shimmerClock ?? liveShimmerClock;
+  const revealedSlotIndexes = props.revealedSlotIndexes ?? [];
 
   return (
     <Canvas
@@ -324,6 +332,7 @@ export function AllocationSceneCanvas(props: {
           shimmerClock={shimmerClock}
           team={slot.team}
           revealProgress={slot.revealProgress}
+          showRevealedArtwork={revealedSlotIndexes.includes(index)}
         />
       ))}
     </Canvas>
@@ -434,6 +443,9 @@ export default function TouchAllocationScene(props: TouchAllocationSceneProps) {
           liveSceneOpacity={liveSceneOpacity}
           shakeX={controller.shakeX}
           holdProgress={controller.revealProgress}
+          revealedSlotIndexes={controller.revealedAssignments.map(
+            (assignment) => assignment.slotIndex,
+          )}
         />
         <RevealedPlayerLabelLayer
           testID="round-one-labels"
