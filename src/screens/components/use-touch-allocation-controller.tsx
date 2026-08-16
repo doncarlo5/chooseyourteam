@@ -303,11 +303,17 @@ export default function useTouchAllocationController(props: {
               lifecycleConfiguration,
               { type: "countdownCompleted", token },
             );
-            applyLifecycleResult(result);
+            if (result.snapshot) {
+              scheduleOnRN(handleReveal, token, result.snapshot);
+            }
           }
         }),
       ),
     );
+  };
+
+  const notifyExitReady = () => {
+    props.onExitReady();
   };
 
   const applyLifecycleEffect = (effect: TouchAllocationLifecycleEffect) => {
@@ -338,10 +344,6 @@ export default function useTouchAllocationController(props: {
     emitTouchAllocationLifecycleEffects(result, applyLifecycleEffect);
   };
   const resetAllSlotsEvent = useEffectEvent(resetAllSlots);
-
-  const notifyExitReady = () => {
-    props.onExitReady();
-  };
 
   const completeExitIfReady = () => {
     "worklet";
