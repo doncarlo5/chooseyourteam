@@ -5,7 +5,7 @@ import {
   countTrackedTouches,
   countVisibleTouches,
   createRevealedPlayers,
-  emitTouchAllocationLifecycleEffects,
+  getTouchAllocationLifecycleEffects,
   findTouchSlot,
   isCurrentToken,
   isExitReady,
@@ -13,7 +13,6 @@ import {
   meetsExpectedTouchCount,
   transitionTouchAllocationLifecycle,
   type TouchAllocationLifecycleResult,
-  type TouchAllocationLifecycleEffect,
   type TouchAllocationLifecycleStore,
   type TouchSlotStore,
   type TouchSnapshot,
@@ -316,32 +315,30 @@ export default function useTouchAllocationController(props: {
     props.onExitReady();
   };
 
-  const applyLifecycleEffect = (effect: TouchAllocationLifecycleEffect) => {
-    "worklet";
-    if (effect.type === "exitReady") {
-      scheduleOnRN(notifyExitReady);
-      return;
-    }
-
-    if (effect.type === "revealReady") {
-      scheduleOnRN(handleReveal, revealToken.get(), effect.snapshot);
-      return;
-    }
-
-    scheduleOnRN(handleCountChange, effect.count, revealToken.get());
-    if (effect.countdownToken === null) {
-      cancelAnimation(revealProgress);
-      revealProgress.set(0);
-      cancelAnimation(shakeX);
-      shakeX.set(0);
-    } else {
-      startCountdown(effect.count, effect.countdownToken);
-    }
-  };
-
   const applyLifecycleResult = (result: TouchAllocationLifecycleResult) => {
     "worklet";
-    emitTouchAllocationLifecycleEffects(result, applyLifecycleEffect);
+    const effects = getTouchAllocationLifecycleEffects(result);
+    for (let index = 0; index < effects.length; index += 1) {
+      const effect = effects[index];
+      if (effect.type === "exitReady") {
+        scheduleOnRN(notifyExitReady);
+        continue;
+      }
+      if (effect.type === "revealReady") {
+        scheduleOnRN(handleReveal, revealToken.get(), effect.snapshot);
+        continue;
+      }
+
+      scheduleOnRN(handleCountChange, effect.count, revealToken.get());
+      if (effect.countdownToken === null) {
+        cancelAnimation(revealProgress);
+        revealProgress.set(0);
+        cancelAnimation(shakeX);
+        shakeX.set(0);
+      } else {
+        startCountdown(effect.count, effect.countdownToken);
+      }
+    }
   };
   const resetAllSlotsEvent = useEffectEvent(resetAllSlots);
 

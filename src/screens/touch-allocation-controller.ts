@@ -81,10 +81,6 @@ export type TouchAllocationLifecycleEffect =
   | { type: "revealReady"; snapshot: TouchSnapshot[] }
   | { type: "exitReady" };
 
-export type TouchAllocationLifecycleEffectAdapter = (
-  effect: TouchAllocationLifecycleEffect,
-) => void;
-
 export const isPointInsideRect = (x: number, y: number, rect: TouchRect) => {
   "worklet";
   return (
@@ -237,17 +233,20 @@ export const meetsExpectedTouchCount = (
 
 const createLifecycleResult = (
   store: TouchAllocationLifecycleStore,
-): TouchAllocationLifecycleResult => ({
-  slotIndex: -1,
-  wasAllocated: false,
-  visibilityChanged: false,
-  visibleCount: countVisibleTouches(store),
-  trackedCount: countTrackedTouches(store),
-  countChanged: false,
-  countdownToken: null,
-  snapshot: null,
-  exitReady: false,
-});
+): TouchAllocationLifecycleResult => {
+  "worklet";
+  return {
+    slotIndex: -1,
+    wasAllocated: false,
+    visibilityChanged: false,
+    visibleCount: countVisibleTouches(store),
+    trackedCount: countTrackedTouches(store),
+    countChanged: false,
+    countdownToken: null,
+    snapshot: null,
+    exitReady: false,
+  };
+};
 
 const updateLifecycleCount = (
   store: TouchAllocationLifecycleStore,
@@ -282,24 +281,25 @@ const updateLifecycleCount = (
  * and deterministic tests. The transition owns decisions; adapters own timing,
  * animation, feedback, and thread crossings.
  */
-export const emitTouchAllocationLifecycleEffects = (
+export const getTouchAllocationLifecycleEffects = (
   result: TouchAllocationLifecycleResult,
-  adapter: TouchAllocationLifecycleEffectAdapter,
 ) => {
   "worklet";
+  const effects: TouchAllocationLifecycleEffect[] = [];
   if (result.countChanged) {
-    adapter({
+    effects.push({
       type: "touchCountChanged",
       count: result.visibleCount,
       countdownToken: result.countdownToken,
     });
   }
   if (result.snapshot) {
-    adapter({ type: "revealReady", snapshot: result.snapshot });
+    effects.push({ type: "revealReady", snapshot: result.snapshot });
   }
   if (result.exitReady) {
-    adapter({ type: "exitReady" });
+    effects.push({ type: "exitReady" });
   }
+  return effects;
 };
 
 /**

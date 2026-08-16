@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createRevealedPlayers,
-  emitTouchAllocationLifecycleEffects,
+  getTouchAllocationLifecycleEffects,
   isPointInsideRect,
   transitionTouchAllocationLifecycle,
   type MutableCell,
@@ -63,10 +63,10 @@ const createDeterministicLifecycleHarness = (
       configuration,
       event,
     );
-    emitTouchAllocationLifecycleEffects(result, (effect) => {
+    for (const effect of getTouchAllocationLifecycleEffects(result)) {
       feedback.push(effect);
       if (effect.type !== "touchCountChanged") {
-        return;
+        continue;
       }
       if (countdownHandle !== null) {
         clearTimeout(countdownHandle);
@@ -80,7 +80,7 @@ const createDeterministicLifecycleHarness = (
           });
         }, 3000);
       }
-    });
+    }
     return result;
   };
   const admitTouch = (touchId: number) =>
