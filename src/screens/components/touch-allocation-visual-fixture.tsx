@@ -4,7 +4,9 @@ import type { TeamNumber } from "@/src/domain/team-identity";
 import {
   AllocationSceneCanvas,
   type AllocationLiveSlot,
+  RevealedPlayerLabelLayer,
 } from "@/src/screens/components/touch-allocation-scene-content";
+import RevealedPlayerLabel from "@/src/screens/components/revealed-player-label";
 import { useLocalSearchParams } from "expo-router";
 import { useMemo } from "react";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
@@ -37,7 +39,8 @@ export default function TouchAllocationVisualFixture() {
           y: makeMutable(position.y),
           opacity: makeMutable(1),
           scale: makeMutable(1),
-          team: isRevealed ? (revealedTeams[index] ?? null) : null,
+          team: makeMutable(isRevealed ? (revealedTeams[index] ?? 0) : 0),
+          revealProgress: makeMutable(isRevealed ? 1 : 0),
         };
       }),
     [isFrozen, isRevealed, isScrolling],
@@ -83,20 +86,8 @@ export default function TouchAllocationVisualFixture() {
     ? activePositions.map((position, index) => ({
         ...position,
         team: revealedTeams[index],
-        opacity: 1,
       }))
-    : [
-        ...frozenRounds.roundOne.map((player) => ({
-          ...player,
-          x: player.x - (isScrolling ? width * 0.5 : 0),
-          opacity: isScrolling ? 0.5 : 1,
-        })),
-        ...frozenRounds.roundTwo.map((player) => ({
-          ...player,
-          x: player.x + (isScrolling ? width * 0.5 : 0),
-          opacity: isScrolling ? 0.5 : 1,
-        })),
-      ];
+    : [];
 
   return (
     <View testID="allocation-scene-fixture" className="flex-1 bg-emerald-200">
@@ -116,11 +107,11 @@ export default function TouchAllocationVisualFixture() {
         shimmerClock={buffers.shimmerClock}
       />
       {visiblePlayers.map((player, index) => (
-        <View
+        <RevealedPlayerLabel
           key={`${player.x}-${player.y}-${player.team}-${index}`}
+          team={player.team}
           style={[
             styles.label,
-            { opacity: player.opacity },
             {
               transform: [
                 { translateX: player.x - 75 },
@@ -128,12 +119,26 @@ export default function TouchAllocationVisualFixture() {
               ],
             },
           ]}
-        >
-          <AppText className="text-7xl font-extrabold font-mono text-white text-center mt-3">
-            {player.team}
-          </AppText>
-        </View>
+        />
       ))}
+      {!isRevealed ? (
+        <>
+          <RevealedPlayerLabelLayer
+            testID="fixture-round-one-labels"
+            players={frozenRounds.roundOne}
+            transform={buffers.roundOneTransform}
+            opacity={buffers.roundOneOpacity}
+            isAccessibilityVisible
+          />
+          <RevealedPlayerLabelLayer
+            testID="fixture-round-two-labels"
+            players={frozenRounds.roundTwo}
+            transform={buffers.roundTwoTransform}
+            opacity={buffers.roundTwoOpacity}
+            isAccessibilityVisible={false}
+          />
+        </>
+      ) : null}
     </View>
   );
 }

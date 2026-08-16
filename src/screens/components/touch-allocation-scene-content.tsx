@@ -1,4 +1,3 @@
-import { AppText } from "@/src/components/app-text";
 import type { RevealedPlayer } from "@/src/domain/revealed-player";
 import type { RoundAssignment, TeamNumber } from "@/src/domain/team-identity";
 import type { TouchRect } from "@/src/helpers/types/home-screen";
@@ -12,7 +11,6 @@ import {
   useClock,
   vec,
 } from "@shopify/react-native-skia";
-import { useLingui } from "@lingui/react/macro";
 import { useEffect, useMemo, type ReactNode } from "react";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
@@ -22,10 +20,12 @@ import Animated, {
   type SharedValue,
   useAnimatedStyle,
   useDerivedValue,
-  useSharedValue,
-  withTiming,
 } from "react-native-reanimated";
-import { TeamResultArtwork } from "./team-result-artwork";
+import {
+  SharedTeamResultArtwork,
+  TeamResultArtwork,
+} from "./team-result-artwork";
+import RevealedPlayerLabel from "./revealed-player-label";
 import useTouchAllocationController from "./use-touch-allocation-controller";
 
 const BASE_CIRCLE_SIZE = 120;
@@ -54,6 +54,8 @@ export type TouchAllocationSceneProps = {
   isMultiRound: boolean;
   onReveal: (event: { round: 0 | 1; players: RevealedPlayer[] }) => void;
   onTouchStateChange: (state: { count: number; isTouching: boolean }) => void;
+  exitRequested: boolean;
+  onExitReady: () => void;
   children: ReactNode;
 };
 
@@ -67,9 +69,9 @@ function LiveDotArtwork(props: {
   holdProgress: SharedValue<number>;
   sceneOpacity: SharedValue<number>;
   shimmerClock: SharedValue<number>;
-  team: TeamNumber | null;
+  team: SharedValue<number>;
+  revealProgress: SharedValue<number>;
 }) {
-  const revealProgress = useSharedValue(props.team ? 1 : 0);
   const ringThickness = BASE_CIRCLE_SIZE * 0.08;
   const ringRadius = BASE_CIRCLE_SIZE / 2 - ringThickness / 2;
   const progressPath = useMemo(
@@ -95,25 +97,22 @@ function LiveDotArtwork(props: {
     { translateY: props.y.get() - REVEAL_CIRCLE_SIZE / 2 },
     {
       scale:
-        props.scale.get() * interpolate(revealProgress.get(), [0, 1], [0.8, 1]),
+        props.scale.get() *
+        interpolate(props.revealProgress.get(), [0, 1], [0.8, 1]),
     },
   ]);
   const sharedOpacity = useDerivedValue(
     () => props.active.get() * props.opacity.get() * props.sceneOpacity.get(),
   );
   const unrevealedOpacity = useDerivedValue(
-    () => sharedOpacity.get() * (1 - revealProgress.get()),
+    () => sharedOpacity.get() * (1 - props.revealProgress.get()),
   );
   const revealedOpacity = useDerivedValue(
-    () => sharedOpacity.get() * revealProgress.get(),
+    () => sharedOpacity.get() * props.revealProgress.get(),
   );
   const shimmerTransform = useDerivedValue(() => [
     { rotate: (props.shimmerClock.get() / 1200) * Math.PI * 3 },
   ]);
-
-  useEffect(() => {
-    revealProgress.set(withTiming(props.team ? 1 : 0, { duration: 200 }));
-  }, [props.team, revealProgress]);
 
   return (
     <>
@@ -162,15 +161,13 @@ function LiveDotArtwork(props: {
           end={props.holdProgress}
         />
       </Group>
-      {props.team ? (
-        <Group
-          origin={vec(REVEAL_CIRCLE_SIZE / 2, REVEAL_CIRCLE_SIZE / 2)}
-          transform={revealedTransform}
-          opacity={revealedOpacity}
-        >
-          <TeamResultArtwork size={REVEAL_CIRCLE_SIZE} team={props.team} />
-        </Group>
-      ) : null}
+      <Group
+        origin={vec(REVEAL_CIRCLE_SIZE / 2, REVEAL_CIRCLE_SIZE / 2)}
+        transform={revealedTransform}
+        opacity={revealedOpacity}
+      >
+        <SharedTeamResultArtwork size={REVEAL_CIRCLE_SIZE} team={props.team} />
+      </Group>
     </>
   );
 }
@@ -206,7 +203,6 @@ function LiveTeamLabel(props: {
   sceneOpacity: SharedValue<number>;
   team: TeamNumber;
 }) {
-  const { t } = useLingui();
   const style = useAnimatedStyle(() => ({
     opacity:
       props.active.get() * props.opacity.get() * props.sceneOpacity.get(),
@@ -218,39 +214,41 @@ function LiveTeamLabel(props: {
   }));
 
   return (
-    <Animated.View
-      pointerEvents="none"
-      accessible
-      accessibilityLabel={t`Player assigned to Team ${props.team}`}
+    <RevealedPlayerLabel
+      team={props.team}
       style={[styles.teamLabel, style]}
-    >
-      <AppText className="text-7xl font-extrabold font-mono text-white text-center mt-3">
-        {props.team}
-      </AppText>
-    </Animated.View>
+      isAnimated
+    />
   );
 }
 
-function FrozenRoundLabels(props: {
+export function RevealedPlayerLabelLayer(props: {
   players: RevealedPlayer[];
   transform: SharedValue<{ translateX: number }[]>;
   opacity: SharedValue<number>;
+  isAccessibilityVisible: boolean;
+  testID?: string;
 }) {
-  const { t } = useLingui();
   const style = useAnimatedStyle(() => ({
     opacity: props.opacity.get(),
     transform: props.transform.get(),
   }));
   return (
     <Animated.View
+      testID={props.testID}
       pointerEvents="none"
+      aria-hidden={!props.isAccessibilityVisible}
+      accessibilityElementsHidden={!props.isAccessibilityVisible}
+      importantForAccessibility={
+        props.isAccessibilityVisible ? "auto" : "no-hide-descendants"
+      }
       style={[StyleSheet.absoluteFill, style]}
     >
       {props.players.map((player, index) => (
-        <View
+        <RevealedPlayerLabel
           key={`${player.x}-${player.y}-${player.team}-${index}`}
-          accessible
-          accessibilityLabel={t`Player assigned to Team ${player.team}`}
+          team={player.team}
+          isAccessibilityVisible={props.isAccessibilityVisible}
           style={[
             styles.teamLabel,
             {
@@ -260,11 +258,7 @@ function FrozenRoundLabels(props: {
               ],
             },
           ]}
-        >
-          <AppText className="text-7xl font-extrabold font-mono text-white text-center mt-3">
-            {player.team}
-          </AppText>
-        </View>
+        />
       ))}
     </Animated.View>
   );
@@ -276,7 +270,8 @@ export type AllocationLiveSlot = {
   y: SharedValue<number>;
   opacity: SharedValue<number>;
   scale: SharedValue<number>;
-  team: TeamNumber | null;
+  team: SharedValue<number>;
+  revealProgress: SharedValue<number>;
 };
 
 export function AllocationSceneCanvas(props: {
@@ -326,6 +321,7 @@ export function AllocationSceneCanvas(props: {
           sceneOpacity={props.liveSceneOpacity}
           shimmerClock={shimmerClock}
           team={slot.team}
+          revealProgress={slot.revealProgress}
         />
       ))}
     </Canvas>
@@ -349,8 +345,17 @@ export default function TouchAllocationScene(props: TouchAllocationSceneProps) {
     roundAssignment: props.configuration.roundAssignment,
     isPairingModeEnabled: props.configuration.isPairingModeEnabled,
     resetKey: props.configuration.resetKey,
+    exitRequested: props.exitRequested,
+    onExitReady: props.onExitReady,
   });
+  const hasFrozenCurrentRound =
+    round === 0
+      ? props.frozenRounds.roundOne.length > 0
+      : props.frozenRounds.roundTwo.length > 0;
   const liveSceneOpacity = useDerivedValue(() => {
+    if (hasFrozenCurrentRound) {
+      return 0;
+    }
     if (!isMultiRound) {
       return 1;
     }
@@ -402,7 +407,8 @@ export default function TouchAllocationScene(props: TouchAllocationSceneProps) {
     y: controller.slotY[index],
     opacity: controller.slotOpacity[index],
     scale: controller.slotScale[index],
-    team: controller.isRevealed ? controller.slotRevealTeams[index] : null,
+    team: controller.slotRevealTeams[index],
+    revealProgress: controller.slotRevealProgress[index],
   }));
   useEffect(() => {
     onTouchStateChange({
@@ -426,31 +432,33 @@ export default function TouchAllocationScene(props: TouchAllocationSceneProps) {
           shakeX={controller.shakeX}
           holdProgress={controller.revealProgress}
         />
-        <FrozenRoundLabels
+        <RevealedPlayerLabelLayer
+          testID="round-one-labels"
           players={props.frozenRounds.roundOne}
           transform={roundOneTransform}
           opacity={roundOneOpacity}
+          isAccessibilityVisible={round === 0}
         />
-        <FrozenRoundLabels
+        <RevealedPlayerLabelLayer
+          testID="round-two-labels"
           players={props.frozenRounds.roundTwo}
           transform={roundTwoTransform}
           opacity={roundTwoOpacity}
+          isAccessibilityVisible={round === 1}
         />
-        {controller.isRevealed
-          ? controller.slotRevealTeams.map((team, index) =>
-              team ? (
-                <LiveTeamLabel
-                  key={index}
-                  x={controller.slotX[index]}
-                  y={controller.slotY[index]}
-                  active={controller.slotActive[index]}
-                  opacity={controller.slotOpacity[index]}
-                  scale={controller.slotScale[index]}
-                  sceneOpacity={liveSceneOpacity}
-                  team={team}
-                />
-              ) : null,
-            )
+        {controller.isRevealed && !hasFrozenCurrentRound
+          ? controller.revealedAssignments.map((assignment) => (
+              <LiveTeamLabel
+                key={assignment.slotIndex}
+                x={controller.slotX[assignment.slotIndex]}
+                y={controller.slotY[assignment.slotIndex]}
+                active={controller.slotActive[assignment.slotIndex]}
+                opacity={controller.slotOpacity[assignment.slotIndex]}
+                scale={controller.slotScale[assignment.slotIndex]}
+                sceneOpacity={liveSceneOpacity}
+                team={assignment.team}
+              />
+            ))
           : null}
       </View>
     </GestureDetector>

@@ -45,6 +45,7 @@ export default function Home() {
     initialHomeGameState,
   );
   const [isMorePlayersDialogOpen, setIsMorePlayersDialogOpen] = useState(false);
+  const [isExitRequested, setIsExitRequested] = useState(false);
   const isMultiRound = game.declaredPlayerCount !== null;
 
   const toggleRectSv = useSharedValue<TouchRect>({
@@ -165,8 +166,12 @@ export default function Home() {
     resetAllocationSession();
   };
   const handleBack = () => {
+    setIsExitRequested(true);
+  };
+  const handleExitReady = () => {
     dispatchGame({ type: "backToTeamSelection" });
     resetAllocationSession();
+    setIsExitRequested(false);
   };
   const handleReveal = useCallback(
     (event: { round: 0 | 1; players: RevealedPlayer[] }) => {
@@ -251,6 +256,8 @@ export default function Home() {
           isMultiRound={isMultiRound}
           onReveal={handleReveal}
           onTouchStateChange={handleTouchStateChange}
+          exitRequested={isExitRequested}
+          onExitReady={handleExitReady}
         >
           <View className="absolute top-16 right-6 z-10 items-center gap-2">
             <DialogMorePlayers
@@ -360,7 +367,11 @@ export default function Home() {
               </Animated.View>
             </View>
           ) : null}
-          <AllocationBackButton rect={backButtonRectSv} onPress={handleBack} />
+          <AllocationBackButton
+            rect={backButtonRectSv}
+            isDisabled={isExitRequested}
+            onPress={handleBack}
+          />
         </TouchAllocationScene>
       )}
       <AppReviewButton isVisible={!game.selectedTeams} />

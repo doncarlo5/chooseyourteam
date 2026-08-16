@@ -1,49 +1,58 @@
 import { describe, expect, it } from "vitest";
 import {
-  cancelControllerTouches,
-  createControllerState,
+  allocateTouchSlot,
+  clearTouchSlots,
+  countTrackedTouches,
+  countVisibleTouches,
   createRevealedPlayers,
   createTouchSnapshot,
+  findTouchSlot,
+  invalidateToken,
+  isCurrentToken,
+  isExitReady,
   isPointInsideRect,
   meetsExpectedTouchCount,
-  updateControllerTouch,
+  moveTouchSlot,
+  releaseTouchSlot,
+  type MutableCell,
+  type TouchSlotStore,
 } from "./touch-allocation-controller";
+
+const createCell = <T>(initialValue: T): MutableCell<T> => {
+  let value = initialValue;
+  return {
+    get: () => value,
+    set: (nextValue) => {
+      value = nextValue;
+    },
+  };
+};
+
+const createStore = (slotCount: number): TouchSlotStore => ({
+  touchIds: Array.from({ length: slotCount }, () => createCell(-1)),
+  active: Array.from({ length: slotCount }, () => createCell(0)),
+  x: Array.from({ length: slotCount }, () => createCell(0)),
+  y: Array.from({ length: slotCount }, () => createCell(0)),
+});
 
 describe("touch allocation controller", () => {
   it("allocates, moves, hides, and releases a touch slot", () => {
-    const initialState = createControllerState(2);
-    const downState = updateControllerTouch(initialState, {
-      type: "down",
-      touchId: 7,
-      x: 10,
-      y: 20,
-    });
-    const movedState = updateControllerTouch(downState, {
-      type: "move",
-      touchId: 7,
-      x: 30,
-      y: 40,
-    });
-    const ignoredState = updateControllerTouch(movedState, {
-      type: "move",
-      touchId: 7,
-      x: 50,
-      y: 60,
-      isIgnored: true,
-    });
-    const upState = updateControllerTouch(ignoredState, {
-      type: "up",
-      touchId: 7,
-      x: 50,
-      y: 60,
-    });
-
-    expect(createTouchSnapshot(downState)).toEqual([
+    const store = createStore(2);
+    expect(allocateTouchSlot(store, 7, 10, 20)).toBe(0);
+    expect(createTouchSnapshot(store)).toEqual([
       { slotIndex: 0, touchId: 7, x: 10, y: 20 },
     ]);
-    expect(createTouchSnapshot(movedState)[0]).toMatchObject({ x: 30, y: 40 });
-    expect(createTouchSnapshot(ignoredState)).toEqual([]);
-    expect(createTouchSnapshot(upState)).toEqual([]);
+    expect(moveTouchSlot(store, 7, 30, 40, true)).toEqual({
+      slotIndex: 0,
+      visibilityChanged: false,
+    });
+    expect(createTouchSnapshot(store)[0]).toMatchObject({ x: 30, y: 40 });
+    expect(moveTouchSlot(store, 7, 50, 60, false).visibilityChanged).toBe(true);
+    expect(createTouchSnapshot(store)).toEqual([]);
+    expect(countVisibleTouches(store)).toBe(0);
+    expect(countTrackedTouches(store)).toBe(1);
+    expect(releaseTouchSlot(store, 7)).toBe(0);
+    expect(findTouchSlot(store, 7)).toBe(-1);
   });
 
   it("ignores control regions and refuses touches when slots are full", () => {
@@ -51,42 +60,36 @@ describe("touch allocation controller", () => {
     expect(isPointInsideRect(10, 10, rect)).toBe(true);
     expect(isPointInsideRect(30, 30, rect)).toBe(false);
 
-    const state = updateControllerTouch(createControllerState(1), {
-      type: "down",
-      touchId: 1,
-      x: 10,
-      y: 10,
-      isIgnored: true,
-    });
-    expect(state).toEqual(createControllerState(1));
-
-    const occupied = updateControllerTouch(state, {
-      type: "down",
-      touchId: 1,
-      x: 30,
-      y: 30,
-    });
-    const full = updateControllerTouch(occupied, {
-      type: "down",
-      touchId: 2,
-      x: 40,
-      y: 40,
-    });
-    expect(full).toBe(occupied);
+    const store = createStore(1);
+    expect(allocateTouchSlot(store, 1, 30, 30)).toBe(0);
+    expect(allocateTouchSlot(store, 2, 40, 40)).toBe(-1);
+    expect(countTrackedTouches(store)).toBe(1);
+    expect(countVisibleTouches(store)).toBe(1);
   });
 
   it("invalidates stale reveal tokens on changes, cancellation, and reset", () => {
-    const active = updateControllerTouch(createControllerState(2), {
-      type: "down",
-      touchId: 1,
-      x: 10,
-      y: 20,
-    });
-    const cancelled = cancelControllerTouches(active);
+    const store = createStore(2);
+    const token = createCell(0);
+    allocateTouchSlot(store, 1, 10, 20);
+    const countdownToken = invalidateToken(token);
+    expect(isCurrentToken(token, countdownToken)).toBe(true);
+    clearTouchSlots(store);
+    invalidateToken(token);
+    expect(isCurrentToken(token, countdownToken)).toBe(false);
+    expect(createTouchSnapshot(store)).toEqual([]);
+  });
 
-    expect(active.revealToken).toBe(1);
-    expect(cancelled.revealToken).toBe(2);
-    expect(createTouchSnapshot(cancelled)).toEqual([]);
+  it("defers exit until every tracked touch is released or cancelled", () => {
+    const store = createStore(2);
+    allocateTouchSlot(store, 1, 10, 20);
+    allocateTouchSlot(store, 2, 30, 40);
+
+    expect(isExitReady(store, true)).toBe(false);
+    releaseTouchSlot(store, 1);
+    expect(isExitReady(store, true)).toBe(false);
+    releaseTouchSlot(store, 2);
+    expect(isExitReady(store, true)).toBe(true);
+    expect(isExitReady(store, false)).toBe(false);
   });
 
   it("supports exact and at-least touch-count policies", () => {

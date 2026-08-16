@@ -127,14 +127,17 @@ For a more expressive reveal, normalize paths and animate a circle-to-team-shape
 
 ## Implemented performance changes
 
-| Measurement                             |                                                  Before |                                                      After |
-| --------------------------------------- | ------------------------------------------------------: | ---------------------------------------------------------: |
-| Mounted allocation artwork canvases     |                      12 live, up to 5 additional frozen |                                                    1 total |
-| Scroll-to-JavaScript visibility updates |                             Up to once per scroll frame |    One swipe-hint event per Session plus scroll completion |
-| Reveal snapshot reads                   |     Repeated JavaScript reads across slot shared values |            One UI-thread snapshot array sent to JavaScript |
-| Mesh vertex/color construction          | New point objects, arrays, and color strings each frame | Unchanged; buffer-backed `Vertices` rendered only the fallback fill, so the documented arrays were retained |
-| Inactive mesh clock                     |                         Continued running while mounted |           Paused when the route or application is inactive |
+| Measurement                             |                                                                   Before |                                                                                                       After |
+| --------------------------------------- | -----------------------------------------------------------------------: | ----------------------------------------------------------------------------------------------------------: |
+| Mounted allocation artwork canvases     |                                       12 live, up to 5 additional frozen |                                                                                                     1 total |
+| Scroll-to-JavaScript visibility updates |                                              Up to once per scroll frame |                                                     One swipe-hint event per Session plus scroll completion |
+| Reveal snapshot reads                   |                      Repeated JavaScript reads across slot shared values |                                                             One UI-thread snapshot array sent to JavaScript |
+| Reveal assignment presentation          |                React state followed by one animation effect per live dot |           One `scheduleOnUI` batch updates every shared team/progress slot before the semantic reveal event |
+| Controller test seam                    |        A parallel immutable model not imported by the gesture controller |           Worklet-compatible slot, token, snapshot, and exit primitives shared by production and unit tests |
+| Revealed-result accessibility           | Both frozen-round label trees remained available to assistive technology |         Only the current round is exposed; decorative/off-screen layers are hidden on iOS, Android, and web |
+| Mesh vertex/color construction          |                  New point objects, arrays, and color strings each frame | Unchanged; buffer-backed `Vertices` rendered only the fallback fill, so the documented arrays were retained |
+| Inactive mesh clock                     |                                          Continued running while mounted |                                                            Paused when the route or application is inactive |
 
-Five deterministic Playwright states verify unrevealed, countdown, revealed, frozen, and mid-scroll rendering. Every fixture asserts one Canvas and fails on browser page errors.
+Five deterministic Playwright states verify unrevealed, countdown, revealed, frozen, and mid-scroll rendering. Every fixture asserts one Canvas and fails on browser page errors. The frozen and mid-scroll fixtures also verify that only the current revealed-result layer remains in the accessibility tree.
 
 The final development-build smoke test rendered the allocation screen on iOS and an active touch on Android without a visible stall or runtime error. This is a qualitative regression check, not an FPS claim; sustained multi-touch behavior and accessibility still require the physical-device matrix in `docs/touch-allocation-validation.md`.

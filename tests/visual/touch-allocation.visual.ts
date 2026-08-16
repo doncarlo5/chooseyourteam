@@ -18,6 +18,14 @@ for (const fixtureState of fixtureStates) {
     const scene = page.getByTestId("allocation-scene-fixture");
     await expect(scene).toBeVisible();
     await expect(scene.locator("canvas")).toHaveCount(1);
+    if (fixtureState === "scrolling") {
+      await expect(
+        scene.getByTestId("fixture-round-one-labels"),
+      ).not.toHaveAttribute("aria-hidden", "true");
+      await expect(
+        scene.getByTestId("fixture-round-two-labels"),
+      ).toHaveAttribute("aria-hidden", "true");
+    }
     expect(pageErrors).toEqual([]);
     await expect(scene).toHaveScreenshot(`${fixtureState}.png`, {
       animations: "disabled",

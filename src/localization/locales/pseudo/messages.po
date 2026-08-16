@@ -66,7 +66,7 @@ msgctxt "dismiss reduced-motion notification"
 msgid "Close"
 msgstr ""
 
-#: src/screens/components/allocation-back-button.tsx:35
+#: src/screens/components/allocation-back-button.tsx:36
 msgctxt "return from allocation to team selection"
 msgid "Close"
 msgstr ""
@@ -111,7 +111,7 @@ msgstr ""
 msgid "Language"
 msgstr ""
 
-#: src/screens/components/use-touch-allocation-controller.tsx:267
+#: src/screens/components/use-touch-allocation-feedback.ts:168
 msgid "Maximum 5 fingers"
 msgstr ""
 
@@ -148,10 +148,8 @@ msgstr ""
 msgid "Pick a number to get started"
 msgstr ""
 
-#. placeholder {0}: player.team
 #. placeholder {0}: props.team
-#: src/screens/components/touch-allocation-scene-content.tsx:224
-#: src/screens/components/touch-allocation-scene-content.tsx:253
+#: src/screens/components/revealed-player-label.tsx:38
 msgid "Player assigned to Team {0}"
 msgstr ""
 
@@ -169,7 +167,7 @@ msgstr ""
 msgid "Reduce motion enabled"
 msgstr ""
 
-#: src/screens/components/allocation-back-button.tsx:39
+#: src/screens/components/allocation-back-button.tsx:40
 msgid "Returns to team selection"
 msgstr ""
 
@@ -183,6 +181,6 @@ msgstr ""
 msgid "System"
 msgstr ""
 
-#: src/screens/components/use-touch-allocation-controller.tsx:268
+#: src/screens/components/use-touch-allocation-feedback.ts:169
 msgid "Use +5."
 msgstr ""

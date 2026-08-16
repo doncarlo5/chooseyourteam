@@ -13,103 +13,158 @@ export type TouchSnapshot = {
   y: number;
 };
 
-export type ControllerSlot = {
-  touchId: number | null;
-  x: number;
-  y: number;
-  isActive: boolean;
+export type MutableCell<T> = {
+  get: () => T;
+  set: (value: T) => void;
 };
 
-export type ControllerState = {
-  slots: ControllerSlot[];
-  revealToken: number;
+export type TouchSlotStore = {
+  touchIds: MutableCell<number>[];
+  active: MutableCell<number>[];
+  x: MutableCell<number>[];
+  y: MutableCell<number>[];
 };
 
-export const createControllerState = (slotCount: number): ControllerState => ({
-  slots: Array.from({ length: slotCount }, () => ({
-    touchId: null,
-    x: 0,
-    y: 0,
-    isActive: false,
-  })),
-  revealToken: 0,
-});
+export const isPointInsideRect = (x: number, y: number, rect: TouchRect) => {
+  "worklet";
+  return (
+    rect.isReady &&
+    x >= rect.x &&
+    x <= rect.x + rect.width &&
+    y >= rect.y &&
+    y <= rect.y + rect.height
+  );
+};
 
-export const isPointInsideRect = (x: number, y: number, rect: TouchRect) =>
-  rect.isReady &&
-  x >= rect.x &&
-  x <= rect.x + rect.width &&
-  y >= rect.y &&
-  y <= rect.y + rect.height;
-
-export const updateControllerTouch = (
-  state: ControllerState,
-  event: {
-    type: "down" | "move" | "up";
-    touchId: number;
-    x: number;
-    y: number;
-    isIgnored?: boolean;
-  },
-): ControllerState => {
-  const slots = state.slots.map((slot) => ({ ...slot }));
-  let slotIndex = slots.findIndex((slot) => slot.touchId === event.touchId);
-
-  if (event.type === "down" && slotIndex === -1 && !event.isIgnored) {
-    slotIndex = slots.findIndex((slot) => slot.touchId === null);
-    if (slotIndex !== -1) {
-      slots[slotIndex] = {
-        touchId: event.touchId,
-        x: event.x,
-        y: event.y,
-        isActive: true,
-      };
+export const findTouchSlot = (store: TouchSlotStore, touchId: number) => {
+  "worklet";
+  for (let index = 0; index < store.touchIds.length; index += 1) {
+    if (store.touchIds[index].get() === touchId) {
+      return index;
     }
   }
-
-  if (slotIndex === -1) {
-    return state;
-  }
-
-  if (event.type === "up") {
-    slots[slotIndex] = {
-      touchId: null,
-      x: event.x,
-      y: event.y,
-      isActive: false,
-    };
-  } else {
-    slots[slotIndex] = {
-      ...slots[slotIndex],
-      x: event.x,
-      y: event.y,
-      isActive: !event.isIgnored,
-    };
-  }
-
-  return { slots, revealToken: state.revealToken + 1 };
+  return -1;
 };
 
-export const cancelControllerTouches = (
-  state: ControllerState,
-): ControllerState => ({
-  ...createControllerState(state.slots.length),
-  revealToken: state.revealToken + 1,
-});
+export const allocateTouchSlot = (
+  store: TouchSlotStore,
+  touchId: number,
+  x: number,
+  y: number,
+) => {
+  "worklet";
+  const existingSlot = findTouchSlot(store, touchId);
+  if (existingSlot !== -1) {
+    return existingSlot;
+  }
+  for (let index = 0; index < store.touchIds.length; index += 1) {
+    if (store.touchIds[index].get() !== -1) {
+      continue;
+    }
+    store.touchIds[index].set(touchId);
+    store.active[index].set(1);
+    store.x[index].set(x);
+    store.y[index].set(y);
+    return index;
+  }
+  return -1;
+};
 
-export const createTouchSnapshot = (state: ControllerState): TouchSnapshot[] =>
-  state.slots.flatMap((slot, slotIndex) =>
-    slot.isActive && slot.touchId !== null
-      ? [
-          {
-            slotIndex,
-            touchId: slot.touchId,
-            x: slot.x,
-            y: slot.y,
-          },
-        ]
-      : [],
-  );
+export const moveTouchSlot = (
+  store: TouchSlotStore,
+  touchId: number,
+  x: number,
+  y: number,
+  isActive: boolean,
+) => {
+  "worklet";
+  const slotIndex = findTouchSlot(store, touchId);
+  if (slotIndex === -1) {
+    return { slotIndex, visibilityChanged: false };
+  }
+  const nextActive = isActive ? 1 : 0;
+  const visibilityChanged = store.active[slotIndex].get() !== nextActive;
+  store.x[slotIndex].set(x);
+  store.y[slotIndex].set(y);
+  store.active[slotIndex].set(nextActive);
+  return { slotIndex, visibilityChanged };
+};
+
+export const releaseTouchSlot = (store: TouchSlotStore, touchId: number) => {
+  "worklet";
+  const slotIndex = findTouchSlot(store, touchId);
+  if (slotIndex !== -1) {
+    store.touchIds[slotIndex].set(-1);
+  }
+  return slotIndex;
+};
+
+export const clearTouchSlots = (store: TouchSlotStore) => {
+  "worklet";
+  for (let index = 0; index < store.touchIds.length; index += 1) {
+    store.touchIds[index].set(-1);
+    store.active[index].set(0);
+  }
+};
+
+export const countVisibleTouches = (store: TouchSlotStore) => {
+  "worklet";
+  let count = 0;
+  for (let index = 0; index < store.touchIds.length; index += 1) {
+    if (store.active[index].get() === 1 && store.touchIds[index].get() !== -1) {
+      count += 1;
+    }
+  }
+  return count;
+};
+
+export const countTrackedTouches = (store: TouchSlotStore) => {
+  "worklet";
+  let count = 0;
+  for (let index = 0; index < store.touchIds.length; index += 1) {
+    if (store.touchIds[index].get() !== -1) {
+      count += 1;
+    }
+  }
+  return count;
+};
+
+export const isExitReady = (store: TouchSlotStore, isExitPending: boolean) => {
+  "worklet";
+  return isExitPending && countTrackedTouches(store) === 0;
+};
+
+export const createTouchSnapshot = (store: TouchSlotStore): TouchSnapshot[] => {
+  "worklet";
+  const snapshot: TouchSnapshot[] = [];
+  for (let slotIndex = 0; slotIndex < store.touchIds.length; slotIndex += 1) {
+    const touchId = store.touchIds[slotIndex].get();
+    if (store.active[slotIndex].get() === 1 && touchId !== -1) {
+      snapshot.push({
+        slotIndex,
+        touchId,
+        x: store.x[slotIndex].get(),
+        y: store.y[slotIndex].get(),
+      });
+    }
+  }
+  return snapshot;
+};
+
+export const invalidateToken = (token: MutableCell<number>) => {
+  "worklet";
+  const nextToken = token.get() + 1;
+  token.set(nextToken);
+  return nextToken;
+};
+
+export const isCurrentToken = (
+  token: MutableCell<number>,
+  candidate: number,
+) => {
+  "worklet";
+  return token.get() === candidate;
+};
 
 export const meetsExpectedTouchCount = (
   count: number,

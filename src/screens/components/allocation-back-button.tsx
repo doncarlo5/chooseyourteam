@@ -9,6 +9,7 @@ import { type SharedValue, useSharedValue } from "react-native-reanimated";
 
 export default function AllocationBackButton(props: {
   rect: SharedValue<TouchRect>;
+  isDisabled: boolean;
   onPress: () => void;
 }) {
   const { t } = useLingui();
@@ -37,6 +38,7 @@ export default function AllocationBackButton(props: {
         message: "Close",
       })}
       accessibilityHint={t`Returns to team selection`}
+      isDisabled={props.isDisabled}
       onPress={props.onPress}
       onLayout={() => {
         buttonRef.current?.measureInWindow((x, y, width, height) => {
