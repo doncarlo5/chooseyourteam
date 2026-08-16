@@ -1,8 +1,13 @@
-import type { FrozenDot } from "../../helpers/types/home-screen";
+import type { MultiRoundAssignmentPlan } from "../../domain/team-allocation";
+import type { RevealedPlayer } from "../../domain/revealed-player";
 import { describe, expect, it } from "vitest";
 import { homeGameReducer, initialHomeGameState } from "./home-game-state";
 
-const frozenDot: FrozenDot = { x: 100, y: 200, team: 1 };
+const revealedPlayer: RevealedPlayer = { x: 100, y: 200, team: 1 };
+const multiRoundPlan: MultiRoundAssignmentPlan = {
+  roundOne: [1, 2, 3, 4, 1],
+  roundTwo: [2, 3, 4],
+};
 
 describe("homeGameReducer", () => {
   it("enables pairing mode only during setup and clears it on Back", () => {
@@ -36,7 +41,7 @@ describe("homeGameReducer", () => {
     expect(resetState.isPairingModeEnabled).toBe(false);
   });
 
-  it("plans the second and third declared players together when enabled", () => {
+  it("stores the completed assignment plan supplied by the event handler", () => {
     const enabledState = homeGameReducer(initialHomeGameState, {
       type: "setPairingMode",
       isEnabled: true,
@@ -48,11 +53,17 @@ describe("homeGameReducer", () => {
     const state = homeGameReducer(teamState, {
       type: "selectPlayerCount",
       playerCount: 8,
+      plan: multiRoundPlan,
     });
 
-    expect(state.multiRoundPlan?.roundOne[2]).toBe(
-      state.multiRoundPlan?.roundOne[1],
-    );
+    expect(state.multiRoundPlan).toBe(multiRoundPlan);
+
+    const replayedState = homeGameReducer(teamState, {
+      type: "selectPlayerCount",
+      playerCount: 8,
+      plan: multiRoundPlan,
+    });
+    expect(replayedState).toEqual(state);
   });
 
   it("starts a clean game when a team count is selected", () => {
@@ -74,6 +85,7 @@ describe("homeGameReducer", () => {
     const state = homeGameReducer(teamState, {
       type: "selectPlayerCount",
       playerCount: 8,
+      plan: multiRoundPlan,
     });
 
     expect(state.declaredPlayerCount).toBe(8);
@@ -87,22 +99,24 @@ describe("homeGameReducer", () => {
     const roundOneState = homeGameReducer(initialHomeGameState, {
       type: "revealRound",
       round: 0,
-      dots: [frozenDot],
+      players: [revealedPlayer],
     });
     const repeatedState = homeGameReducer(roundOneState, {
       type: "revealRound",
       round: 0,
-      dots: [],
+      players: [],
     });
 
     expect(repeatedState).toBe(roundOneState);
-    expect(repeatedState.roundOneSnapshot).toEqual([frozenDot]);
+    expect(repeatedState.roundOneSnapshot).toEqual([revealedPlayer]);
   });
 
   it("records the swipe hint and advances the reset key with the round", () => {
     const visibleState = homeGameReducer(initialHomeGameState, {
-      type: "roundVisibilityChanged",
-      isRoundTwoVisible: true,
+      type: "roundSwipeHintSeen",
+    });
+    const repeatedVisibleState = homeGameReducer(visibleState, {
+      type: "roundSwipeHintSeen",
     });
     const state = homeGameReducer(visibleState, {
       type: "roundScrollFinished",
@@ -113,5 +127,21 @@ describe("homeGameReducer", () => {
     expect(state.currentRound).toBe(1);
     expect(state.roundResetKey).toBe(1);
     expect(state.isRoundScrolling).toBe(false);
+    expect(repeatedVisibleState).toBe(visibleState);
+  });
+
+  it("keeps repeated round completion idempotent", () => {
+    const state = {
+      ...initialHomeGameState,
+      currentRound: 1,
+      roundResetKey: 4,
+    };
+    const nextState = homeGameReducer(state, {
+      type: "roundScrollFinished",
+      round: 1,
+    });
+
+    expect(nextState.currentRound).toBe(1);
+    expect(nextState.roundResetKey).toBe(4);
   });
 });

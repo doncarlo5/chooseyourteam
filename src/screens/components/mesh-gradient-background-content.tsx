@@ -7,12 +7,16 @@ import {
   Paint,
   Rect,
   Vertices,
-  useClock,
   vec,
 } from "@shopify/react-native-skia";
-import React, { useMemo } from "react";
-import { StyleSheet, View, useWindowDimensions } from "react-native";
-import { useDerivedValue } from "react-native-reanimated";
+import { useIsFocused } from "expo-router";
+import React, { useEffect, useMemo, useState } from "react";
+import { AppState, StyleSheet, View, useWindowDimensions } from "react-native";
+import {
+  useDerivedValue,
+  useFrameCallback,
+  useSharedValue,
+} from "react-native-reanimated";
 
 type Point = { x: number; y: number };
 type RGB = readonly [number, number, number];
@@ -69,6 +73,14 @@ const clamp = (v: number, min: number, max: number) => {
   return Math.max(min, Math.min(max, v));
 };
 
+const rgbaToString = (r: number, g: number, b: number, a: number) => {
+  "worklet";
+  const red = Math.round(clamp(r, 0, 1) * 255);
+  const green = Math.round(clamp(g, 0, 1) * 255);
+  const blue = Math.round(clamp(b, 0, 1) * 255);
+  return `rgba(${red},${green},${blue},${clamp(a, 0, 1)})`;
+};
+
 const lerp = (a: number, b: number, t: number) => {
   "worklet";
   return a + (b - a) * t;
@@ -114,14 +126,21 @@ const noise2D = (x: number, y: number, seed: number) => {
   return n * 2 - 1; // -1..1
 };
 
-const rgbaToString = (r: number, g: number, b: number, a: number) => {
-  "worklet";
-  const A = clamp(a, 0, 1);
-  const R = Math.round(clamp(r, 0, 1) * 255);
-  const G = Math.round(clamp(g, 0, 1) * 255);
-  const B = Math.round(clamp(b, 0, 1) * 255);
-  const alpha = Math.round(A * 1000) / 1000;
-  return `rgba(${R},${G},${B},${alpha})`;
+const useIsAppActive = () => {
+  const [isActive, setIsActive] = useState(AppState.currentState === "active");
+  const handleAppStateChange = (nextState: string) => {
+    setIsActive(nextState === "active");
+  };
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange,
+    );
+    return () => subscription.remove();
+  }, []);
+
+  return isActive;
 };
 
 export default function MeshGradientBackground(props: {
@@ -161,7 +180,25 @@ export default function MeshGradientBackground(props: {
   const yellowWeight = props.yellowWeight ?? 0.65;
 
   const { width, height } = useWindowDimensions();
-  const clock = useClock(); // ms since activated :contentReference[oaicite:2]{index=2}
+  const isFocused = useIsFocused();
+  const isAppActive = useIsAppActive();
+  const clock = useSharedValue(0);
+  const lastFrameTimestamp = useSharedValue(-1);
+  const frameCallback = useFrameCallback((frame) => {
+    "worklet";
+    const previousTimestamp = lastFrameTimestamp.get();
+    if (previousTimestamp >= 0) {
+      clock.set(clock.get() + frame.timestamp - previousTimestamp);
+    }
+    lastFrameTimestamp.set(frame.timestamp);
+  }, false);
+
+  useEffect(() => {
+    const shouldAnimate = isFocused && isAppActive;
+    lastFrameTimestamp.set(-1);
+    frameCallback.setActive(shouldAnimate);
+    return () => frameCallback.setActive(false);
+  }, [frameCallback, isAppActive, isFocused, lastFrameTimestamp]);
 
   const safeOverscan = Math.max(0, meshOverscan);
   const meshWidth = Math.max(0, width + safeOverscan * 2);
@@ -191,123 +228,104 @@ export default function MeshGradientBackground(props: {
 
   // Animate ONLY inner vertices (pin edges to avoid gaps).
   // Motion is coherent: depends on UV coords + time for a soft mesh drift.
+  // Keep Point[]/string[] shared values here: those are the documented Vertices
+  // inputs. Skia 2.11 buffer hooks did not produce a visible Vertices draw.
   const animatedVertices = useDerivedValue(() => {
     "worklet";
-    const t = clock.value * speed;
+    const t = clock.get() * speed;
     const stride = cols + 1;
 
-    return baseVertices.map((p, i) => {
+    return baseVertices.map((basePoint, i) => {
       const xi = i % stride;
       const yi = Math.floor(i / stride);
-
       const isEdge = xi === 0 || yi === 0 || xi === cols || yi === rows;
-      if (isEdge) return p;
+      if (isEdge) return basePoint;
 
-      // Normalized coords
-      const u = xi / cols; // 0..1
-      const v = yi / rows; // 0..1
-      const uvx = u * 2 - 1; // -1..1
-      const uvy = v * 2 - 1; // -1..1
-
-      // Fade motion near edges (extra safety + smoother look)
+      const u = xi / cols;
+      const v = yi / rows;
+      const uvx = u * 2 - 1;
+      const uvy = v * 2 - 1;
       const edge = 0.14;
       const edgeFade =
         smoothstep(0, edge, u) *
         smoothstep(0, edge, 1 - u) *
         smoothstep(0, edge, v) *
         smoothstep(0, edge, 1 - v);
-
-      // Coherent displacement field
       const fx = 2.25;
       const fy = 3.15;
-
-      const n1 = noise2D(uvx * fx + t * 0.35, uvy * fy + t * 0.18, 10.0);
+      const n1 = noise2D(
+        uvx * fx + t * 0.35,
+        uvy * fy + t * 0.18,
+        10.0,
+      );
       const n2 = noise2D(
         uvx * fx - t * 0.22 + 9.3,
         uvy * fy + t * 0.28 + 2.1,
         42.0,
       );
 
-      // Keep deformation mostly vertical for smooth drift.
-      const dx = amplitude * 0.35 * n1 * edgeFade;
-      const dy = amplitude * 1.0 * n2 * edgeFade;
-
-      return { x: p.x + dx, y: p.y + dy };
+      return {
+        x: basePoint.x + amplitude * 0.35 * n1 * edgeFade,
+        y: basePoint.y + amplitude * n2 * edgeFade,
+      };
     });
-  }, [baseVertices, cols, rows, amplitude, speed]);
+  });
 
   // Layered color blending:
   // baseColor acts as a calm backdrop; each layer uses smoothstep + pow falloff.
   const animatedColors = useDerivedValue(() => {
     "worklet";
-    const t = clock.value * speed;
+    const t = clock.get() * speed;
     const stride = cols + 1;
-
     const baseIdx = Math.min(2, paletteRgb.length - 1);
     const base = paletteRgb[baseIdx] ?? ([0.44, 0.07, 0.95] as const);
 
     return baseVertices.map((_, i) => {
       const xi = i % stride;
       const yi = Math.floor(i / stride);
-
       const u = xi / cols;
       const v = yi / rows;
       const uvx = u * 2 - 1;
       const uvy = v * 2 - 1;
-
-      // Keep the strongest color activity around the middle band.
       const band = 1 - clamp(Math.abs(uvy), 0, 1);
       const bandFade = useBandFade
         ? lerp(1, band * band, clamp(bandFadeStrength, 0, 1))
-        : 1; // pow2
-
+        : 1;
       let r = base[0];
       let g = base[1];
       let b = base[2];
 
-      // A few wave layers with varied frequency/flow.
-      for (let k = 0; k < layerOrder.length; k++) {
+      for (let k = 0; k < layerOrder.length; k += 1) {
         const idx = layerOrder[k];
-        const c = paletteRgb[idx] ?? base;
-
-        // Vary freq/flow per layer
+        const paletteColor = paletteRgb[idx] ?? base;
         const freqX = 1.6 + k * 0.55;
         const freqY = 2.2 + k * 0.45;
         const flowX = 0.2 + k * 0.07;
         const flowY = 0.12 + k * 0.05;
         const seed = 100 + k * 37.7;
-
         const raw = noise2D(
           uvx * freqX + t * flowX + seed,
           uvy * freqY - t * flowY + seed * 0.33,
           seed,
-        ); // -1..1
-        const n = raw * 0.5 + 0.5; // 0..1
-
-        const floor = 0.22;
-        const ceil = 0.66 + 0.06 * k; // progressively “rarer” layers
-        const w = smoothstep(floor, ceil, n);
-        const layerWeight = idx === 3 ? clamp(yellowWeight, 0, 1) : 1; // tone down yellow
-        const opacity = Math.pow(w, 4) * bandFade * layerWeight;
-
-        r = lerp(r, c[0], opacity);
-        g = lerp(g, c[1], opacity);
-        b = lerp(b, c[2], opacity);
+        );
+        const noise = raw * 0.5 + 0.5;
+        const weight = smoothstep(0.22, 0.66 + 0.06 * k, noise);
+        const layerWeight = idx === 3 ? clamp(yellowWeight, 0, 1) : 1;
+        const opacity = Math.pow(weight, 4) * bandFade * layerWeight;
+        r = lerp(r, paletteColor[0], opacity);
+        g = lerp(g, paletteColor[1], opacity);
+        b = lerp(b, paletteColor[2], opacity);
       }
 
       const darken = clamp(colorDarken, 0, 1);
-      return rgbaToString(r * darken, g * darken, b * darken, vertexAlpha);
+      return rgbaToString(
+        r * darken,
+        g * darken,
+        b * darken,
+        vertexAlpha,
+      );
     });
-  }, [
-    baseVertices,
-    cols,
-    rows,
-    speed,
-    paletteRgb,
-    vertexAlpha,
-    layerOrder,
-    colorDarken,
-  ]);
+  });
 
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>

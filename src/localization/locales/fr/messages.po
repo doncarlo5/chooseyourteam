@@ -66,7 +66,7 @@ msgctxt "dismiss reduced-motion notification"
 msgid "Close"
 msgstr "Fermer"
 
-#: src/screens/components/selected-players-layer.tsx:859
+#: src/screens/components/allocation-back-button.tsx:36
 msgctxt "return from allocation to team selection"
 msgid "Close"
 msgstr "Retour"
@@ -91,7 +91,7 @@ msgstr "English"
 msgid "Give a review"
 msgstr "Donner un avis"
 
-#: src/screens/components/teams-selection.tsx:81
+#: src/screens/components/teams-selection.tsx:71
 msgid "How many teams?"
 msgstr "Combien d’équipes ?"
 
@@ -111,7 +111,7 @@ msgstr "Maintient les deuxième et troisième joueurs dans la même équipe lors
 msgid "Language"
 msgstr "Langue"
 
-#: src/screens/components/selected-players-layer.tsx:295
+#: src/screens/components/use-touch-allocation-feedback.ts:168
 msgid "Maximum 5 fingers"
 msgstr "5 doigts maximum"
 
@@ -144,9 +144,14 @@ msgstr "Ouverture du partage avec le lien de l’App Store"
 msgid "Pairing mode"
 msgstr "Mode duo"
 
-#: src/screens/components/teams-selection.tsx:84
+#: src/screens/components/teams-selection.tsx:74
 msgid "Pick a number to get started"
 msgstr "Sélectionner un nombre pour commencer"
+
+#. placeholder {0}: props.team
+#: src/screens/components/revealed-player-label.tsx:38
+msgid "Player assigned to Team {0}"
+msgstr "Joueur affecté à l’équipe {0}"
 
 #: src/screens/components/app-info-sheet.android.tsx:66
 #: src/screens/components/app-info-sheet.ios.tsx:41
@@ -162,7 +167,7 @@ msgstr "Noter l’application"
 msgid "Reduce motion enabled"
 msgstr "Réduction des animations activée"
 
-#: src/screens/components/selected-players-layer.tsx:863
+#: src/screens/components/allocation-back-button.tsx:40
 msgid "Returns to team selection"
 msgstr "Retour à la sélection des équipes"
 
@@ -176,6 +181,6 @@ msgstr "Partager {brandName}"
 msgid "System"
 msgstr "Système"
 
-#: src/screens/components/selected-players-layer.tsx:296
+#: src/screens/components/use-touch-allocation-feedback.ts:169
 msgid "Use +5."
 msgstr "Utiliser +5."

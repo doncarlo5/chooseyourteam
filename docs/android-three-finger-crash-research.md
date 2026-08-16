@@ -2,7 +2,7 @@
 
 Research date: 2026-08-13
 
-Scope: React Native Skia 2.10.0 and React Native Gesture Handler 2.32.0, the versions installed by this project. Sources are limited to the maintainers' official documentation and source repository.
+Scope: React Native Skia 2.11.0 and React Native Gesture Handler 2.32.0, the versions installed by this project. Sources are limited to the maintainers' official documentation and source repository.
 
 ## Conclusion
 
@@ -23,5 +23,6 @@ The fatal Android stack is a Gesture Handler lifecycle failure, not a Skia rende
 3. Continue processing already-tracked pointers after results appear so Android can deliver their up/cancel events safely.
 4. Clear tracked slots in both `onTouchesUp` and `onTouchesCancelled`; end the manual gesture only once no pointers remain.
 5. Keep the Skia canvas/dots driven by shared values during that completion. React state may control the visible result, but it should not detach or disable the active recognizer mid-stream.
+6. Treat screen exit as a handshake: stop accepting new pointers immediately, continue cleanup for every tracked pointer, and unmount the scene only after the tracked-pointer count reaches zero.
 
-Items 2, 3, and 5 are an engineering inference from the documented lifecycle and the 2.32.0 Android implementation. They avoid the exact transition in the crash while following Skia's supported UI-thread shared-value integration.
+Items 2, 3, 5, and 6 are an engineering inference from the documented lifecycle and the 2.32.0 Android implementation. They avoid the exact transition in the crash while following Skia's supported UI-thread shared-value integration.
