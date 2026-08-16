@@ -1,8 +1,5 @@
-import {
-  planMultiRoundAssignments,
-  type MultiRoundAssignmentPlan,
-} from "../../domain/team-allocation";
-import type { FrozenDot } from "../../helpers/types/home-screen";
+import { type MultiRoundAssignmentPlan } from "../../domain/team-allocation";
+import type { RevealedPlayer } from "../../domain/revealed-player";
 
 export type HomeGameState = {
   isPairingModeEnabled: boolean;
@@ -10,12 +7,11 @@ export type HomeGameState = {
   declaredPlayerCount: number | null;
   multiRoundPlan: MultiRoundAssignmentPlan | null;
   currentRound: number;
-  roundOneSnapshot: FrozenDot[];
+  roundOneSnapshot: RevealedPlayer[];
   isRoundOneFrozen: boolean;
-  roundTwoSnapshot: FrozenDot[];
+  roundTwoSnapshot: RevealedPlayer[];
   isRoundTwoFrozen: boolean;
   roundResetKey: number;
-  isRoundTwoVisible: boolean;
   isRoundScrolling: boolean;
   hasShownSwipeHint: boolean;
 };
@@ -23,10 +19,14 @@ export type HomeGameState = {
 export type HomeGameAction =
   | { type: "setPairingMode"; isEnabled: boolean }
   | { type: "selectTeams"; teamCount: number }
-  | { type: "selectPlayerCount"; playerCount: number }
+  | {
+      type: "selectPlayerCount";
+      playerCount: number;
+      plan: MultiRoundAssignmentPlan;
+    }
   | { type: "backToTeamSelection" }
-  | { type: "revealRound"; round: number; dots: FrozenDot[] }
-  | { type: "roundVisibilityChanged"; isRoundTwoVisible: boolean }
+  | { type: "revealRound"; round: number; players: RevealedPlayer[] }
+  | { type: "roundSwipeHintSeen" }
   | { type: "roundScrollStarted" }
   | { type: "roundScrollDragEnded" }
   | { type: "roundScrollFinished"; round: number };
@@ -42,7 +42,6 @@ export const initialHomeGameState: HomeGameState = {
   roundTwoSnapshot: [],
   isRoundTwoFrozen: false,
   roundResetKey: 0,
-  isRoundTwoVisible: false,
   isRoundScrolling: false,
   hasShownSwipeHint: false,
 };
@@ -57,7 +56,6 @@ const resetRoundState = (
   | "roundTwoSnapshot"
   | "isRoundTwoFrozen"
   | "roundResetKey"
-  | "isRoundTwoVisible"
   | "isRoundScrolling"
   | "hasShownSwipeHint"
 > => ({
@@ -67,7 +65,6 @@ const resetRoundState = (
   roundTwoSnapshot: [],
   isRoundTwoFrozen: false,
   roundResetKey: state.roundResetKey + 1,
-  isRoundTwoVisible: false,
   isRoundScrolling: false,
   hasShownSwipeHint: false,
 });
@@ -108,12 +105,7 @@ export const homeGameReducer = (
     return {
       ...state,
       declaredPlayerCount: action.playerCount,
-      multiRoundPlan: planMultiRoundAssignments(
-        state.selectedTeams,
-        action.playerCount,
-        Math.random,
-        { pairingMode: state.isPairingModeEnabled },
-      ),
+      multiRoundPlan: action.plan,
       ...resetRoundState(state),
     };
   }
@@ -133,7 +125,7 @@ export const homeGameReducer = (
     if (action.round === 0 && !state.isRoundOneFrozen) {
       return {
         ...state,
-        roundOneSnapshot: action.dots,
+        roundOneSnapshot: action.players,
         isRoundOneFrozen: true,
       };
     }
@@ -141,7 +133,7 @@ export const homeGameReducer = (
     if (action.round === 1 && !state.isRoundTwoFrozen) {
       return {
         ...state,
-        roundTwoSnapshot: action.dots,
+        roundTwoSnapshot: action.players,
         isRoundTwoFrozen: true,
       };
     }
@@ -149,11 +141,14 @@ export const homeGameReducer = (
     return state;
   }
 
-  if (action.type === "roundVisibilityChanged") {
+  if (action.type === "roundSwipeHintSeen") {
+    if (state.hasShownSwipeHint) {
+      return state;
+    }
+
     return {
       ...state,
-      isRoundTwoVisible: action.isRoundTwoVisible,
-      hasShownSwipeHint: state.hasShownSwipeHint || action.isRoundTwoVisible,
+      hasShownSwipeHint: true,
     };
   }
 

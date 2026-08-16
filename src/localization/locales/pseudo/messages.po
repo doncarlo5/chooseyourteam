@@ -66,7 +66,7 @@ msgctxt "dismiss reduced-motion notification"
 msgid "Close"
 msgstr ""
 
-#: src/screens/components/selected-players-layer.tsx:859
+#: src/screens/components/allocation-back-button.tsx:35
 msgctxt "return from allocation to team selection"
 msgid "Close"
 msgstr ""
@@ -91,7 +91,7 @@ msgstr ""
 msgid "Give a review"
 msgstr ""
 
-#: src/screens/components/teams-selection.tsx:81
+#: src/screens/components/teams-selection.tsx:71
 msgid "How many teams?"
 msgstr ""
 
@@ -111,7 +111,7 @@ msgstr ""
 msgid "Language"
 msgstr ""
 
-#: src/screens/components/selected-players-layer.tsx:295
+#: src/screens/components/use-touch-allocation-controller.tsx:267
 msgid "Maximum 5 fingers"
 msgstr ""
 
@@ -144,8 +144,15 @@ msgstr ""
 msgid "Pairing mode"
 msgstr ""
 
-#: src/screens/components/teams-selection.tsx:84
+#: src/screens/components/teams-selection.tsx:74
 msgid "Pick a number to get started"
+msgstr ""
+
+#. placeholder {0}: player.team
+#. placeholder {0}: props.team
+#: src/screens/components/touch-allocation-scene-content.tsx:224
+#: src/screens/components/touch-allocation-scene-content.tsx:253
+msgid "Player assigned to Team {0}"
 msgstr ""
 
 #: src/screens/components/app-info-sheet.android.tsx:66
@@ -162,7 +169,7 @@ msgstr ""
 msgid "Reduce motion enabled"
 msgstr ""
 
-#: src/screens/components/selected-players-layer.tsx:863
+#: src/screens/components/allocation-back-button.tsx:39
 msgid "Returns to team selection"
 msgstr ""
 
@@ -176,6 +183,6 @@ msgstr ""
 msgid "System"
 msgstr ""
 
-#: src/screens/components/selected-players-layer.tsx:296
+#: src/screens/components/use-touch-allocation-controller.tsx:268
 msgid "Use +5."
 msgstr ""

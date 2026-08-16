@@ -1,10 +1,12 @@
-import { AnimatedBlurView } from "@/src/components/animated-blur-view";
-import { planBalancedRoundAssignment } from "@/src/domain/team-allocation";
+import type { RevealedPlayer } from "@/src/domain/revealed-player";
 import type { RoundAssignment, TeamNumber } from "@/src/domain/team-identity";
-import type { FrozenDot, TouchRect } from "@/src/helpers/types/home-screen";
-import type { TouchPoint } from "@/src/helpers/types/touch-point";
+import type { TouchRect } from "@/src/helpers/types/home-screen";
+import {
+  createRevealedPlayers,
+  meetsExpectedTouchCount,
+  type TouchSnapshot,
+} from "@/src/screens/touch-allocation-controller";
 import { H, Step, styleChargeBomb } from "@/src/screens/utils/helper";
-import { AntDesign } from "@expo/vector-icons";
 import { useLingui } from "@lingui/react/macro";
 import { Asset } from "expo-asset";
 import {
@@ -12,9 +14,9 @@ import {
   useAudioPlayer,
   useAudioPlayerStatus,
 } from "expo-audio";
-import { Button, cn, useToast } from "heroui-native";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { useToast } from "heroui-native";
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
+import { Platform } from "react-native";
 import { Gesture } from "react-native-gesture-handler";
 import {
   cancelAnimation,
@@ -28,10 +30,7 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import { scheduleOnRN, scheduleOnUI } from "react-native-worklets";
-import Dot from "./dot";
 
-const BASE_CIRCLE_SIZE = 120;
-const REVEAL_CIRCLE_SIZE = 150;
 const HIGHLIGHT_DELAY_MS = 3000;
 const MAX_SLOTS = 12;
 const SHAKE_DURATION_MS = 1600;
@@ -102,35 +101,40 @@ const useBubblePlayers = () => {
     };
   }, []);
 
-  const players = [
-    useAudioPlayer(uris[0], {
-      keepAudioSessionActive: true,
-      downloadFirst: true,
-    }),
-    useAudioPlayer(uris[1], {
-      keepAudioSessionActive: true,
-      downloadFirst: true,
-    }),
-    useAudioPlayer(uris[2], {
-      keepAudioSessionActive: true,
-      downloadFirst: true,
-    }),
-    useAudioPlayer(uris[3], {
-      keepAudioSessionActive: true,
-      downloadFirst: true,
-    }),
-    useAudioPlayer(uris[4], {
-      keepAudioSessionActive: true,
-      downloadFirst: true,
-    }),
-  ];
+  const player0 = useAudioPlayer(uris[0], {
+    keepAudioSessionActive: true,
+    downloadFirst: true,
+  });
+  const player1 = useAudioPlayer(uris[1], {
+    keepAudioSessionActive: true,
+    downloadFirst: true,
+  });
+  const player2 = useAudioPlayer(uris[2], {
+    keepAudioSessionActive: true,
+    downloadFirst: true,
+  });
+  const player3 = useAudioPlayer(uris[3], {
+    keepAudioSessionActive: true,
+    downloadFirst: true,
+  });
+  const player4 = useAudioPlayer(uris[4], {
+    keepAudioSessionActive: true,
+    downloadFirst: true,
+  });
+  const players = useMemo(
+    () => [player0, player1, player2, player3, player4],
+    [player0, player1, player2, player3, player4],
+  );
 
-  const s0 = useAudioPlayerStatus(players[0]);
-  const s1 = useAudioPlayerStatus(players[1]);
-  const s2 = useAudioPlayerStatus(players[2]);
-  const s3 = useAudioPlayerStatus(players[3]);
-  const s4 = useAudioPlayerStatus(players[4]);
-  const statuses = [s0, s1, s2, s3, s4] as const;
+  const status0 = useAudioPlayerStatus(player0);
+  const status1 = useAudioPlayerStatus(player1);
+  const status2 = useAudioPlayerStatus(player2);
+  const status3 = useAudioPlayerStatus(player3);
+  const status4 = useAudioPlayerStatus(player4);
+  const statuses = useMemo(
+    () => [status0, status1, status2, status3, status4] as const,
+    [status0, status1, status2, status3, status4],
+  );
 
   useEffect(() => {
     statuses.forEach((status, index) => {
@@ -159,14 +163,11 @@ const useBubblePlayers = () => {
   };
 };
 
-export default function useSelectedPlayersLayer(props: {
-  selectedTeams: number | null;
-  onBack: () => void;
-  toggleRectSv: SharedValue<TouchRect>;
-  plusButtonRectSv: SharedValue<TouchRect>;
-  onRevealSnapshot?: (dots: FrozenDot[]) => void;
-  isTouchEnabled?: boolean;
-  isScrollGestureActive?: boolean;
+export default function useTouchAllocationController(props: {
+  selectedTeams: number;
+  excludedRects: SharedValue<TouchRect>[];
+  onReveal: (players: RevealedPlayer[]) => void;
+  acceptsNewTouches: boolean;
   expectedTouchCount?: number;
   allowOverExpected?: boolean;
   roundAssignment?: RoundAssignment;
@@ -174,8 +175,14 @@ export default function useSelectedPlayersLayer(props: {
   resetKey?: number;
 }): {
   touchGesture: ReturnType<typeof Gesture.Manual>;
-  overlay: ReactNode;
-  backButton: ReactNode;
+  slotActive: SharedValue<number>[];
+  slotX: SharedValue<number>[];
+  slotY: SharedValue<number>[];
+  slotOpacity: SharedValue<number>[];
+  slotScale: SharedValue<number>[];
+  slotRevealTeams: (TeamNumber | null)[];
+  revealProgress: SharedValue<number>;
+  shakeX: SharedValue<number>;
   isRevealed: boolean;
   isTouching: boolean;
   touchCount: number;
@@ -189,7 +196,6 @@ export default function useSelectedPlayersLayer(props: {
     Array.from({ length: MAX_SLOTS }, () => null),
   );
   const preRevealHapticsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const backRef = useRef<View>(null);
   const bubbleAudio = useBubblePlayers();
   const bubblePlayers = bubbleAudio.players;
   const bubbleStatuses = bubbleAudio.statuses;
@@ -201,14 +207,6 @@ export default function useSelectedPlayersLayer(props: {
   const revealToken = useSharedValue(0);
   const shakeX = useSharedValue(0);
   const shakeDirRef = useRef(1);
-  const backBlurIntensity = useSharedValue(40);
-  const backRectSv = useSharedValue<TouchRect>({
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-    isReady: false,
-  });
   const slotActive = useMemo(
     () => Array.from({ length: MAX_SLOTS }, () => makeMutable(0)),
     [],
@@ -233,36 +231,10 @@ export default function useSelectedPlayersLayer(props: {
     () => Array.from({ length: MAX_SLOTS }, () => makeMutable(-1)),
     [],
   );
-  const isGestureEnabled =
-    Boolean(props.selectedTeams) &&
-    (props.isTouchEnabled ?? true) &&
-    !(props.isScrollGestureActive ?? false);
+  const isGestureEnabled = props.acceptsNewTouches;
   // Keep the native handler attached while Android is still tracking pointers.
   // Toggling Gesture.enabled mid-stream schedules an unsafe asynchronous cancel.
   const canAcceptNewTouches = useSharedValue(isGestureEnabled);
-
-  const assignTeams = (touchList: TouchPoint[]) => {
-    const assignments: Record<string, TeamNumber> = {};
-    if (!props.selectedTeams) {
-      return assignments;
-    }
-
-    const plannedAssignment =
-      props.roundAssignment?.length === touchList.length
-        ? props.roundAssignment
-        : planBalancedRoundAssignment(
-            props.selectedTeams,
-            touchList.length,
-            Math.random,
-            { pairingMode: props.isPairingModeEnabled },
-          );
-
-    touchList.forEach((touch, index) => {
-      assignments[touch.id] = plannedAssignment[index];
-    });
-
-    return assignments;
-  };
 
   const clearPreRevealHaptics = () => {
     preRevealHapticsRef.current.forEach((timerId) => clearTimeout(timerId));
@@ -440,9 +412,11 @@ export default function useSelectedPlayersLayer(props: {
     }
     const expectedCount = props.expectedTouchCount ?? 2;
     const allowOverExpected = props.allowOverExpected ?? false;
-    const meetsExpected = allowOverExpected
-      ? count >= expectedCount
-      : count === expectedCount;
+    const meetsExpected = meetsExpectedTouchCount(
+      count,
+      expectedCount,
+      allowOverExpected,
+    );
     resetRevealState();
     setIsTouching(count > 0);
     setTouchCount(count);
@@ -451,38 +425,23 @@ export default function useSelectedPlayersLayer(props: {
     }
   };
 
-  const handleReveal = (token: number, revealedTouchCount: number) => {
-    if (!props.selectedTeams) {
-      return;
-    }
-    const touches: TouchPoint[] = [];
-    for (let i = 0; i < MAX_SLOTS; i += 1) {
-      if (slotActive[i].value === 1 && slotTouchId[i].value !== -1) {
-        touches.push({
-          id: String(slotTouchId[i].value),
-          x: slotX[i].value,
-          y: slotY[i].value,
-        });
-      }
-    }
-    if (token !== revealToken.get() || touches.length !== revealedTouchCount) {
+  const handleReveal = (token: number, snapshot: TouchSnapshot[]) => {
+    if (token !== revealToken.get()) {
       return;
     }
 
-    const assignments = assignTeams(touches);
+    const players = createRevealedPlayers(snapshot, {
+      selectedTeams: props.selectedTeams,
+      roundAssignment: props.roundAssignment,
+      isPairingModeEnabled: props.isPairingModeEnabled ?? false,
+    });
     const nextRevealTeams: (TeamNumber | null)[] = Array.from(
       { length: MAX_SLOTS },
       () => null,
     );
-
-    for (let i = 0; i < MAX_SLOTS; i += 1) {
-      const touchId = slotTouchId[i].value;
-      if (slotActive[i].value !== 1 || touchId === -1) {
-        continue;
-      }
-      const id = String(touchId);
-      nextRevealTeams[i] = assignments[id] ?? null;
-    }
+    snapshot.forEach((touch, index) => {
+      nextRevealTeams[touch.slotIndex] = players[index]?.team ?? null;
+    });
 
     cancelAnimation(shakeX);
     shakeX.value = withTiming(0, { duration: 120 });
@@ -490,24 +449,7 @@ export default function useSelectedPlayersLayer(props: {
     setSlotRevealTeams(nextRevealTeams);
     setIsRevealed(true);
     clearPreRevealHaptics();
-    if (props.onRevealSnapshot) {
-      const snapshot: FrozenDot[] = [];
-      for (let i = 0; i < MAX_SLOTS; i += 1) {
-        if (slotActive[i].value !== 1 || slotTouchId[i].value === -1) {
-          continue;
-        }
-        const team = nextRevealTeams[i];
-        if (!team) {
-          continue;
-        }
-        snapshot.push({
-          x: slotX[i].value,
-          y: slotY[i].value,
-          team,
-        });
-      }
-      props.onRevealSnapshot(snapshot);
-    }
+    props.onReveal(players);
   };
 
   const playBubble = (soundIndex: number) => {
@@ -549,11 +491,12 @@ export default function useSelectedPlayersLayer(props: {
 
   const isTouchIgnored = (x: number, y: number) => {
     "worklet";
-    return (
-      isPointInsideRect(x, y, props.toggleRectSv.value) ||
-      isPointInsideRect(x, y, backRectSv.value) ||
-      isPointInsideRect(x, y, props.plusButtonRectSv.value)
-    );
+    for (let index = 0; index < props.excludedRects.length; index += 1) {
+      if (isPointInsideRect(x, y, props.excludedRects[index].value)) {
+        return true;
+      }
+    }
+    return false;
   };
 
   const findSlotByTouchId = (touchId: number) => {
@@ -601,9 +544,11 @@ export default function useSelectedPlayersLayer(props: {
     const expectedCount = props.expectedTouchCount ?? 2;
     const allowOverExpected = props.allowOverExpected ?? false;
     scheduleOnRN(handleCountChange, count, countTokenSv.value);
-    const meetsExpected = allowOverExpected
-      ? count >= expectedCount
-      : count === expectedCount;
+    const meetsExpected = meetsExpectedTouchCount(
+      count,
+      expectedCount,
+      allowOverExpected,
+    );
     if (count < 1 || !meetsExpected) {
       return;
     }
@@ -612,9 +557,20 @@ export default function useSelectedPlayersLayer(props: {
       HIGHLIGHT_DELAY_MS,
       withTiming(1, { duration: 0 }, (finished) => {
         if (finished && token === revealToken.value) {
-          const currentCount = countVisibleTouches();
+          const snapshot: TouchSnapshot[] = [];
+          for (let index = 0; index < MAX_SLOTS; index += 1) {
+            const touchId = slotTouchId[index].value;
+            if (slotActive[index].value === 1 && touchId !== -1) {
+              snapshot.push({
+                slotIndex: index,
+                touchId,
+                x: slotX[index].value,
+                y: slotY[index].value,
+              });
+            }
+          }
           isRevealedSv.value = 1;
-          scheduleOnRN(handleReveal, token, currentCount);
+          scheduleOnRN(handleReveal, token, snapshot);
         }
       }),
     );
@@ -647,11 +603,7 @@ export default function useSelectedPlayersLayer(props: {
     countTokenSv.value += 1;
     startCountdown(count);
   };
-
-  const handleBack = () => {
-    props.onBack();
-    resetAllSlots();
-  };
+  const resetAllSlotsEvent = useEffectEvent(resetAllSlots);
 
   useEffect(() => {
     void setupAudioMode();
@@ -661,36 +613,20 @@ export default function useSelectedPlayersLayer(props: {
   }, []);
 
   useEffect(() => {
-    resetAllSlots();
-    if (!props.selectedTeams) {
-      props.plusButtonRectSv.value = {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-        isReady: false,
-      };
-      backRectSv.value = {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-        isReady: false,
-      };
-    }
-  }, [props.selectedTeams, props.plusButtonRectSv, backRectSv]);
+    resetAllSlotsEvent();
+  }, [props.selectedTeams]);
 
   useEffect(() => {
     if (props.resetKey !== undefined) {
-      resetAllSlots();
+      resetAllSlotsEvent();
     }
   }, [props.resetKey]);
 
   useEffect(() => {
-    if (props.isScrollGestureActive) {
-      resetAllSlots();
+    if (!props.acceptsNewTouches) {
+      resetAllSlotsEvent();
     }
-  }, [props.isScrollGestureActive]);
+  }, [props.acceptsNewTouches]);
 
   useEffect(() => {
     canAcceptNewTouches.value = isGestureEnabled;
@@ -839,81 +775,16 @@ export default function useSelectedPlayersLayer(props: {
       stateManager.end();
     });
 
-  const backButton = props.selectedTeams ? (
-    <Button
-      size="md"
-      className={cn(
-        "absolute top-16 left-6 z-10 border border-white/60 rounded-full size-12 items-center justify-center px-0 overflow-hidden bg-gray-100/40 active:bg-gray-100/80 active:text-white",
-      )}
-      animation={{
-        scale: {
-          value: 1.03,
-          timingConfig: { duration: 170 },
-        },
-        highlight: {
-          backgroundColor: { value: "transparent" },
-          opacity: { value: [0, 0] },
-        },
-      }}
-      accessibilityRole="button"
-      accessibilityLabel={t({
-        context: "return from allocation to team selection",
-        message: "Close",
-      })}
-      accessibilityHint={t`Returns to team selection`}
-      onPress={handleBack}
-      onLayout={() => {
-        backRef.current?.measureInWindow((x, y, width, height) => {
-          backRectSv.value = { x, y, width, height, isReady: true };
-        });
-      }}
-      ref={backRef}
-      isIconOnly
-    >
-      <AnimatedBlurView
-        blurIntensity={backBlurIntensity}
-        tint="light"
-        style={StyleSheet.absoluteFill}
-      />
-      <View
-        pointerEvents="none"
-        style={StyleSheet.absoluteFill}
-        className="bg-white/15"
-      />
-      <Button.Label className="">
-        <AntDesign name="close" size={20} color="rgba(0,0,0,0.8)" />
-      </Button.Label>
-    </Button>
-  ) : null;
-
-  const overlay = props.selectedTeams ? (
-    <>
-      {slotActive.map((active, index) => {
-        const team = slotRevealTeams[index];
-        return (
-          <Dot
-            key={index}
-            x={slotX[index]}
-            y={slotY[index]}
-            active={active}
-            opacity={slotOpacity[index]}
-            scale={slotScale[index]}
-            shakeX={shakeX}
-            holdProgress={revealProgress}
-            team={isRevealed && team ? team : undefined}
-            isRevealed={isRevealed}
-            baseSize={BASE_CIRCLE_SIZE}
-            revealSize={REVEAL_CIRCLE_SIZE}
-          />
-        );
-      })}
-    </>
-  ) : null;
-
   return {
     touchGesture,
-    overlay,
-    backButton,
+    slotActive,
+    slotX,
+    slotY,
+    slotOpacity,
+    slotScale,
+    slotRevealTeams,
+    revealProgress,
+    shakeX,
     isRevealed,
     isTouching,
     touchCount,

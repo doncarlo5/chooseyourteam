@@ -66,7 +66,7 @@ msgctxt "dismiss reduced-motion notification"
 msgid "Close"
 msgstr "Close"
 
-#: src/screens/components/selected-players-layer.tsx:859
+#: src/screens/components/allocation-back-button.tsx:35
 msgctxt "return from allocation to team selection"
 msgid "Close"
 msgstr "Close"
@@ -91,7 +91,7 @@ msgstr "English"
 msgid "Give a review"
 msgstr "Give a review"
 
-#: src/screens/components/teams-selection.tsx:81
+#: src/screens/components/teams-selection.tsx:71
 msgid "How many teams?"
 msgstr "How many teams?"
 
@@ -111,7 +111,7 @@ msgstr "Keeps the second and third players on the same team when fair allocation
 msgid "Language"
 msgstr "Language"
 
-#: src/screens/components/selected-players-layer.tsx:295
+#: src/screens/components/use-touch-allocation-controller.tsx:267
 msgid "Maximum 5 fingers"
 msgstr "Maximum 5 fingers"
 
@@ -144,9 +144,16 @@ msgstr "Opens the share sheet with the App Store link"
 msgid "Pairing mode"
 msgstr "Pairing mode"
 
-#: src/screens/components/teams-selection.tsx:84
+#: src/screens/components/teams-selection.tsx:74
 msgid "Pick a number to get started"
 msgstr "Pick a number to get started"
+
+#. placeholder {0}: player.team
+#. placeholder {0}: props.team
+#: src/screens/components/touch-allocation-scene-content.tsx:224
+#: src/screens/components/touch-allocation-scene-content.tsx:253
+msgid "Player assigned to Team {0}"
+msgstr "Player assigned to Team {0}"
 
 #: src/screens/components/app-info-sheet.android.tsx:66
 #: src/screens/components/app-info-sheet.ios.tsx:41
@@ -162,7 +169,7 @@ msgstr "Rate this app"
 msgid "Reduce motion enabled"
 msgstr "Reduce motion enabled"
 
-#: src/screens/components/selected-players-layer.tsx:863
+#: src/screens/components/allocation-back-button.tsx:39
 msgid "Returns to team selection"
 msgstr "Returns to team selection"
 
@@ -176,6 +183,6 @@ msgstr "Share {brandName}"
 msgid "System"
 msgstr "System"
 
-#: src/screens/components/selected-players-layer.tsx:296
+#: src/screens/components/use-touch-allocation-controller.tsx:268
 msgid "Use +5."
 msgstr "Use +5."

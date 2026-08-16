@@ -2,7 +2,7 @@
 
 Research date: 2026-08-13
 
-Scope: React Native Skia 2.10.0 and React Native Gesture Handler 2.32.0, the versions installed by this project. Sources are limited to the maintainers' official documentation and source repository.
+Scope: React Native Skia 2.11.0 and React Native Gesture Handler 2.32.0, the versions installed by this project. Sources are limited to the maintainers' official documentation and source repository.
 
 ## Conclusion
 

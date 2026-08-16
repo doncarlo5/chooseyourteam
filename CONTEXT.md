@@ -13,6 +13,10 @@ The fixed number, color, and shape representing a Team for the lifetime of the a
 **Player**:
 One participating touch in an allocation.
 
+**Revealed Player**:
+A Player's final position and assigned Team after a Round reveal.
+_Avoid_: Frozen Dot, result dot
+
 **Round**:
 A group of up to five Players allocated together.
 
