@@ -390,11 +390,6 @@ export default function useTouchAllocationController(props: {
         const y = touch.absoluteY;
         const ignored = isTouchIgnored(x, y);
         if (isRevealedSv.get() === 1) {
-          const slot = findTouchSlot(slotStore, touch.id);
-          if (slot !== -1) {
-            slotX[slot].set(x);
-            slotY[slot].set(y);
-          }
           continue;
         }
         if (ignored) {
@@ -448,19 +443,14 @@ export default function useTouchAllocationController(props: {
         }
         const x = touch.absoluteX;
         const y = touch.absoluteY;
-        if (isRevealedSv.get() === 0) {
-          const ignored = isTouchIgnored(x, y);
-          const result = transitionTouchAllocationLifecycle(
-            lifecycleStore,
-            lifecycleConfiguration,
-            { type: "move", touchId: touch.id, x, y, isIgnored: ignored },
-          );
-          if (result.visibilityChanged) {
-            applyLifecycleResult(result);
-          }
-        } else {
-          slotX[slot].set(x);
-          slotY[slot].set(y);
+        const ignored = isTouchIgnored(x, y);
+        const result = transitionTouchAllocationLifecycle(
+          lifecycleStore,
+          lifecycleConfiguration,
+          { type: "move", touchId: touch.id, x, y, isIgnored: ignored },
+        );
+        if (result.visibilityChanged) {
+          applyLifecycleResult(result);
         }
       }
     })

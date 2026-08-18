@@ -361,6 +361,15 @@ export const transitionTouchAllocationLifecycle = (
     return result;
   }
 
+  // A reveal freezes Player positions, but pointer ownership must remain intact
+  // until native up/cancel cleanup completes (see the Android lifecycle ADR).
+  if (
+    store.isRevealed.get() === 1 &&
+    (event.type === "admit" || event.type === "move")
+  ) {
+    return result;
+  }
+
   if (event.type === "admit") {
     if (!event.acceptsNewTouches || event.isIgnored) {
       return result;

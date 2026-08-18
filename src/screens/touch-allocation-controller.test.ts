@@ -213,6 +213,28 @@ describe("touch allocation lifecycle", () => {
     ).toBeNull();
   });
 
+  it("freezes revealed positions while retaining pointer ownership", () => {
+    const store = createLifecycle();
+    admit(store, 1);
+    const second = admit(store, 2);
+    transitionTouchAllocationLifecycle(store, exactTwo, {
+      type: "countdownCompleted",
+      token: second.countdownToken!,
+    });
+
+    const moved = transitionTouchAllocationLifecycle(store, exactTwo, {
+      type: "move",
+      touchId: 2,
+      x: 900,
+      y: 1000,
+      isIgnored: false,
+    });
+
+    expect(store.x[1].get()).toBe(20);
+    expect(store.y[1].get()).toBe(40);
+    expect(moved).toMatchObject({ trackedCount: 2, visibleCount: 2 });
+  });
+
   it("resets and cancels countdown state", () => {
     const store = createLifecycle();
     admit(store, 1);
