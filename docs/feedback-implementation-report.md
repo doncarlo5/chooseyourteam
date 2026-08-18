@@ -1,7 +1,7 @@
 # Skia feedback implementation report
 
-Status date: 16 August 2026  
-Implementation reviewed: `codex/deep-allocation-session` at `3b7a509`
+Status date: 18 August 2026
+Implementation reviewed: `codex/deep-allocation-session` at `7429b7d`
 
 This report updates the earlier comparison made at `a577ef8`. It reconciles
 three inputs against the implementation after the unified scene and deep
@@ -77,10 +77,10 @@ configuration plus `onExit`.
 | Keep reducers deterministic                                                             | ✅     | Multi-Round assignment planning is computed before dispatch with injected randomness. Replaying the same plan produces the same state; duplicate reveal/navigation actions are idempotent.                                    | Nothing required.                                                                                                                    |
 | Preserve the existing allocation domain                                                 | ✅     | Team identities, Fair Allocation, injected randomness, and domain tests remain authoritative. `RevealedPlayer` is the final position-plus-Team domain result.                                                                 | Nothing required.                                                                                                                    |
 | Add deterministic visual regression coverage                                            | ✅     | Playwright covers unrevealed, countdown, revealed, frozen, mid-scroll, both settled accessibility positions, duplicate-label absence, and one Canvas.                                                                         | Native snapshots can be expanded if platform-specific artwork regressions recur.                                                     |
-| Test the real touch lifecycle rather than a parallel model                              | ✅     | Unit tests exercise the same admission, visibility, count policy, token, snapshot, cancel/reset, and deferred-exit transitions used by production. A native fixture checks two dynamically activated rings.                   | Real Gesture Handler delivery still requires manual multi-pointer validation.                                                        |
+| Test the real touch lifecycle rather than a parallel model                              | ✅     | Unit tests exercise the same admission, visibility, count policy, token, snapshot, cancel/reset, reveal-position freeze, and deferred-exit transitions used by production. Native fixtures cover repeated dynamic slots and the Android Multi-Round transition.            | The remaining assistive-technology and release-ordering matrix still requires manual validation.                                      |
 | Use Atlas only for a measured repeated-sprite bottleneck                                | ⏸      | Atlas was not introduced for at most 12 live dots and five results.                                                                                                                                                           | Reconsider for a future object-heavy game or if profiling shows result artwork batching is a bottleneck.                             |
 | Avoid a generic engine before game two                                                  | ✅     | The module remains allocation-specific, as recorded in ADR 0004.                                                                                                                                                              | Reassess only after a second game provides evidence for common rules.                                                                |
-| Match the app to the current compatible Skia API                                        | ✅     | The app is pinned to `@shopify/react-native-skia` `2.11.0`, which remains the npm `latest` version on the report date and satisfies the installed React Native/Reanimated peers.                                              | Repeat migration and native-render checks for every future Skia upgrade.                                                             |
+| Match the app to the current compatible Skia API                                        | ✅     | The app is pinned to the tested `@shopify/react-native-skia` `2.11.0` release and satisfies the installed React Native/Reanimated peers.                                                                                       | Recheck the latest compatible version, migrations, and native rendering during every future Skia upgrade.                            |
 
 ### Shopify conclusion
 
@@ -111,7 +111,7 @@ evidence-driven options, not missing architecture work.
 | Use shaders for visual polish, not game rules or ordinary UI                | ✅     | No shader controls game rules or replaces ordinary UI.                                                                                                        |
 | Do not copy the article's shader snippet blindly                            | ✅     | The malformed/inconsistent educational shader sample was not used.                                                                                            |
 | Preserve accessibility outside Skia                                         | ✅     | Localized React Native result labels expose only the current settled Round; decorative/off-screen layers are hidden from assistive technology.                |
-| Add visual and interaction regression tests                                 | 🟡     | Deterministic visual, production-seam lifecycle, navigation, and native two-ring tests exist. Full physical multitouch and screen-reader automation does not. |
+| Add visual and interaction regression tests                                 | 🟡     | Deterministic visual, production-seam lifecycle, navigation, iOS repeated-ring, and Android Multi-Round rendering tests exist. Targeted physical iPhone and Huawei regressions passed; the full screen-reader matrix remains incomplete. |
 
 ### Medium conclusion
 
@@ -126,7 +126,7 @@ evidence, not the ownership model.
 | ------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
 | Remove scroll-to-JavaScript hot-path crossings                | ✅     | Continuous scrolling remains on the UI thread; only threshold and settlement events cross.                                                                         | Nothing required.                                                                                    |
 | Keep gesture updates on the UI thread                         | ✅     | Manual gesture callbacks mutate worklet-owned lifecycle/shared state.                                                                                              | Nothing required.                                                                                    |
-| Preserve the Android pointer lifecycle                        | 🟡     | The detector remains mounted; only new admissions are gated; up/cancel always clean up; Back waits for all tracked pointers.                                       | Repeat three-plus-pointer release ordering on a physical Android device.                             |
+| Preserve the Android pointer lifecycle                        | 🟡     | The detector remains mounted; only new admissions are gated; up/cancel always clean up; Back waits for all tracked pointers. Targeted physical Huawei Multi-Round touch delivery passed.              | Complete three-plus-pointer release ordering and Back-during-tracking checks on a physical Android device. |
 | Prefer transforms to animated layout properties               | ✅     | Allocation dots use Skia transforms instead of animated `left`, `top`, `width`, and `height`.                                                                      | Unrelated showcase/layout animations were outside scope.                                             |
 | Consolidate live and frozen dots                              | ✅     | One allocation Canvas owns both. Hidden revealed artwork is no longer mounted for inactive slots.                                                                  | Nothing required.                                                                                    |
 | Build one reveal snapshot on the UI thread                    | ✅     | Countdown completion creates one ordered `{slotIndex, touchId, x, y}[]` snapshot and crosses once.                                                                 | Nothing required.                                                                                    |
@@ -171,8 +171,10 @@ mesh. The remaining performance work is measurement, not speculative tuning.
 | Atomic UI-thread assignment                  | ✅ Implemented                                    |
 | Accessible visible-only result labels        | ✅ Implemented in code and automated web checks   |
 | Pausable mesh animation                      | ✅ Implemented                                    |
-| Native repeated-dot rendering regression     | ✅ Implemented for two dynamic slots              |
-| Physical multitouch and screen-reader matrix | 🟡 Pending devices                                |
+| Native repeated-dot rendering regression     | ✅ iOS dynamic-slot and Android Multi-Round fixtures |
+| Revealed positions remain frozen             | ✅ Unit-tested and confirmed on physical iPhone 17 |
+| Android second-Round rendering               | ✅ Confirmed on physical Huawei EML-L29            |
+| Physical multitouch and screen-reader matrix | 🟡 Targeted regressions passed; full matrix pending |
 | Native mesh/blur measurements                | 🟡 Fixture ready; evidence pending                |
 | Zero-allocation mesh                         | ↩ Not achieved; failed buffer experiment reverted |
 | Repository-wide shared-value migration       | ⏸ Intentionally deferred                          |
@@ -190,14 +192,25 @@ mesh. The remaining performance work is measurement, not speculative tuning.
   verifies that the fixture loaded, and checks two dynamically activated rings.
 - Revealed artwork mounts only for assigned slots. This fixed the native Skia
   recorder-capacity bug that caused only the first unrevealed ring to appear.
+- Revealed Player positions stop responding to move/admit transitions while
+  native pointer ownership remains intact until up/cancel. This prevents
+  translucent artwork from moving after reveal without weakening Android
+  cleanup guarantees.
+- Android pre-renders the five immutable Team results as non-texture Skia
+  images before animating frozen-Round opacity or translation. This avoids an
+  old-Mali/EGL failure that hid second-Round live dots while keeping the
+  original vector path on iOS and web.
+- A deterministic Android fixture reproduces the five-result first Round plus
+  two dynamic second-Round rings and checks frozen counts one through five.
 - ADR 0004 and a durable architecture document replace reliance on temporary
   HTML reports.
 
 ## Remaining improvements, in priority order
 
-1. Complete the physical iPhone and Android matrix: one through five touches,
-   cancellation, Back during tracking, audio/haptics, VoiceOver/TalkBack, and
-   Android three-pointer release ordering.
+1. Complete the portions of the physical iPhone and Android matrix not already
+   covered by the targeted regression checks: cancellation, Back during
+   tracking, audio/haptics, VoiceOver/TalkBack, and Android three-pointer
+   release ordering.
 2. Record the three mesh scenarios on representative real devices and decide
    whether full-screen blur needs a measured policy.
 3. Watch the allocation Canvas's animated-variable budget when adding artwork;
@@ -212,10 +225,15 @@ mesh. The remaining performance work is measurement, not speculative tuning.
 
 - TypeScript passed.
 - Localization checks passed.
-- 218 unit tests passed.
+- 219 unit tests passed.
 - Seven Playwright checks passed.
 - Lint reported no errors and six pre-existing unrelated warnings.
 - The corrected native two-ring fixture passed on the iPhone 17 simulator.
-- iOS and Android builds were completed during the plan implementation.
-- Physical iOS/Android performance, multitouch, VoiceOver, and TalkBack evidence
-  remains pending as documented in `touch-allocation-validation.md`.
+- The Android Multi-Round fixture passed with one through five frozen results,
+  detecting both second-Round rings in every scenario.
+- The reveal-position freeze passed on a physical iPhone 17, and the real `+5`
+  second-Round flow passed on a Huawei EML-L29 running Android 10.
+- iOS and Android Release builds completed during the plan implementation.
+- Physical performance, VoiceOver/TalkBack, Back-during-tracking, and complete
+  Android release-ordering evidence remains pending as documented in
+  `touch-allocation-validation.md`.

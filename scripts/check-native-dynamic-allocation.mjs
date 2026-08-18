@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -7,6 +7,19 @@ import { PNG } from "pngjs";
 const screenshotPath = join(tmpdir(), "touch-allocation-dynamic-check.png");
 const route = "chooseyourteam:///__visual__/touch-allocation?state=dynamic";
 const bundleIdentifier = "com.doncarlos.chooseyourteam";
+
+const terminateAppIfRunning = () => {
+  const result = spawnSync(
+    "xcrun",
+    ["simctl", "terminate", "booted", bundleIdentifier],
+    { encoding: "utf8" },
+  );
+  if (result.status === 0 || result.status === 3) {
+    return;
+  }
+  throw new Error(result.stderr || "Failed to terminate the simulator app");
+};
+
 const appPath = execFileSync(
   "xcrun",
   ["simctl", "get_app_container", "booted", bundleIdentifier, "app"],
@@ -39,7 +52,7 @@ try {
       stdio: "ignore",
     },
   );
-  execFileSync("xcrun", ["simctl", "terminate", "booted", bundleIdentifier]);
+  terminateAppIfRunning();
   execFileSync("xcrun", ["simctl", "openurl", "booted", route]);
   await new Promise((resolve) => setTimeout(resolve, 6000));
   execFileSync("xcrun", [
@@ -51,7 +64,7 @@ try {
   ]);
 } finally {
   await writeFile(bundlePath, originalBundle);
-  execFileSync("xcrun", ["simctl", "terminate", "booted", bundleIdentifier]);
+  terminateAppIfRunning();
   execFileSync("xcrun", ["simctl", "launch", "booted", bundleIdentifier]);
 }
 
