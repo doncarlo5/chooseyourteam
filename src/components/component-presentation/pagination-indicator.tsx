@@ -1,4 +1,5 @@
 import { View } from "react-native";
+import { cn } from "heroui-native";
 import Animated, {
   Extrapolation,
   interpolate,
@@ -59,7 +60,7 @@ export function PaginationIndicator(props: {
   });
 
   return (
-    <View className="flex-row items-center h-8 my-1">
+    <View className={cn("flex-row items-center h-8 my-1")}>
       <StyleAnimatedView
         style={[
           {

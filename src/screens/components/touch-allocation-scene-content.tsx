@@ -4,15 +4,19 @@ import type { TouchRect } from "@/src/helpers/types/home-screen";
 import {
   Canvas,
   Circle,
+  drawAsImage,
   Group,
+  Image,
   Path,
   Skia,
   SweepGradient,
+  type SkImage,
   useClock,
   vec,
 } from "@shopify/react-native-skia";
-import { useEffect, useMemo, type ReactNode } from "react";
-import { StyleSheet, View, useWindowDimensions } from "react-native";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { cn } from "heroui-native";
+import { Platform, StyleSheet, View, useWindowDimensions } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Extrapolation,
@@ -27,10 +31,66 @@ import {
 } from "./team-result-artwork";
 import RevealedPlayerLabel from "./revealed-player-label";
 import useTouchAllocationController from "./use-touch-allocation-controller";
+import { shouldRasterizeFrozenArtwork } from "../touch-allocation-rendering-policy";
 
 const BASE_CIRCLE_SIZE = 120;
 const REVEAL_CIRCLE_SIZE = 150;
 const GLASS_RING = "rgba(255,255,255,0.8)";
+const TEAM_NUMBERS = [1, 2, 3, 4, 5] as const;
+
+async function renderTeamResultImages(size: number) {
+  return Promise.all(
+    TEAM_NUMBERS.map((team) =>
+      drawAsImage(<TeamResultArtwork size={size} team={team} />, {
+        width: size,
+        height: size,
+      }),
+    ),
+  );
+}
+
+function disposeTeamResultImages(images: (SkImage | null)[]) {
+  for (const image of images) {
+    image?.dispose();
+  }
+}
+
+function loadTeamResultImages(
+  isEnabled: boolean,
+  size: number,
+  setImages: (images: (SkImage | null)[]) => void,
+) {
+  if (!isEnabled) {
+    return () => undefined;
+  }
+  let isCancelled = false;
+  void renderTeamResultImages(size).then((images) => {
+    if (isCancelled) {
+      disposeTeamResultImages(images);
+      return;
+    }
+    setImages(images);
+  });
+  return () => {
+    isCancelled = true;
+  };
+}
+
+function useTeamResultImages(size: number, isEnabled: boolean) {
+  const [images, setImages] = useState<(SkImage | null)[]>([]);
+
+  function loadImagesEffect() {
+    return loadTeamResultImages(isEnabled, size, setImages);
+  }
+
+  function disposeImagesEffect() {
+    return () => disposeTeamResultImages(images);
+  }
+
+  useEffect(loadImagesEffect, [isEnabled, size]);
+  useEffect(disposeImagesEffect, [images]);
+  return images;
+}
 
 export type TouchAllocationConfiguration = {
   selectedTeams: number;
@@ -51,6 +111,7 @@ export type TouchAllocationSceneProps = {
     roundTwo: RevealedPlayer[];
   };
   roundScrollX: SharedValue<number>;
+  isRoundNavigationIdle: SharedValue<boolean>;
   isMultiRound: boolean;
   onReveal: (event: { round: 0 | 1; players: RevealedPlayer[] }) => void;
   onTouchStateChange: (state: { count: number; isTouching: boolean }) => void;
@@ -71,6 +132,7 @@ function LiveDotArtwork(props: {
   shimmerClock: SharedValue<number>;
   team: SharedValue<number>;
   revealProgress: SharedValue<number>;
+  showRevealedArtwork: boolean;
 }) {
   const ringThickness = BASE_CIRCLE_SIZE * 0.08;
   const ringRadius = BASE_CIRCLE_SIZE / 2 - ringThickness / 2;
@@ -161,13 +223,18 @@ function LiveDotArtwork(props: {
           end={props.holdProgress}
         />
       </Group>
-      <Group
-        origin={vec(REVEAL_CIRCLE_SIZE / 2, REVEAL_CIRCLE_SIZE / 2)}
-        transform={revealedTransform}
-        opacity={revealedOpacity}
-      >
-        <SharedTeamResultArtwork size={REVEAL_CIRCLE_SIZE} team={props.team} />
-      </Group>
+      {props.showRevealedArtwork ? (
+        <Group
+          origin={vec(REVEAL_CIRCLE_SIZE / 2, REVEAL_CIRCLE_SIZE / 2)}
+          transform={revealedTransform}
+          opacity={revealedOpacity}
+        >
+          <SharedTeamResultArtwork
+            size={REVEAL_CIRCLE_SIZE}
+            team={props.team}
+          />
+        </Group>
+      ) : null}
     </>
   );
 }
@@ -176,7 +243,10 @@ function FrozenRoundArtwork(props: {
   players: RevealedPlayer[];
   transform: SharedValue<{ translateX: number }[]>;
   opacity: SharedValue<number>;
+  teamImages: (SkImage | null)[];
 }) {
+  const shouldRasterize = shouldRasterizeFrozenArtwork(Platform.OS);
+
   return (
     <Group transform={props.transform} opacity={props.opacity}>
       {props.players.map((player, index) => (
@@ -187,7 +257,17 @@ function FrozenRoundArtwork(props: {
             { translateY: player.y - REVEAL_CIRCLE_SIZE / 2 },
           ]}
         >
-          <TeamResultArtwork size={REVEAL_CIRCLE_SIZE} team={player.team} />
+          {shouldRasterize ? (
+            <Image
+              image={props.teamImages[player.team - 1] ?? null}
+              x={0}
+              y={0}
+              width={REVEAL_CIRCLE_SIZE}
+              height={REVEAL_CIRCLE_SIZE}
+            />
+          ) : (
+            <TeamResultArtwork size={REVEAL_CIRCLE_SIZE} team={player.team} />
+          )}
         </Group>
       ))}
     </Group>
@@ -288,9 +368,16 @@ export function AllocationSceneCanvas(props: {
   shakeX: SharedValue<number>;
   holdProgress: SharedValue<number>;
   shimmerClock?: SharedValue<number>;
+  revealedSlotIndexes?: number[];
 }) {
   const liveShimmerClock = useClock();
+  const shouldRasterize = shouldRasterizeFrozenArtwork(Platform.OS);
+  const teamResultImages = useTeamResultImages(
+    REVEAL_CIRCLE_SIZE,
+    shouldRasterize,
+  );
   const shimmerClock = props.shimmerClock ?? liveShimmerClock;
+  const revealedSlotIndexes = props.revealedSlotIndexes ?? [];
 
   return (
     <Canvas
@@ -302,11 +389,13 @@ export function AllocationSceneCanvas(props: {
         players={props.frozenRounds.roundOne}
         transform={props.roundOneTransform}
         opacity={props.roundOneOpacity}
+        teamImages={teamResultImages}
       />
       <FrozenRoundArtwork
         players={props.frozenRounds.roundTwo}
         transform={props.roundTwoTransform}
         opacity={props.roundTwoOpacity}
+        teamImages={teamResultImages}
       />
       {props.slots.map((slot, index) => (
         <LiveDotArtwork
@@ -322,6 +411,7 @@ export function AllocationSceneCanvas(props: {
           shimmerClock={shimmerClock}
           team={slot.team}
           revealProgress={slot.revealProgress}
+          showRevealedArtwork={revealedSlotIndexes.includes(index)}
         />
       ))}
     </Canvas>
@@ -340,6 +430,7 @@ export default function TouchAllocationScene(props: TouchAllocationSceneProps) {
       props.onReveal({ round: props.configuration.round, players });
     },
     acceptsNewTouches: props.configuration.acceptsNewTouches,
+    isRoundNavigationIdle: props.isRoundNavigationIdle,
     expectedTouchCount: props.configuration.expectedTouchCount,
     allowOverExpected: props.configuration.allowOverExpected,
     roundAssignment: props.configuration.roundAssignment,
@@ -419,7 +510,7 @@ export default function TouchAllocationScene(props: TouchAllocationSceneProps) {
 
   return (
     <GestureDetector gesture={controller.touchGesture}>
-      <View className="flex-1" style={{ backgroundColor: "transparent" }}>
+      <View className={cn("flex-1")} style={{ backgroundColor: "transparent" }}>
         {props.children}
         <AllocationSceneCanvas
           slots={liveSlots}
@@ -431,6 +522,9 @@ export default function TouchAllocationScene(props: TouchAllocationSceneProps) {
           liveSceneOpacity={liveSceneOpacity}
           shakeX={controller.shakeX}
           holdProgress={controller.revealProgress}
+          revealedSlotIndexes={controller.revealedAssignments.map(
+            (assignment) => assignment.slotIndex,
+          )}
         />
         <RevealedPlayerLabelLayer
           testID="round-one-labels"

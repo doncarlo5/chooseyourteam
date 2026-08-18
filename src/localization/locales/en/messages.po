@@ -27,7 +27,7 @@ msgstr "{0, plural, one {<number>#</number><unit>team</unit>} other {<number>#</
 
 #. Accessibility label for choosing the total player count
 #. placeholder {0}: props.count
-#: src/screens/components/dialog-more-players.tsx:56
+#: src/screens/components/dialog-more-players.tsx:54
 msgid "{0, plural, one {Select # player} other {Select # players}}"
 msgstr "{0, plural, one {Select # player} other {Select # players}}"
 
@@ -38,12 +38,12 @@ msgid "{0, plural, one {Select # team} other {Select # teams}}"
 msgstr "{0, plural, one {Select # team} other {Select # teams}}"
 
 #. Touch instruction. Keep the waiting, number, and unit elements so each line retains its styling.
-#: src/screens/components/round-screen.tsx:38
+#: src/screens/components/round-screen.tsx:40
 msgid "{count, plural, one {<waiting>Put at least</waiting><number>#</number><unit>finger</unit>} other {<waiting>Put at least</waiting><number>#</number><unit>fingers</unit>}}"
 msgstr "{count, plural, one {<waiting>Put at least</waiting><number>#</number><unit>finger</unit>} other {<waiting>Put at least</waiting><number>#</number><unit>fingers</unit>}}"
 
 #. Touch instruction. Keep the waiting, number, and unit elements so each line retains its styling.
-#: src/screens/components/round-screen.tsx:47
+#: src/screens/components/round-screen.tsx:49
 msgid "{count, plural, one {<waiting>Put</waiting><number>#</number><unit>finger</unit>} other {<waiting>Put</waiting><number>#</number><unit>fingers</unit>}}"
 msgstr "{count, plural, one {<waiting>Put</waiting><number>#</number><unit>finger</unit>} other {<waiting>Put</waiting><number>#</number><unit>fingers</unit>}}"
 
@@ -53,7 +53,7 @@ msgstr "{count, plural, one {<waiting>Put</waiting><number>#</number><unit>finge
 msgid "About"
 msgstr "About"
 
-#: src/screens/components/dialog-more-players.tsx:146
+#: src/screens/components/dialog-more-players.tsx:144
 msgid "Add more players"
 msgstr "Add more players"
 
@@ -111,7 +111,7 @@ msgstr "Keeps the second and third players on the same team when fair allocation
 msgid "Language"
 msgstr "Language"
 
-#: src/screens/components/use-touch-allocation-feedback.ts:168
+#: src/screens/components/use-touch-allocation-feedback.ts:176
 msgid "Maximum 5 fingers"
 msgstr "Maximum 5 fingers"
 
@@ -131,7 +131,7 @@ msgstr "Opens developer credits and language settings"
 msgid "Opens the App Store review page"
 msgstr "Opens the App Store review page"
 
-#: src/screens/components/dialog-more-players.tsx:147
+#: src/screens/components/dialog-more-players.tsx:145
 msgid "Opens the player count picker"
 msgstr "Opens the player count picker"
 
@@ -149,7 +149,7 @@ msgid "Pick a number to get started"
 msgstr "Pick a number to get started"
 
 #. placeholder {0}: props.team
-#: src/screens/components/revealed-player-label.tsx:38
+#: src/screens/components/revealed-player-label.tsx:43
 msgid "Player assigned to Team {0}"
 msgstr "Player assigned to Team {0}"
 
@@ -181,6 +181,6 @@ msgstr "Share {brandName}"
 msgid "System"
 msgstr "System"
 
-#: src/screens/components/use-touch-allocation-feedback.ts:169
+#: src/screens/components/use-touch-allocation-feedback.ts:177
 msgid "Use +5."
 msgstr "Use +5."

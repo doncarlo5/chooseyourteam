@@ -1,6 +1,7 @@
 import { AppText } from "@/src/components/app-text";
 import type { TeamNumber } from "@/src/domain/team-identity";
 import { useLingui } from "@lingui/react/macro";
+import { cn } from "heroui-native";
 import type { ComponentProps } from "react";
 import { type StyleProp, View, type ViewStyle } from "react-native";
 import Animated from "react-native-reanimated";
@@ -24,7 +25,11 @@ export default function RevealedPlayerLabel(
   const isAccessibilityVisible = props.isAccessibilityVisible ?? true;
 
   const content = (
-    <AppText className="text-7xl font-extrabold font-mono text-white text-center mt-3">
+    <AppText
+      className={cn(
+        "text-7xl font-extrabold font-mono text-white text-center mt-3",
+      )}
+    >
       {props.team}
     </AppText>
   );

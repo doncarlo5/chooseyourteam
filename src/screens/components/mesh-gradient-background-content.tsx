@@ -161,6 +161,8 @@ export default function MeshGradientBackground(props: {
   bandFadeStrength?: number; // 0..1
   colorDarken?: number; // 0..1
   yellowWeight?: number; // 0..1
+  isAnimationPaused?: boolean;
+  testID?: string;
 }) {
   const cols = props.cols ?? 6;
   const rows = props.rows ?? 10;
@@ -193,12 +195,20 @@ export default function MeshGradientBackground(props: {
     lastFrameTimestamp.set(frame.timestamp);
   }, false);
 
-  useEffect(() => {
-    const shouldAnimate = isFocused && isAppActive;
+  function synchronizeFrameCallbackEffect() {
+    const shouldAnimate = isFocused && isAppActive && !props.isAnimationPaused;
     lastFrameTimestamp.set(-1);
     frameCallback.setActive(shouldAnimate);
     return () => frameCallback.setActive(false);
-  }, [frameCallback, isAppActive, isFocused, lastFrameTimestamp]);
+  }
+
+  useEffect(synchronizeFrameCallbackEffect, [
+    frameCallback,
+    isAppActive,
+    isFocused,
+    lastFrameTimestamp,
+    props.isAnimationPaused,
+  ]);
 
   const safeOverscan = Math.max(0, meshOverscan);
   const meshWidth = Math.max(0, width + safeOverscan * 2);
@@ -253,11 +263,7 @@ export default function MeshGradientBackground(props: {
         smoothstep(0, edge, 1 - v);
       const fx = 2.25;
       const fy = 3.15;
-      const n1 = noise2D(
-        uvx * fx + t * 0.35,
-        uvy * fy + t * 0.18,
-        10.0,
-      );
+      const n1 = noise2D(uvx * fx + t * 0.35, uvy * fy + t * 0.18, 10.0);
       const n2 = noise2D(
         uvx * fx - t * 0.22 + 9.3,
         uvy * fy + t * 0.28 + 2.1,
@@ -318,17 +324,16 @@ export default function MeshGradientBackground(props: {
       }
 
       const darken = clamp(colorDarken, 0, 1);
-      return rgbaToString(
-        r * darken,
-        g * darken,
-        b * darken,
-        vertexAlpha,
-      );
+      return rgbaToString(r * darken, g * darken, b * darken, vertexAlpha);
     });
   });
 
   return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+    <View
+      testID={props.testID}
+      pointerEvents="none"
+      style={StyleSheet.absoluteFill}
+    >
       <Canvas style={StyleSheet.absoluteFill}>
         {/* Base fill prevents any accidental gaps from showing through */}
         <Fill color={baseColor} />

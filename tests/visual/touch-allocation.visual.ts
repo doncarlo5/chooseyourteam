@@ -32,3 +32,26 @@ for (const fixtureState of fixtureStates) {
     });
   });
 }
+
+test("exposes only the settled Round result labels", async ({ page }) => {
+  await page.goto("/__visual__/touch-allocation?state=frozen&round=1");
+  const scene = page.getByTestId("allocation-scene-fixture");
+  await expect(scene.locator("canvas")).toHaveCount(1);
+  await expect(scene.getByTestId("fixture-round-one-labels")).toHaveAttribute(
+    "aria-hidden",
+    "true",
+  );
+  await expect(
+    scene.getByTestId("fixture-round-two-labels"),
+  ).not.toHaveAttribute("aria-hidden", "true");
+  await expect(
+    scene
+      .getByTestId("fixture-round-one-labels")
+      .getByLabel(/Player assigned to Team/),
+  ).toHaveCount(3);
+  await expect(
+    scene
+      .getByTestId("fixture-round-two-labels")
+      .getByLabel(/Player assigned to Team/),
+  ).toHaveCount(2);
+});
