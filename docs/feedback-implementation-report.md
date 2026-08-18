@@ -196,10 +196,10 @@ mesh. The remaining performance work is measurement, not speculative tuning.
   native pointer ownership remains intact until up/cancel. This prevents
   translucent artwork from moving after reveal without weakening Android
   cleanup guarantees.
-- Android pre-renders the five immutable Team results as non-texture Skia
-  images before animating frozen-Round opacity or translation. This avoids an
-  old-Mali/EGL failure that hid second-Round live dots while keeping the
-  original vector path on iOS and web.
+- iOS and Android pre-render the five immutable Team results as non-texture
+  Skia images before animating frozen-Round opacity or translation. Physical
+  devices on both platforms stopped presenting second-Round live dots when a
+  complex frozen vector group became transparent; web keeps the vector path.
 - A deterministic Android fixture reproduces the five-result first Round plus
   two dynamic second-Round rings and checks frozen counts one through five.
 - ADR 0004 and a durable architecture document replace reliance on temporary
@@ -225,14 +225,15 @@ mesh. The remaining performance work is measurement, not speculative tuning.
 
 - TypeScript passed.
 - Localization checks passed.
-- 219 unit tests passed.
+- 222 unit tests passed.
 - Seven Playwright checks passed.
 - Lint reported no errors and six pre-existing unrelated warnings.
 - The corrected native two-ring fixture passed on the iPhone 17 simulator.
 - The Android Multi-Round fixture passed with one through five frozen results,
   detecting both second-Round rings in every scenario.
-- The reveal-position freeze passed on a physical iPhone 17, and the real `+5`
-  second-Round flow passed on a Huawei EML-L29 running Android 10.
+- Reveal-position freeze and the complete real `+5` second-Round flow passed on
+  a physical iPhone 17 running iOS 26.5.2; the Android flow passed on a Huawei
+  EML-L29 running Android 10.
 - iOS and Android Release builds completed during the plan implementation.
 - Physical performance, VoiceOver/TalkBack, Back-during-tracking, and complete
   Android release-ordering evidence remains pending as documented in

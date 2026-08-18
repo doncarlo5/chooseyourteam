@@ -90,27 +90,28 @@ The no-blur scenario retains the production 28-point overscan so blur is the onl
 
 | Evidence                                                                  | Status                                                                                                                                                                                                           |
 | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| TypeScript, lint, localization, 219 unit tests                            | Passed on 18 August 2026. Lint retained six pre-existing warnings in unrelated showcase controls and reported no errors.                                                                                         |
+| TypeScript, lint, localization, 222 unit tests                            | Passed on 18 August 2026. Lint retained six pre-existing warnings in unrelated showcase controls and reported no errors.                                                                                         |
 | Five Playwright baselines, production-scene, and accessibility assertions | Seven checks passed on Desktop Chrome at a 390 × 844 viewport.                                                                                                                                                   |
 | Native repeated-slot rendering fixture                                    | Passed on the iPhone 17 simulator: two dynamically activated unrevealed rings were detected after the fixture route and screenshot assertions were corrected.                                                    |
 | Expo Doctor and web export                                                | Expo Doctor passed 21/21 checks; static web export completed.                                                                                                                                                    |
 | iOS and Android native builds                                             | iPhone 17 simulator Release and Android Debug builds completed successfully; the iOS build also launched without logged errors.                                                                                  |
-| Physical iPhone 17 matrix and profiling                                   | Partial: the reveal-position freeze regression passed on a physical iPhone 17. The remaining interaction, VoiceOver, and profiling matrix is still pending.                                                      |
+| Physical iPhone 17 matrix and profiling                                   | Partial: reveal-position freeze and the complete `+5` second-Round render passed on a physical iPhone 17 running iOS 26.5.2. The remaining interaction, VoiceOver, and profiling matrix is still pending.          |
 | Physical Android matrix, TalkBack, three-pointer ordering, and profiling  | Partial: the Multi-Round second-screen rendering regression passed on a Huawei EML-L29 with Android 10, including frozen counts one through five. TalkBack, full release ordering, and profiling remain pending. |
 
-### Android frozen-Round rendering finding
+### Native frozen-Round rendering finding
 
-On the Huawei EML-L29, animating the opacity or translation of a frozen-Round
-`Group` containing one complex vector Team result caused Skia's EGL surface to
-stop presenting the live dots, even though gesture state continued to update.
-The same Canvas rendered correctly with no frozen result, and adding a Skia
-`layer` did not change the failure. On Android, the allocation Canvas now
-pre-renders the five immutable Team results once as non-texture Skia images and
-animates those simple image nodes for frozen Rounds. Live and revealing Players
-remain vector artwork, and iOS and web retain the original vector frozen-Round
-path. This preserves the one-Canvas hybrid boundary and exact existing
-rendering on unaffected platforms while avoiding the affected old-Mali driver
-path.
+On the Huawei EML-L29, animating a frozen-Round `Group` containing one complex
+vector Team result caused Skia's EGL surface to stop presenting the live dots,
+even though gesture state continued to update. A physical iPhone 17 running
+iOS 26.5.2 later reproduced the same missing live drawings and incomplete
+reveal specifically when the frozen vector group reached zero opacity. Both
+devices rendered correctly without frozen results, and the iPhone rendered
+correctly when translation changed without opacity. The allocation Canvas now
+pre-renders the five immutable Team results once as non-texture Skia images on
+both native platforms and animates those simple image nodes for frozen Rounds.
+Live and revealing Players remain vector artwork, while web retains the
+original vector frozen-Round path. This preserves the one-Canvas hybrid
+boundary and exact appearance while avoiding the native recorder failure.
 
 The physical-device rows are a merge gate, not inferred from simulator, build, or screenshot success.
 

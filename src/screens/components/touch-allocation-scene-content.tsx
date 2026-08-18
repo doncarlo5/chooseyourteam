@@ -31,6 +31,7 @@ import {
 } from "./team-result-artwork";
 import RevealedPlayerLabel from "./revealed-player-label";
 import useTouchAllocationController from "./use-touch-allocation-controller";
+import { shouldRasterizeFrozenArtwork } from "../touch-allocation-rendering-policy";
 
 const BASE_CIRCLE_SIZE = 120;
 const REVEAL_CIRCLE_SIZE = 150;
@@ -244,6 +245,8 @@ function FrozenRoundArtwork(props: {
   opacity: SharedValue<number>;
   teamImages: (SkImage | null)[];
 }) {
+  const shouldRasterize = shouldRasterizeFrozenArtwork(Platform.OS);
+
   return (
     <Group transform={props.transform} opacity={props.opacity}>
       {props.players.map((player, index) => (
@@ -254,7 +257,7 @@ function FrozenRoundArtwork(props: {
             { translateY: player.y - REVEAL_CIRCLE_SIZE / 2 },
           ]}
         >
-          {Platform.OS === "android" ? (
+          {shouldRasterize ? (
             <Image
               image={props.teamImages[player.team - 1] ?? null}
               x={0}
@@ -368,9 +371,10 @@ export function AllocationSceneCanvas(props: {
   revealedSlotIndexes?: number[];
 }) {
   const liveShimmerClock = useClock();
+  const shouldRasterize = shouldRasterizeFrozenArtwork(Platform.OS);
   const teamResultImages = useTeamResultImages(
     REVEAL_CIRCLE_SIZE,
-    Platform.OS === "android",
+    shouldRasterize,
   );
   const shimmerClock = props.shimmerClock ?? liveShimmerClock;
   const revealedSlotIndexes = props.revealedSlotIndexes ?? [];

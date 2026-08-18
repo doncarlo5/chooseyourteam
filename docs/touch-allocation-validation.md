@@ -26,6 +26,16 @@ during this refactor:
 - On an iPhone 17, revealed Player positions remain frozen while every native
   pointer stays owned until up/cancel cleanup. Moving fingers after reveal no
   longer moves translucent artwork.
+- On the same physical iPhone 17 running iOS 26.5.2, the second Round of a
+  Multi-Round Session initially accepted two touches and emitted haptics while
+  drawing neither unrevealed ring; its revealed Team artwork was also
+  incomplete. A Canvas snapshot probe reproduced the missing rings as `0 / 0`
+  pixels. With no frozen result the probe detected `5,749 / 5,749` pixels;
+  retaining even one vector result at zero opacity reproduced `0 / 0`, while
+  translation alone retained `5,749 / 5,749`. Rasterizing immutable frozen
+  Team results on iOS restored both unrevealed rings (`5,749 / 5,749`) and both
+  complete revealed centers (`63,574 / 65,101`). The user confirmed the real
+  `+5` flow on the same device.
 - On a Huawei EML-L29 running Android 10, the second Round of a Multi-Round
   Session accepted touches but initially rendered no unrevealed rings. The
   deterministic fixture reproduced this as `0 / 0` detected ring pixels when
