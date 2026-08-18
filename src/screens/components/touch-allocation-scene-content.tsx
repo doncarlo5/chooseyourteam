@@ -4,16 +4,19 @@ import type { TouchRect } from "@/src/helpers/types/home-screen";
 import {
   Canvas,
   Circle,
+  drawAsImage,
   Group,
+  Image,
   Path,
   Skia,
   SweepGradient,
+  type SkImage,
   useClock,
   vec,
 } from "@shopify/react-native-skia";
-import { useEffect, useMemo, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { cn } from "heroui-native";
-import { StyleSheet, View, useWindowDimensions } from "react-native";
+import { Platform, StyleSheet, View, useWindowDimensions } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Extrapolation,
@@ -32,6 +35,55 @@ import useTouchAllocationController from "./use-touch-allocation-controller";
 const BASE_CIRCLE_SIZE = 120;
 const REVEAL_CIRCLE_SIZE = 150;
 const GLASS_RING = "rgba(255,255,255,0.8)";
+const TEAM_NUMBERS = [1, 2, 3, 4, 5] as const;
+
+async function renderTeamResultImages(size: number) {
+  return Promise.all(
+    TEAM_NUMBERS.map((team) =>
+      drawAsImage(<TeamResultArtwork size={size} team={team} />, {
+        width: size,
+        height: size,
+      }),
+    ),
+  );
+}
+
+function disposeTeamResultImages(images: (SkImage | null)[]) {
+  for (const image of images) {
+    image?.dispose();
+  }
+}
+
+function loadTeamResultImages(
+  isEnabled: boolean,
+  size: number,
+  setImages: (images: (SkImage | null)[]) => void,
+) {
+  if (!isEnabled) {
+    return () => undefined;
+  }
+  let isCancelled = false;
+  void renderTeamResultImages(size).then((images) => {
+    if (isCancelled) {
+      disposeTeamResultImages(images);
+      return;
+    }
+    setImages(images);
+  });
+  return () => {
+    isCancelled = true;
+  };
+}
+
+function useTeamResultImages(size: number, isEnabled: boolean) {
+  const [images, setImages] = useState<(SkImage | null)[]>([]);
+  useEffect(
+    () => loadTeamResultImages(isEnabled, size, setImages),
+    [isEnabled, size],
+  );
+  useEffect(() => () => disposeTeamResultImages(images), [images]);
+  return images;
+}
 
 export type TouchAllocationConfiguration = {
   selectedTeams: number;
@@ -184,6 +236,7 @@ function FrozenRoundArtwork(props: {
   players: RevealedPlayer[];
   transform: SharedValue<{ translateX: number }[]>;
   opacity: SharedValue<number>;
+  teamImages: (SkImage | null)[];
 }) {
   return (
     <Group transform={props.transform} opacity={props.opacity}>
@@ -195,7 +248,17 @@ function FrozenRoundArtwork(props: {
             { translateY: player.y - REVEAL_CIRCLE_SIZE / 2 },
           ]}
         >
-          <TeamResultArtwork size={REVEAL_CIRCLE_SIZE} team={player.team} />
+          {Platform.OS === "android" ? (
+            <Image
+              image={props.teamImages[player.team - 1] ?? null}
+              x={0}
+              y={0}
+              width={REVEAL_CIRCLE_SIZE}
+              height={REVEAL_CIRCLE_SIZE}
+            />
+          ) : (
+            <TeamResultArtwork size={REVEAL_CIRCLE_SIZE} team={player.team} />
+          )}
         </Group>
       ))}
     </Group>
@@ -299,6 +362,10 @@ export function AllocationSceneCanvas(props: {
   revealedSlotIndexes?: number[];
 }) {
   const liveShimmerClock = useClock();
+  const teamResultImages = useTeamResultImages(
+    REVEAL_CIRCLE_SIZE,
+    Platform.OS === "android",
+  );
   const shimmerClock = props.shimmerClock ?? liveShimmerClock;
   const revealedSlotIndexes = props.revealedSlotIndexes ?? [];
 
@@ -312,11 +379,13 @@ export function AllocationSceneCanvas(props: {
         players={props.frozenRounds.roundOne}
         transform={props.roundOneTransform}
         opacity={props.roundOneOpacity}
+        teamImages={teamResultImages}
       />
       <FrozenRoundArtwork
         players={props.frozenRounds.roundTwo}
         transform={props.roundTwoTransform}
         opacity={props.roundTwoOpacity}
+        teamImages={teamResultImages}
       />
       {props.slots.map((slot, index) => (
         <LiveDotArtwork
