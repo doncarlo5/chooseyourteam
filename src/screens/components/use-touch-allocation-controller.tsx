@@ -81,7 +81,7 @@ export default function useTouchAllocationController(props: {
   const [revealedAssignments, setRevealedAssignments] = useState<
     RevealedSlotAssignment[]
   >([]);
-  const isRevealedSv = useSharedValue(0);
+  const isRevealedSv = useSharedValue(false);
   const stableCountSv = useSharedValue(0);
   const revealProgress = useSharedValue(0);
   const revealToken = useSharedValue(0);
@@ -389,7 +389,7 @@ export default function useTouchAllocationController(props: {
         const x = touch.absoluteX;
         const y = touch.absoluteY;
         const ignored = isTouchIgnored(x, y);
-        if (isRevealedSv.get() === 1) {
+        if (isRevealedSv.get()) {
           continue;
         }
         if (ignored) {
@@ -521,7 +521,7 @@ export default function useTouchAllocationController(props: {
       const reachedIosTouchLimit =
         Platform.OS === "ios" &&
         (props.allowOverExpected ?? false) &&
-        isRevealedSv.get() === 0 &&
+        !isRevealedSv.get() &&
         countVisibleTouches(slotStore) === 5;
 
       if (reachedIosTouchLimit) {

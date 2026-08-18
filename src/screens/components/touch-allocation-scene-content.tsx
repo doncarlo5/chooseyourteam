@@ -77,11 +77,17 @@ function loadTeamResultImages(
 
 function useTeamResultImages(size: number, isEnabled: boolean) {
   const [images, setImages] = useState<(SkImage | null)[]>([]);
-  useEffect(
-    () => loadTeamResultImages(isEnabled, size, setImages),
-    [isEnabled, size],
-  );
-  useEffect(() => () => disposeTeamResultImages(images), [images]);
+
+  function loadImagesEffect() {
+    return loadTeamResultImages(isEnabled, size, setImages);
+  }
+
+  function disposeImagesEffect() {
+    return () => disposeTeamResultImages(images);
+  }
+
+  useEffect(loadImagesEffect, [isEnabled, size]);
+  useEffect(disposeImagesEffect, [images]);
   return images;
 }
 

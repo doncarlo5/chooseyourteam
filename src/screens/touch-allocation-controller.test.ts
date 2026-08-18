@@ -28,7 +28,7 @@ const createLifecycle = (slotCount = 12): TouchAllocationLifecycleStore => ({
   y: Array.from({ length: slotCount }, () => createCell(0)),
   stableCount: createCell(0),
   countdownToken: createCell(0),
-  isRevealed: createCell(0),
+  isRevealed: createCell(false),
   exitPending: createCell(false),
 });
 

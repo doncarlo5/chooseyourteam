@@ -28,7 +28,7 @@ export type TouchSlotStore = {
 export type TouchAllocationLifecycleStore = TouchSlotStore & {
   stableCount: MutableCell<number>;
   countdownToken: MutableCell<number>;
-  isRevealed: MutableCell<number>;
+  isRevealed: MutableCell<boolean>;
   exitPending: MutableCell<boolean>;
 };
 
@@ -255,7 +255,7 @@ const updateLifecycleCount = (
 ) => {
   "worklet";
   if (
-    store.isRevealed.get() === 1 ||
+    store.isRevealed.get() ||
     result.visibleCount === store.stableCount.get()
   ) {
     return;
@@ -318,7 +318,7 @@ export const transitionTouchAllocationLifecycle = (
   if (event.type === "reset" || event.type === "cancel") {
     clearTouchSlots(store);
     store.stableCount.set(0);
-    store.isRevealed.set(0);
+    store.isRevealed.set(false);
     invalidateToken(store.countdownToken);
     result.visibleCount = 0;
     result.trackedCount = 0;
@@ -342,7 +342,7 @@ export const transitionTouchAllocationLifecycle = (
   if (event.type === "countdownCompleted") {
     if (
       !isCurrentToken(store.countdownToken, event.token) ||
-      store.isRevealed.get() === 1
+      store.isRevealed.get()
     ) {
       return result;
     }
@@ -356,7 +356,7 @@ export const transitionTouchAllocationLifecycle = (
     ) {
       return result;
     }
-    store.isRevealed.set(1);
+    store.isRevealed.set(true);
     result.snapshot = snapshot;
     return result;
   }
@@ -364,7 +364,7 @@ export const transitionTouchAllocationLifecycle = (
   // A reveal freezes Player positions, but pointer ownership must remain intact
   // until native up/cancel cleanup completes (see the Android lifecycle ADR).
   if (
-    store.isRevealed.get() === 1 &&
+    store.isRevealed.get() &&
     (event.type === "admit" || event.type === "move")
   ) {
     return result;

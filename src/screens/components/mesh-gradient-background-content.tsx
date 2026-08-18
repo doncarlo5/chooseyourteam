@@ -195,12 +195,14 @@ export default function MeshGradientBackground(props: {
     lastFrameTimestamp.set(frame.timestamp);
   }, false);
 
-  useEffect(() => {
+  function synchronizeFrameCallbackEffect() {
     const shouldAnimate = isFocused && isAppActive && !props.isAnimationPaused;
     lastFrameTimestamp.set(-1);
     frameCallback.setActive(shouldAnimate);
     return () => frameCallback.setActive(false);
-  }, [
+  }
+
+  useEffect(synchronizeFrameCallbackEffect, [
     frameCallback,
     isAppActive,
     isFocused,

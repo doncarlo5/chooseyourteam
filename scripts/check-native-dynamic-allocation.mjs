@@ -3,6 +3,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { PNG } from "pngjs";
+import { countBrightRingPixels } from "./screenshot-analysis.mjs";
 
 const screenshotPath = join(tmpdir(), "touch-allocation-dynamic-check.png");
 const route = "chooseyourteam:///__visual__/touch-allocation?state=dynamic";
@@ -46,6 +47,7 @@ try {
       bundlePath,
       "--assets-dest",
       appPath,
+      "--reset-cache",
     ],
     {
       env: { ...process.env, EXPO_PUBLIC_VISUAL_TEST_MODE: "1" },
@@ -86,39 +88,8 @@ if (
   );
   process.exit(1);
 }
-const countBrightRingPixels = (x, y) => {
-  let count = 0;
-  const centerX = x * scale;
-  const centerY = y * scale;
-  const innerRadius = 46 * scale;
-  const outerRadius = 64 * scale;
-  for (
-    let row = Math.floor(centerY - outerRadius);
-    row <= centerY + outerRadius;
-    row += 1
-  ) {
-    for (
-      let column = Math.floor(centerX - outerRadius);
-      column <= centerX + outerRadius;
-      column += 1
-    ) {
-      const distance = Math.hypot(column - centerX, row - centerY);
-      if (distance < innerRadius || distance > outerRadius) continue;
-      const offset = (row * screenshot.width + column) * 4;
-      if (
-        screenshot.data[offset] > 235 &&
-        screenshot.data[offset + 1] > 235 &&
-        screenshot.data[offset + 2] > 235
-      ) {
-        count += 1;
-      }
-    }
-  }
-  return count;
-};
-
-const firstRingPixels = countBrightRingPixels(92, 300);
-const secondRingPixels = countBrightRingPixels(198, 420);
+const firstRingPixels = countBrightRingPixels(screenshot, 92, 300, scale);
+const secondRingPixels = countBrightRingPixels(screenshot, 198, 420, scale);
 console.log(JSON.stringify({ firstRingPixels, secondRingPixels }));
 if (firstRingPixels < 100 || secondRingPixels < 100) {
   process.exitCode = 1;

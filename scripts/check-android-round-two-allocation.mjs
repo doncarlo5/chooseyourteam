@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { PNG } from "pngjs";
+import { countBrightRingPixels } from "./screenshot-analysis.mjs";
 
 const screenshotPath = join(tmpdir(), "android-round-two-allocation.png");
 const fixtureState =
@@ -30,43 +31,12 @@ await import("node:fs/promises").then((fs) =>
 
 const png = PNG.sync.read(await readFile(screenshotPath));
 const scale = png.width / 360;
-const countBrightRingPixels = (x, y) => {
-  let count = 0;
-  const centerX = x * scale;
-  const centerY = y * scale;
-  const innerRadius = 46 * scale;
-  const outerRadius = 64 * scale;
-  for (
-    let row = Math.max(0, Math.floor(centerY - outerRadius));
-    row <= Math.min(png.height - 1, centerY + outerRadius);
-    row += 1
-  ) {
-    for (
-      let column = Math.max(0, Math.floor(centerX - outerRadius));
-      column <= Math.min(png.width - 1, centerX + outerRadius);
-      column += 1
-    ) {
-      const distance = Math.hypot(column - centerX, row - centerY);
-      if (distance < innerRadius || distance > outerRadius) continue;
-      const offset = (row * png.width + column) * 4;
-      if (
-        png.data[offset] > 235 &&
-        png.data[offset + 1] > 235 &&
-        png.data[offset + 2] > 235
-      ) {
-        count += 1;
-      }
-    }
-  }
-  return count;
-};
-
 const result = {
   fixtureState,
   frozenCount: Number(frozenCount),
   transitionMode,
-  firstRingPixels: countBrightRingPixels(92, 300),
-  secondRingPixels: countBrightRingPixels(198, 420),
+  firstRingPixels: countBrightRingPixels(png, 92, 300, scale),
+  secondRingPixels: countBrightRingPixels(png, 198, 420, scale),
 };
 console.log(JSON.stringify(result));
 if (result.firstRingPixels < 100 || result.secondRingPixels < 100) {

@@ -170,11 +170,14 @@ export default function TouchAllocationVisualFixture() {
       );
     }
   }, [buffers, isRoundTwoDynamic, slots, transitionMode, width]);
-  useEffect(() => {
+
+  function activateDynamicSlotsEffect() {
     if (isDynamic) {
       scheduleOnUI(activateDynamicSlots);
     }
-  }, [activateDynamicSlots, isDynamic]);
+  }
+
+  useEffect(activateDynamicSlotsEffect, [activateDynamicSlots, isDynamic]);
 
   const visiblePlayers = isRevealed
     ? activePositions.map((position, index) => ({
