@@ -1,7 +1,7 @@
 # Skia feedback implementation report
 
 Status date: 18 August 2026
-Implementation reviewed: `codex/deep-allocation-session` at `7429b7d`
+Implementation reviewed: `codex/deep-allocation-session` at `29a6fbb`
 
 This report updates the earlier comparison made at `a577ef8`. It reconciles
 three inputs against the implementation after the unified scene and deep
