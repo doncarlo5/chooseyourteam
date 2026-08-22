@@ -1,5 +1,8 @@
 import { useLocalization } from "@/src/localization/localization-provider";
 import { isLocalePreference } from "@/src/localization/locale";
+import { isGameThemeId } from "@/src/game-themes/game-theme-id";
+import { useGameTheme } from "@/src/game-themes/game-theme-provider";
+import { GAME_THEMES } from "@/src/game-themes/game-theme-registry";
 import { Host } from "@expo/ui";
 import {
   BottomSheet,
@@ -24,6 +27,7 @@ const PORTFOLIO_URL = "https://projulienthomas.vercel.app";
 export default function AppInfoSheet(props: AppInfoSheetProps) {
   const { t } = useLingui();
   const { localePreference, setLocalePreference } = useLocalization();
+  const { themeId, setThemeId } = useGameTheme();
 
   return (
     <Host matchContents>
@@ -32,7 +36,7 @@ export default function AppInfoSheet(props: AppInfoSheetProps) {
         onIsPresentedChange={props.onIsPresentedChange}
         fitToContents
       >
-        <Form modifiers={[padding({ top: 12 }), frame({ height: 470 })]}>
+        <Form modifiers={[padding({ top: 12 }), frame({ height: 590 })]}>
           <Section title={t`Credits`}>
             <Text modifiers={[listRowSeparator("hidden", "bottom")]}>
               {t`Ideas or suggestions?`}
@@ -56,6 +60,23 @@ export default function AppInfoSheet(props: AppInfoSheetProps) {
               <Text modifiers={[tag("system")]}>{t`System`}</Text>
               <Text modifiers={[tag("en")]}>{t`English`}</Text>
               <Text modifiers={[tag("fr")]}>Français</Text>
+            </Picker>
+          </Section>
+          <Section title={t`Theme`}>
+            <Picker
+              selection={themeId}
+              onSelectionChange={(selection) => {
+                if (isGameThemeId(selection)) {
+                  void setThemeId(selection);
+                }
+              }}
+              modifiers={[pickerStyle("inline")]}
+            >
+              {GAME_THEMES.map((theme) => (
+                <Text key={theme.id} modifiers={[tag(theme.id)]}>
+                  {theme.displayName}
+                </Text>
+              ))}
             </Picker>
           </Section>
         </Form>

@@ -1,4 +1,5 @@
 import { StatusBar } from "expo-status-bar";
+import { useGameTheme } from "../game-themes/game-theme-provider";
 import { cn } from "heroui-native";
 import { useState } from "react";
 import { View } from "react-native";
@@ -8,7 +9,6 @@ import AllocationSessionScreen, {
 import AppInfoButton from "./components/app-info-button";
 import AppReviewButton from "./components/app-review-button";
 import AppShareButton from "./components/app-share-button";
-import MeshGradientBackground from "./components/mesh-gradient-background";
 import TeamsSelection from "./components/teams-selection";
 import { H } from "./utils/helper";
 
@@ -18,6 +18,7 @@ const isSupportedTeamCount = (
   teamCount >= 2 && teamCount <= 5;
 
 export default function Home() {
+  const { theme } = useGameTheme();
   const [selectedTeams, setSelectedTeams] = useState<
     AllocationSessionConfiguration["selectedTeams"] | null
   >(null);
@@ -38,8 +39,12 @@ export default function Home() {
   };
 
   return (
-    <View className={cn("flex-1")} style={{ backgroundColor: "transparent" }}>
-      <MeshGradientBackground />
+    <View
+      testID="home-screen"
+      className={cn("flex-1")}
+      style={{ backgroundColor: theme.chrome.screenBackgroundColor }}
+    >
+      <theme.Background />
       {selectedTeams === null ? (
         <>
           <TeamsSelection
@@ -58,7 +63,7 @@ export default function Home() {
         />
       )}
       <AppReviewButton isVisible={selectedTeams === null} />
-      <StatusBar style="dark" />
+      <StatusBar style={theme.chrome.statusBarStyle} />
     </View>
   );
 }

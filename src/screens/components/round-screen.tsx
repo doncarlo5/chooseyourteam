@@ -1,4 +1,5 @@
 import { AppText } from "@/src/components/app-text";
+import { useGameTheme } from "@/src/game-themes/game-theme-provider";
 import { msg, plural } from "@lingui/core/macro";
 import { Trans } from "@lingui/react";
 import { cn } from "heroui-native";
@@ -25,14 +26,18 @@ const startSkeletonPulse = (progress: SharedValue<number>) => {
 };
 
 function RoundInstruction(props: { count: number; requiresAtLeast: boolean }) {
+  const { theme } = useGameTheme();
   const waitingClassName = cn(
-    "text-4xl font-medium text-center leading-none text-black/25",
+    "text-4xl font-medium text-center leading-none",
+    theme.chrome.instructionTextClassName,
   );
   const numberClassName = cn(
-    "text-7xl font-medium text-center leading-none mt-3 text-black/30",
+    "text-7xl font-medium text-center leading-none mt-3",
+    theme.chrome.instructionNumberTextClassName,
   );
   const unitClassName = cn(
-    "pb-1 text-4xl font-medium text-center text-black/25",
+    "pb-1 text-4xl font-medium text-center",
+    theme.chrome.instructionTextClassName,
   );
   const sharedStyle = { fontFamily: "QuickSand" };
   const count = props.count;

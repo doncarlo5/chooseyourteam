@@ -1,5 +1,6 @@
 import { AnimatedBlurView } from "@/src/components/animated-blur-view";
 import { AppText } from "@/src/components/app-text";
+import { useGameTheme } from "@/src/game-themes/game-theme-provider";
 import type { TouchRect } from "@/src/helpers/types/home-screen";
 import { msg, plural } from "@lingui/core/macro";
 import { Trans } from "@lingui/react";
@@ -22,6 +23,7 @@ import Animated, {
 const PLAYER_COUNTS = [6, 7, 8, 9, 10];
 
 function PlayerCountLabel(props: { count: number }) {
+  const { theme } = useGameTheme();
   const descriptor = msg({
     comment:
       "Visible player count. Keep number and unit placeholders so their separate styles are preserved.",
@@ -36,10 +38,20 @@ function PlayerCountLabel(props: { count: number }) {
     components: {
       number: (
         <AppText
-          className={cn("text-5xl font-extrabold leading-none text-[#0B0B0B]")}
+          className={cn(
+            "text-5xl font-extrabold leading-none",
+            theme.chrome.primaryTextClassName,
+          )}
         />
       ),
-      unit: <AppText className={cn("pl-0.5 leading-none text-black/60")} />,
+      unit: (
+        <AppText
+          className={cn(
+            "pl-0.5 leading-none",
+            theme.chrome.cardSecondaryTextClassName,
+          )}
+        />
+      ),
     },
   });
 }
@@ -51,6 +63,7 @@ function PlayerCountOption(props: {
   onPress: () => void;
 }) {
   const { t } = useLingui();
+  const { theme } = useGameTheme();
   const accessibilityLabel = t({
     comment: "Accessibility label for choosing the total player count",
     message: plural(props.count, {
@@ -74,7 +87,8 @@ function PlayerCountOption(props: {
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
         className={cn(
-          "h-28 w-full overflow-hidden rounded-3xl border-2 border-white/55 active:opacity-90",
+          "h-28 w-full overflow-hidden rounded-3xl border-2 active:opacity-90",
+          theme.chrome.dialogOptionClassName,
         )}
         animation={{
           scale: {
@@ -84,7 +98,7 @@ function PlayerCountOption(props: {
         }}
       >
         <LinearGradient
-          colors={["rgba(91, 202, 186, 0.58)", "rgba(246, 187, 91, 0.68)"]}
+          colors={theme.chrome.dialogOptionGradient}
           start={{ x: 0, y: 0.35 }}
           end={{ x: 1, y: 0.65 }}
           style={StyleSheet.absoluteFill}
@@ -92,7 +106,7 @@ function PlayerCountOption(props: {
         <View
           pointerEvents="none"
           style={StyleSheet.absoluteFill}
-          className={cn("bg-white/10")}
+          className={cn(theme.chrome.dialogOptionOverlayClassName)}
         />
         <View className={cn("flex-1 justify-end px-4 pb-4")}>
           <PlayerCountLabel count={props.count} />
@@ -112,6 +126,7 @@ export default function DialogMorePlayers(props: {
   const [isOpen, setIsOpen] = useState(false);
   const plusButtonRef = useRef<View>(null);
   const blurIntensity = useSharedValue(40);
+  const { theme } = useGameTheme();
   const handleOpenChange = (nextIsOpen: boolean) => {
     setIsOpen(nextIsOpen);
     props.onOpenChange?.(nextIsOpen);
@@ -128,7 +143,8 @@ export default function DialogMorePlayers(props: {
       <Button
         size="md"
         className={cn(
-          "border border-white/60 rounded-full size-12 items-center justify-center px-0 overflow-hidden bg-gray-100/40 active:bg-gray-100/80 active:text-white",
+          "border rounded-full size-12 items-center justify-center px-0 overflow-hidden",
+          theme.chrome.controlClassName,
         )}
         animation={{
           scale: {
@@ -161,22 +177,27 @@ export default function DialogMorePlayers(props: {
       >
         <AnimatedBlurView
           blurIntensity={blurIntensity}
-          tint="light"
+          tint={theme.chrome.controlBlurTint}
           style={StyleSheet.absoluteFill}
         />
         <View
           pointerEvents="none"
           style={StyleSheet.absoluteFill}
-          className={cn("bg-white/15")}
+          className={cn(theme.chrome.controlOverlayClassName)}
         />
-        <Button.Label className={cn("text-base font-semibold")}>
+        <Button.Label
+          className={cn(
+            "text-base font-semibold",
+            theme.chrome.primaryTextClassName,
+          )}
+        >
           +5
         </Button.Label>
       </Button>
       <ExpoBottomSheet
         index={isOpen ? 0 : -1}
         enablePanDownToClose
-        backgroundStyle={{ backgroundColor: "#F4EDDE" }}
+        backgroundStyle={{ backgroundColor: theme.chrome.dialogSurfaceColor }}
         onDismiss={() => handleOpenChange(false)}
       >
         <BottomSheetView>

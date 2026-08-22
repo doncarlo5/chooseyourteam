@@ -25,6 +25,10 @@ import {
 import "../../global.css";
 import { AppThemeProvider } from "../contexts/app-theme-context";
 import {
+  GameThemeProvider,
+  useGameTheme,
+} from "../game-themes/game-theme-provider";
+import {
   LocalizationProvider,
   useLocalization,
 } from "../localization/localization-provider";
@@ -42,6 +46,7 @@ void SplashScreen.preventAutoHideAsync();
  */
 function AppContent(props: { fontsReady: boolean }) {
   const { isReady: localizationReady } = useLocalization();
+  const { isReady: gameThemeReady } = useGameTheme();
   const contentWrapper = useCallback(
     (children: React.ReactNode) => (
       <KeyboardAvoidingView
@@ -56,14 +61,14 @@ function AppContent(props: { fontsReady: boolean }) {
     [],
   );
   const hideSplashScreenWhenReady = useCallback(() => {
-    if (props.fontsReady && localizationReady) {
+    if (props.fontsReady && localizationReady && gameThemeReady) {
       void SplashScreen.hideAsync();
     }
-  }, [localizationReady, props.fontsReady]);
+  }, [gameThemeReady, localizationReady, props.fontsReady]);
 
   useEffect(hideSplashScreenWhenReady, [hideSplashScreenWhenReady]);
 
-  if (!props.fontsReady || !localizationReady) {
+  if (!props.fontsReady || !localizationReady || !gameThemeReady) {
     return null;
   }
 
@@ -102,7 +107,9 @@ export default function Layout() {
     <GestureHandlerRootView className={cn("flex-1")}>
       <KeyboardProvider>
         <LocalizationProvider>
-          <AppContent fontsReady={fontsReady} />
+          <GameThemeProvider>
+            <AppContent fontsReady={fontsReady} />
+          </GameThemeProvider>
         </LocalizationProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>

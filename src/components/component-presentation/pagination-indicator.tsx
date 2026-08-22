@@ -13,14 +13,15 @@ const StyleAnimatedView = withUniwind(Animated.View);
 
 const DOT_SIZE = 8;
 const DOT_ACTIVE_SCALE = 1.45;
-const DOT_INACTIVE_COLOR = "#8D8D8D";
-const DOT_ACTIVE_COLOR = "#D6D6D6";
-
 export function PaginationIndicator(props: {
   index: number;
   scrollX: SharedValue<number>;
   itemSize: number;
+  inactiveColor?: string;
+  activeColor?: string;
 }) {
+  const inactiveColor = props.inactiveColor ?? "#8D8D8D";
+  const activeColor = props.activeColor ?? "#D6D6D6";
   const rDotStyle = useAnimatedStyle(() => {
     return {
       opacity: interpolate(
@@ -38,7 +39,7 @@ export function PaginationIndicator(props: {
       backgroundColor: interpolateColor(
         props.scrollX.get() / props.itemSize,
         [props.index - 1, props.index, props.index + 1],
-        [DOT_INACTIVE_COLOR, DOT_ACTIVE_COLOR, DOT_INACTIVE_COLOR],
+        [inactiveColor, activeColor, inactiveColor],
       ),
       transform: [
         {
@@ -57,7 +58,7 @@ export function PaginationIndicator(props: {
         },
       ],
     };
-  });
+  }, [activeColor, inactiveColor]);
 
   return (
     <View className={cn("flex-row items-center h-8 my-1")}>

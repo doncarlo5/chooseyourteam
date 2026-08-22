@@ -245,7 +245,14 @@ export default function useTouchAllocationController(props: {
     });
     const assignments = snapshot.flatMap((touch, index) => {
       const player = players[index];
-      return player ? [{ slotIndex: touch.slotIndex, team: player.team }] : [];
+      return player
+        ? [
+            {
+              slotIndex: touch.slotIndex,
+              team: player.team,
+            },
+          ]
+        : [];
     });
 
     scheduleOnUI(applyRevealAssignments, token, assignments, players);

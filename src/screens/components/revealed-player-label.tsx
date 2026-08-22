@@ -2,8 +2,9 @@ import { AppText } from "@/src/components/app-text";
 import type { TeamNumber } from "@/src/domain/team-identity";
 import { useLingui } from "@lingui/react/macro";
 import { cn } from "heroui-native";
+import { useGameTheme } from "@/src/game-themes/game-theme-provider";
 import type { ComponentProps } from "react";
-import { type StyleProp, View, type ViewStyle } from "react-native";
+import { Platform, type StyleProp, View, type ViewStyle } from "react-native";
 import Animated from "react-native-reanimated";
 
 export default function RevealedPlayerLabel(
@@ -12,23 +13,34 @@ export default function RevealedPlayerLabel(
         team: TeamNumber;
         style: ComponentProps<typeof Animated.View>["style"];
         isAccessibilityVisible?: boolean;
+        isVisuallyHidden?: boolean;
         isAnimated: true;
       }
     | {
         team: TeamNumber;
         style: StyleProp<ViewStyle>;
         isAccessibilityVisible?: boolean;
+        isVisuallyHidden?: boolean;
         isAnimated?: false;
       },
 ) {
   const { t } = useLingui();
+  const { theme } = useGameTheme();
   const isAccessibilityVisible = props.isAccessibilityVisible ?? true;
 
   const content = (
     <AppText
       className={cn(
-        "text-7xl font-extrabold font-mono text-white text-center mt-3",
+        "text-7xl font-extrabold font-mono text-center",
+        Platform.OS !== "android" && "mt-3",
+        theme.chrome.revealedLabelClassName,
       )}
+      style={[
+        theme.chrome.revealedLabelStyle,
+        (props.isVisuallyHidden ?? theme.id === "neon-arena")
+          ? { opacity: 0 }
+          : undefined,
+      ]}
     >
       {props.team}
     </AppText>

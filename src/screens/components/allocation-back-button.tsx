@@ -1,4 +1,5 @@
 import { AnimatedBlurView } from "@/src/components/animated-blur-view";
+import { useGameTheme } from "@/src/game-themes/game-theme-provider";
 import type { TouchRect } from "@/src/helpers/types/home-screen";
 import { AntDesign } from "@expo/vector-icons";
 import { useLingui } from "@lingui/react/macro";
@@ -15,12 +16,14 @@ export default function AllocationBackButton(props: {
   const { t } = useLingui();
   const buttonRef = useRef<View>(null);
   const blurIntensity = useSharedValue(40);
+  const { theme } = useGameTheme();
 
   return (
     <Button
       size="md"
       className={cn(
-        "absolute top-16 left-6 z-10 border border-white/60 rounded-full size-12 items-center justify-center px-0 overflow-hidden bg-gray-100/40 active:bg-gray-100/80 active:text-white",
+        "absolute top-16 left-6 z-10 border rounded-full size-12 items-center justify-center px-0 overflow-hidden",
+        theme.chrome.controlClassName,
       )}
       animation={{
         scale: {
@@ -50,16 +53,20 @@ export default function AllocationBackButton(props: {
     >
       <AnimatedBlurView
         blurIntensity={blurIntensity}
-        tint="light"
+        tint={theme.chrome.controlBlurTint}
         style={StyleSheet.absoluteFill}
       />
       <View
         pointerEvents="none"
         style={StyleSheet.absoluteFill}
-        className={cn("bg-white/15")}
+        className={cn(theme.chrome.controlOverlayClassName)}
       />
       <Button.Label>
-        <AntDesign name="close" size={20} color="rgba(0,0,0,0.8)" />
+        <AntDesign
+          name="close"
+          size={20}
+          color={theme.chrome.controlIconColor}
+        />
       </Button.Label>
     </Button>
   );

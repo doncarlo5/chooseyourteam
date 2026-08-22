@@ -13,7 +13,7 @@ export default function AppInfoButton() {
         side="left"
         iconName="information-outline"
         accessibilityLabel={t`About`}
-        accessibilityHint={t`Opens developer credits and language settings`}
+        accessibilityHint={t`Opens developer credits, language, and theme settings`}
         onPress={() => setIsPresented(true)}
       />
       <AppInfoSheet

@@ -1,5 +1,8 @@
 import { useLocalization } from "@/src/localization/localization-provider";
 import { isLocalePreference } from "@/src/localization/locale";
+import { isGameThemeId } from "@/src/game-themes/game-theme-id";
+import { useGameTheme } from "@/src/game-themes/game-theme-provider";
+import { GAME_THEMES } from "@/src/game-themes/game-theme-registry";
 import { useLingui } from "@lingui/react/macro";
 import { Link } from "expo-router";
 import { Dialog, Label, Radio, RadioGroup, Separator, cn } from "heroui-native";
@@ -11,6 +14,7 @@ const PORTFOLIO_URL = "https://projulienthomas.vercel.app";
 export default function AppInfoSheet(props: AppInfoSheetProps) {
   const { t } = useLingui();
   const { localePreference, setLocalePreference } = useLocalization();
+  const { themeId, setThemeId } = useGameTheme();
   const options = [
     { label: t`System`, value: "system" },
     { label: t`English`, value: "en" },
@@ -69,6 +73,27 @@ export default function AppInfoSheet(props: AppInfoSheetProps) {
                 <RadioGroup.Item key={option.value} value={option.value}>
                   <Radio />
                   <Label>{option.label}</Label>
+                </RadioGroup.Item>
+              ))}
+            </RadioGroup>
+          </View>
+          <Separator className={cn("my-6")} />
+          <View className={cn("gap-3")}>
+            <Label className={cn("text-sm font-semibold")}>{t`Theme`}</Label>
+            <RadioGroup
+              animation="disable-all"
+              value={themeId}
+              onValueChange={(value) => {
+                if (isGameThemeId(value)) {
+                  void setThemeId(value);
+                }
+              }}
+              className={cn("gap-4")}
+            >
+              {GAME_THEMES.map((theme) => (
+                <RadioGroup.Item key={theme.id} value={theme.id}>
+                  <Radio />
+                  <Label>{theme.displayName}</Label>
                 </RadioGroup.Item>
               ))}
             </RadioGroup>

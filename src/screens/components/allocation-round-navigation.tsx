@@ -1,4 +1,5 @@
 import { PaginationIndicator } from "@/src/components/component-presentation/pagination-indicator";
+import { useGameTheme } from "@/src/game-themes/game-theme-provider";
 import type { AllocationRound } from "@/src/screens/state/allocation-session-state";
 import { Ionicons } from "@expo/vector-icons";
 import { cn } from "heroui-native";
@@ -55,6 +56,7 @@ export default function AllocationRoundNavigation(props: {
   ) => ReactNode;
 }) {
   const { width } = useWindowDimensions();
+  const { theme } = useGameTheme();
   const roundScrollX = useSharedValue(0);
   const isRoundNavigationIdle = useSharedValue(true);
   const hasCrossedThreshold = useSharedValue(false);
@@ -190,6 +192,8 @@ export default function AllocationRoundNavigation(props: {
                   index={index}
                   scrollX={roundScrollX}
                   itemSize={width}
+                  inactiveColor={theme.chrome.paginationInactiveColor}
+                  activeColor={theme.chrome.paginationActiveColor}
                 />
               ))}
             </View>
@@ -206,7 +210,7 @@ export default function AllocationRoundNavigation(props: {
                 <Ionicons
                   name="chevron-forward-outline"
                   size={34}
-                  color="#0B0B0B"
+                  color={theme.chrome.navigationIconColor}
                 />
               </Animated.View>
             </View>
@@ -222,7 +226,7 @@ export default function AllocationRoundNavigation(props: {
                 <Ionicons
                   name="chevron-back-outline"
                   size={34}
-                  color="#0B0B0B"
+                  color={theme.chrome.navigationIconColor}
                 />
               </Animated.View>
             </View>

@@ -5,9 +5,8 @@ import {
   planMultiRoundAssignments,
 } from "./team-allocation";
 import {
-  TEAM_IDENTITIES,
+  TEAM_NUMBERS,
   getSelectedTeamNumbers,
-  getTeamIdentity,
   type TeamNumber,
 } from "./team-identity";
 
@@ -33,36 +32,14 @@ const deterministicRandom = (seed: number) => {
   };
 };
 
-describe("canonical team identities", () => {
-  it("keeps the exact number, color, and shape mapping", () => {
-    expect(TEAM_IDENTITIES).toEqual([
-      { number: 1, color: "#415679", shape: "spike" },
-      { number: 2, color: "#FB7185", shape: "wave" },
-      { number: 3, color: "#512663", shape: "hexagon" },
-      { number: 4, color: "#E11D48", shape: "diamond" },
-      { number: 5, color: "#9D659F", shape: "squircle" },
-    ]);
-  });
-
-  it("keeps every identity field unique", () => {
-    expect(
-      new Set(TEAM_IDENTITIES.map((identity) => identity.number)).size,
-    ).toBe(TEAM_IDENTITIES.length);
-    expect(
-      new Set(TEAM_IDENTITIES.map((identity) => identity.color)).size,
-    ).toBe(TEAM_IDENTITIES.length);
-    expect(
-      new Set(TEAM_IDENTITIES.map((identity) => identity.shape)).size,
-    ).toBe(TEAM_IDENTITIES.length);
+describe("team identities", () => {
+  it("keeps the canonical team-number order", () => {
+    expect(TEAM_NUMBERS).toEqual([1, 2, 3, 4, 5]);
+    expect(new Set(TEAM_NUMBERS).size).toBe(TEAM_NUMBERS.length);
   });
 
   it("resolves selected teams in canonical order", () => {
     expect(getSelectedTeamNumbers(3)).toEqual([1, 2, 3]);
-    expect(getTeamIdentity(4)).toEqual({
-      number: 4,
-      color: "#E11D48",
-      shape: "diamond",
-    });
   });
 });
 

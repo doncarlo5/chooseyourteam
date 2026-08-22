@@ -1,22 +1,33 @@
 import type { RevealedPlayer } from "@/src/domain/revealed-player";
 import type { RoundAssignment, TeamNumber } from "@/src/domain/team-identity";
+import { getGameThemeArtwork } from "@/src/game-themes/game-theme-artwork-registry";
+import type { GameThemeId } from "@/src/game-themes/game-theme-id";
+import { useGameTheme } from "@/src/game-themes/game-theme-provider";
+import type { GameThemeArtwork } from "@/src/game-themes/game-theme-types";
 import type { TouchRect } from "@/src/helpers/types/home-screen";
+import { Inter_800ExtraBold } from "@expo-google-fonts/inter";
 import {
+  BlurMask,
   Canvas,
-  Circle,
   drawAsImage,
   Group,
   Image,
-  Path,
-  Skia,
-  SweepGradient,
+  type SkFont,
   type SkImage,
+  Text as SkiaText,
   useClock,
+  useFont,
   vec,
 } from "@shopify/react-native-skia";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { cn } from "heroui-native";
-import { Platform, StyleSheet, View, useWindowDimensions } from "react-native";
+import {
+  PixelRatio,
+  Platform,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Extrapolation,
@@ -25,26 +36,117 @@ import Animated, {
   useAnimatedStyle,
   useDerivedValue,
 } from "react-native-reanimated";
-import {
-  SharedTeamResultArtwork,
-  TeamResultArtwork,
-} from "./team-result-artwork";
 import RevealedPlayerLabel from "./revealed-player-label";
 import useTouchAllocationController from "./use-touch-allocation-controller";
 import { shouldRasterizeFrozenArtwork } from "../touch-allocation-rendering-policy";
 
 const BASE_CIRCLE_SIZE = 120;
 const REVEAL_CIRCLE_SIZE = 150;
-const GLASS_RING = "rgba(255,255,255,0.8)";
+const REVEAL_NUMBER_FONT_SIZE = 72;
+const TEAM_ONE_OPTICAL_OFFSET_X = -3;
 const TEAM_NUMBERS = [1, 2, 3, 4, 5] as const;
 
-async function renderTeamResultImages(size: number) {
+function getRevealedNumberBaseline(size: number, font: SkFont) {
+  const metrics = font.getMetrics();
+  return size / 2 - (metrics.ascent + metrics.descent) / 2;
+}
+
+function getRevealedNumberOffsetX(team: number) {
+  "worklet";
+  return team === 1 ? TEAM_ONE_OPTICAL_OFFSET_X : 0;
+}
+
+function StaticRevealedNumber(props: {
+  size: number;
+  team: TeamNumber;
+  font: SkFont;
+}) {
+  const text = String(props.team);
+  const bounds = props.font.measureText(text);
+  const x =
+    (props.size - bounds.width) / 2 -
+    bounds.x +
+    getRevealedNumberOffsetX(props.team);
+  const y = getRevealedNumberBaseline(props.size, props.font);
+
+  return (
+    <>
+      <SkiaText
+        x={x}
+        y={y}
+        text={text}
+        font={props.font}
+        color="white"
+        opacity={0.75}
+      >
+        <BlurMask blur={5} style="solid" respectCTM={false} />
+      </SkiaText>
+      <SkiaText x={x} y={y} text={text} font={props.font} color="white" />
+    </>
+  );
+}
+
+function SharedRevealedNumber(props: {
+  size: number;
+  team: SharedValue<number>;
+  font: SkFont | null;
+}) {
+  const widths = useMemo(
+    () =>
+      TEAM_NUMBERS.map((team) =>
+        props.font ? props.font.measureText(String(team)) : null,
+      ),
+    [props.font],
+  );
+  const text = useDerivedValue(() => String(props.team.get()));
+  const x = useDerivedValue(() => {
+    const bounds = widths[props.team.get() - 1];
+    return bounds
+      ? (props.size - bounds.width) / 2 -
+          bounds.x +
+          getRevealedNumberOffsetX(props.team.get())
+      : 0;
+  });
+  const y = props.font ? getRevealedNumberBaseline(props.size, props.font) : 0;
+
+  if (!props.font) {
+    return null;
+  }
+
+  return (
+    <>
+      <SkiaText
+        x={x}
+        y={y}
+        text={text}
+        font={props.font}
+        color="white"
+        opacity={0.75}
+      >
+        <BlurMask blur={5} style="solid" respectCTM={false} />
+      </SkiaText>
+      <SkiaText x={x} y={y} text={text} font={props.font} color="white" />
+    </>
+  );
+}
+
+async function renderTeamResultImages(
+  size: number,
+  RevealedDot: GameThemeArtwork["RevealedDot"],
+  showRevealedNumber: boolean,
+  font: SkFont | null,
+) {
   return Promise.all(
     TEAM_NUMBERS.map((team) =>
-      drawAsImage(<TeamResultArtwork size={size} team={team} />, {
-        width: size,
-        height: size,
-      }),
+      drawAsImage(
+        <>
+          <RevealedDot size={size} team={team} />
+          {showRevealedNumber && font ? (
+            <StaticRevealedNumber size={size} team={team} font={font} />
+          ) : null}
+        </>,
+        { width: size, height: size },
+      ),
     ),
   );
 }
@@ -58,38 +160,115 @@ function disposeTeamResultImages(images: (SkImage | null)[]) {
 function loadTeamResultImages(
   isEnabled: boolean,
   size: number,
+  RevealedDot: GameThemeArtwork["RevealedDot"],
+  showRevealedNumber: boolean,
+  font: SkFont | null,
   setImages: (images: (SkImage | null)[]) => void,
 ) {
-  if (!isEnabled) {
+  if (!isEnabled || (showRevealedNumber && !font)) {
     return () => undefined;
   }
   let isCancelled = false;
-  void renderTeamResultImages(size).then((images) => {
-    if (isCancelled) {
-      disposeTeamResultImages(images);
-      return;
-    }
-    setImages(images);
-  });
+  void renderTeamResultImages(size, RevealedDot, showRevealedNumber, font).then(
+    (images) => {
+      if (isCancelled) {
+        disposeTeamResultImages(images);
+        return;
+      }
+      setImages(images);
+    },
+  );
   return () => {
     isCancelled = true;
   };
 }
 
-function useTeamResultImages(size: number, isEnabled: boolean) {
+function useTeamResultImages(
+  size: number,
+  isEnabled: boolean,
+  RevealedDot: GameThemeArtwork["RevealedDot"],
+  showRevealedNumber: boolean,
+  font: SkFont | null,
+) {
   const [images, setImages] = useState<(SkImage | null)[]>([]);
 
   function loadImagesEffect() {
-    return loadTeamResultImages(isEnabled, size, setImages);
+    return loadTeamResultImages(
+      isEnabled,
+      size,
+      RevealedDot,
+      showRevealedNumber,
+      font,
+      setImages,
+    );
   }
 
   function disposeImagesEffect() {
     return () => disposeTeamResultImages(images);
   }
 
-  useEffect(loadImagesEffect, [isEnabled, size]);
+  useEffect(loadImagesEffect, [
+    font,
+    isEnabled,
+    RevealedDot,
+    showRevealedNumber,
+    size,
+  ]);
   useEffect(disposeImagesEffect, [images]);
   return images;
+}
+
+async function renderUnrevealedBaseImage(
+  size: number,
+  RasterizedBase: NonNullable<GameThemeArtwork["RasterizedUnrevealedBase"]>,
+) {
+  const pixelRatio = PixelRatio.get();
+  const rasterSize = Math.ceil(size * pixelRatio);
+  return drawAsImage(<RasterizedBase size={rasterSize} />, {
+    width: rasterSize,
+    height: rasterSize,
+  });
+}
+
+function loadUnrevealedBaseImage(
+  size: number,
+  RasterizedBase: GameThemeArtwork["RasterizedUnrevealedBase"],
+  setImage: (image: SkImage | null) => void,
+) {
+  if (!RasterizedBase || Platform.OS === "web") {
+    setImage(null);
+    return () => undefined;
+  }
+  let isCancelled = false;
+  void renderUnrevealedBaseImage(size, RasterizedBase).then((image) => {
+    if (isCancelled) {
+      image?.dispose();
+      return;
+    }
+    setImage(image);
+  });
+  return () => {
+    isCancelled = true;
+  };
+}
+
+function useUnrevealedBaseImage(
+  size: number,
+  RasterizedBase: GameThemeArtwork["RasterizedUnrevealedBase"],
+) {
+  const [image, setImage] = useState<SkImage | null>(null);
+
+  function loadImageEffect() {
+    return loadUnrevealedBaseImage(size, RasterizedBase, setImage);
+  }
+
+  function disposeImageEffect() {
+    return () => image?.dispose();
+  }
+
+  useEffect(loadImageEffect, [RasterizedBase, size]);
+  useEffect(disposeImageEffect, [image]);
+  return image;
 }
 
 export type TouchAllocationConfiguration = {
@@ -133,18 +312,11 @@ function LiveDotArtwork(props: {
   team: SharedValue<number>;
   revealProgress: SharedValue<number>;
   showRevealedArtwork: boolean;
+  artwork: GameThemeArtwork;
+  unrevealedBaseImage: SkImage | null;
+  revealedNumberFont: SkFont | null;
+  showRevealedNumber: boolean;
 }) {
-  const ringThickness = BASE_CIRCLE_SIZE * 0.08;
-  const ringRadius = BASE_CIRCLE_SIZE / 2 - ringThickness / 2;
-  const progressPath = useMemo(
-    () =>
-      Skia.Path.Circle(
-        BASE_CIRCLE_SIZE / 2,
-        BASE_CIRCLE_SIZE / 2,
-        BASE_CIRCLE_SIZE / 2 - ringThickness,
-      ),
-    [ringThickness],
-  );
   const unrevealedTransform = useDerivedValue(() => {
     const shake = props.shakeX.get();
     return [
@@ -172,9 +344,9 @@ function LiveDotArtwork(props: {
   const revealedOpacity = useDerivedValue(
     () => sharedOpacity.get() * props.revealProgress.get(),
   );
-  const shimmerTransform = useDerivedValue(() => [
-    { rotate: (props.shimmerClock.get() / 1200) * Math.PI * 3 },
-  ]);
+  const UnrevealedDot = props.artwork.UnrevealedDot;
+  const UnrevealedOverlay = props.artwork.UnrevealedOverlay;
+  const SharedRevealedDot = props.artwork.SharedRevealedDot;
 
   return (
     <>
@@ -183,45 +355,28 @@ function LiveDotArtwork(props: {
         transform={unrevealedTransform}
         opacity={unrevealedOpacity}
       >
-        <Circle
-          cx={BASE_CIRCLE_SIZE / 2}
-          cy={BASE_CIRCLE_SIZE / 2}
-          r={ringRadius}
-          style="stroke"
-          strokeWidth={ringThickness}
-          color={GLASS_RING}
-        />
-        <Group
-          origin={vec(BASE_CIRCLE_SIZE / 2, BASE_CIRCLE_SIZE / 2)}
-          transform={shimmerTransform}
-          opacity={0.9}
-        >
-          <Circle
-            cx={BASE_CIRCLE_SIZE / 2}
-            cy={BASE_CIRCLE_SIZE / 2}
-            r={ringRadius - ringThickness * 0.45}
-            style="stroke"
-            strokeWidth={ringThickness * 0.99}
-          >
-            <SweepGradient
-              c={vec(BASE_CIRCLE_SIZE / 2, BASE_CIRCLE_SIZE / 2)}
-              colors={[
-                "rgba(255,255,255,0)",
-                "rgba(255,255,255,0.85)",
-                "rgba(255,255,255,0)",
-              ]}
+        {props.unrevealedBaseImage && UnrevealedOverlay ? (
+          <>
+            <Image
+              image={props.unrevealedBaseImage}
+              x={0}
+              y={0}
+              width={BASE_CIRCLE_SIZE}
+              height={BASE_CIRCLE_SIZE}
             />
-          </Circle>
-        </Group>
-        <Path
-          path={progressPath}
-          style="stroke"
-          strokeWidth={ringThickness}
-          strokeCap="round"
-          color="rgba(255,255,255,0.95)"
-          start={0}
-          end={props.holdProgress}
-        />
+            <UnrevealedOverlay
+              size={BASE_CIRCLE_SIZE}
+              holdProgress={props.holdProgress}
+              clock={props.shimmerClock}
+            />
+          </>
+        ) : (
+          <UnrevealedDot
+            size={BASE_CIRCLE_SIZE}
+            holdProgress={props.holdProgress}
+            clock={props.shimmerClock}
+          />
+        )}
       </Group>
       {props.showRevealedArtwork ? (
         <Group
@@ -229,10 +384,14 @@ function LiveDotArtwork(props: {
           transform={revealedTransform}
           opacity={revealedOpacity}
         >
-          <SharedTeamResultArtwork
-            size={REVEAL_CIRCLE_SIZE}
-            team={props.team}
-          />
+          <SharedRevealedDot size={REVEAL_CIRCLE_SIZE} team={props.team} />
+          {props.showRevealedNumber ? (
+            <SharedRevealedNumber
+              size={REVEAL_CIRCLE_SIZE}
+              team={props.team}
+              font={props.revealedNumberFont}
+            />
+          ) : null}
         </Group>
       ) : null}
     </>
@@ -244,6 +403,9 @@ function FrozenRoundArtwork(props: {
   transform: SharedValue<{ translateX: number }[]>;
   opacity: SharedValue<number>;
   teamImages: (SkImage | null)[];
+  RevealedDot: GameThemeArtwork["RevealedDot"];
+  revealedNumberFont: SkFont | null;
+  showRevealedNumber: boolean;
 }) {
   const shouldRasterize = shouldRasterizeFrozenArtwork(Platform.OS);
 
@@ -266,7 +428,16 @@ function FrozenRoundArtwork(props: {
               height={REVEAL_CIRCLE_SIZE}
             />
           ) : (
-            <TeamResultArtwork size={REVEAL_CIRCLE_SIZE} team={player.team} />
+            <>
+              <props.RevealedDot size={REVEAL_CIRCLE_SIZE} team={player.team} />
+              {props.showRevealedNumber && props.revealedNumberFont ? (
+                <StaticRevealedNumber
+                  size={REVEAL_CIRCLE_SIZE}
+                  team={player.team}
+                  font={props.revealedNumberFont}
+                />
+              ) : null}
+            </>
           )}
         </Group>
       ))}
@@ -307,6 +478,7 @@ export function RevealedPlayerLabelLayer(props: {
   transform: SharedValue<{ translateX: number }[]>;
   opacity: SharedValue<number>;
   isAccessibilityVisible: boolean;
+  isVisuallyHidden?: boolean;
   testID?: string;
 }) {
   const style = useAnimatedStyle(() => ({
@@ -329,6 +501,7 @@ export function RevealedPlayerLabelLayer(props: {
           key={`${player.x}-${player.y}-${player.team}-${index}`}
           team={player.team}
           isAccessibilityVisible={props.isAccessibilityVisible}
+          isVisuallyHidden={props.isVisuallyHidden}
           style={[
             styles.teamLabel,
             {
@@ -369,52 +542,83 @@ export function AllocationSceneCanvas(props: {
   holdProgress: SharedValue<number>;
   shimmerClock?: SharedValue<number>;
   revealedSlotIndexes?: number[];
+  themeId?: GameThemeId;
+  artwork?: GameThemeArtwork;
 }) {
+  const { themeId: selectedThemeId } = useGameTheme();
+  const activeThemeId = props.themeId ?? selectedThemeId;
+  const artwork = props.artwork ?? getGameThemeArtwork(activeThemeId);
+  const showRevealedNumber = activeThemeId === "neon-arena";
   const liveShimmerClock = useClock();
+  const revealedNumberFont = useFont(
+    Inter_800ExtraBold,
+    REVEAL_NUMBER_FONT_SIZE,
+  );
   const shouldRasterize = shouldRasterizeFrozenArtwork(Platform.OS);
   const teamResultImages = useTeamResultImages(
     REVEAL_CIRCLE_SIZE,
     shouldRasterize,
+    artwork.RevealedDot,
+    showRevealedNumber,
+    revealedNumberFont,
+  );
+  const unrevealedBaseImage = useUnrevealedBaseImage(
+    BASE_CIRCLE_SIZE,
+    artwork.RasterizedUnrevealedBase,
   );
   const shimmerClock = props.shimmerClock ?? liveShimmerClock;
   const revealedSlotIndexes = props.revealedSlotIndexes ?? [];
+  const activeUnrevealedBaseImage =
+    revealedSlotIndexes.length === 0 ? unrevealedBaseImage : null;
 
   return (
-    <Canvas
+    <View
       testID="allocation-scene-canvas"
       pointerEvents="none"
       style={StyleSheet.absoluteFill}
     >
-      <FrozenRoundArtwork
-        players={props.frozenRounds.roundOne}
-        transform={props.roundOneTransform}
-        opacity={props.roundOneOpacity}
-        teamImages={teamResultImages}
-      />
-      <FrozenRoundArtwork
-        players={props.frozenRounds.roundTwo}
-        transform={props.roundTwoTransform}
-        opacity={props.roundTwoOpacity}
-        teamImages={teamResultImages}
-      />
-      {props.slots.map((slot, index) => (
-        <LiveDotArtwork
-          key={index}
-          active={slot.active}
-          x={slot.x}
-          y={slot.y}
-          opacity={slot.opacity}
-          scale={slot.scale}
-          shakeX={props.shakeX}
-          holdProgress={props.holdProgress}
-          sceneOpacity={props.liveSceneOpacity}
-          shimmerClock={shimmerClock}
-          team={slot.team}
-          revealProgress={slot.revealProgress}
-          showRevealedArtwork={revealedSlotIndexes.includes(index)}
+      <Canvas pointerEvents="none" style={StyleSheet.absoluteFill}>
+        <FrozenRoundArtwork
+          players={props.frozenRounds.roundOne}
+          transform={props.roundOneTransform}
+          opacity={props.roundOneOpacity}
+          teamImages={teamResultImages}
+          RevealedDot={artwork.RevealedDot}
+          revealedNumberFont={revealedNumberFont}
+          showRevealedNumber={showRevealedNumber}
         />
-      ))}
-    </Canvas>
+        <FrozenRoundArtwork
+          players={props.frozenRounds.roundTwo}
+          transform={props.roundTwoTransform}
+          opacity={props.roundTwoOpacity}
+          teamImages={teamResultImages}
+          RevealedDot={artwork.RevealedDot}
+          revealedNumberFont={revealedNumberFont}
+          showRevealedNumber={showRevealedNumber}
+        />
+        {props.slots.map((slot, index) => (
+          <LiveDotArtwork
+            key={index}
+            active={slot.active}
+            x={slot.x}
+            y={slot.y}
+            opacity={slot.opacity}
+            scale={slot.scale}
+            shakeX={props.shakeX}
+            holdProgress={props.holdProgress}
+            sceneOpacity={props.liveSceneOpacity}
+            shimmerClock={shimmerClock}
+            team={slot.team}
+            revealProgress={slot.revealProgress}
+            showRevealedArtwork={revealedSlotIndexes.includes(index)}
+            artwork={artwork}
+            unrevealedBaseImage={activeUnrevealedBaseImage}
+            revealedNumberFont={revealedNumberFont}
+            showRevealedNumber={showRevealedNumber}
+          />
+        ))}
+      </Canvas>
+    </View>
   );
 }
 

@@ -1,4 +1,5 @@
 import { AppText } from "@/src/components/app-text";
+import { useGameTheme } from "@/src/game-themes/game-theme-provider";
 import { Trans, useLingui } from "@lingui/react/macro";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -27,6 +28,7 @@ const getStoreReviewUrl = () => {
 
 export default function AppReviewButton(props: { isVisible: boolean }) {
   const { t } = useLingui();
+  const { theme } = useGameTheme();
   const canUseStoreReview =
     Platform.OS === "ios" &&
     !__DEV__ &&
@@ -81,7 +83,7 @@ export default function AppReviewButton(props: { isVisible: boolean }) {
     <View className="absolute bottom-10 inset-x-0 items-center">
       <Button
         size="md"
-        className={cn("rounded-full px-5 bg-[#0B0B0B]/20")}
+        className={cn("rounded-full px-5", theme.chrome.reviewSurfaceClassName)}
         accessibilityRole="button"
         accessibilityLabel={t`Rate this app`}
         accessibilityHint={t`Opens the App Store review page`}
@@ -96,10 +98,20 @@ export default function AppReviewButton(props: { isVisible: boolean }) {
         }}
       >
         <View className={cn("flex-row items-center gap-2")}>
-          <AppText className={cn("text-sm font-semibold text-white/80")}>
+          <AppText
+            className={cn(
+              "text-sm font-semibold",
+              theme.chrome.reviewForegroundClassName,
+            )}
+          >
             <Trans>Give a review</Trans>
           </AppText>
-          <FontAwesome6 name="smile" size={16} color="#FFFFFF" opacity={0.8} />
+          <FontAwesome6
+            name="smile"
+            size={16}
+            color={theme.chrome.reviewIconColor}
+            opacity={0.8}
+          />
         </View>
       </Button>
     </View>

@@ -1,4 +1,5 @@
 import { AnimatedBlurView } from "@/src/components/animated-blur-view";
+import { useGameTheme } from "@/src/game-themes/game-theme-provider";
 import type { PlayerCardProps } from "@/src/helpers/types/home-screen";
 import { msg, plural } from "@lingui/core/macro";
 import { Trans } from "@lingui/react";
@@ -13,6 +14,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 function TeamCountLabel(props: { count: number }) {
+  const { theme } = useGameTheme();
   const descriptor = msg({
     comment:
       "Visible team count. Keep number and unit placeholders so their separate styles are preserved.",
@@ -28,12 +30,18 @@ function TeamCountLabel(props: { count: number }) {
       number: (
         <Card.Title
           className={cn(
-            "text-5xl font-extrabold leading-none text-[#0B0B0B]",
+            "text-5xl font-extrabold leading-none",
+            theme.chrome.primaryTextClassName,
           )}
         />
       ),
       unit: (
-        <Card.Description className="pl-0.5 leading-none text-black/60" />
+        <Card.Description
+          className={cn(
+            "pl-0.5 leading-none",
+            theme.chrome.cardSecondaryTextClassName,
+          )}
+        />
       ),
     },
   });
@@ -41,6 +49,7 @@ function TeamCountLabel(props: { count: number }) {
 
 export function PlayerCard(props: PlayerCardProps) {
   const { t } = useLingui();
+  const { theme } = useGameTheme();
   const blurIntensity = useSharedValue(40);
   const accessibilityLabel = t({
     comment: "Accessibility label for choosing a number of teams",
@@ -63,7 +72,7 @@ export function PlayerCard(props: PlayerCardProps) {
         isDisabled={props.isDisabled}
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
-        className="w-full rounded-3xl active:bg-white/40"
+        className={cn("w-full rounded-3xl", theme.chrome.cardActiveClassName)}
         animation={{
           scale: {
             value: 1.03,
@@ -74,19 +83,20 @@ export function PlayerCard(props: PlayerCardProps) {
         <Card
           className={cn(
             "p-0 rounded-3xl overflow-hidden shadow-sm shadow-black/10",
-            "bg-white/10 border-2 border-white/30",
+            "border-2",
+            theme.chrome.cardClassName,
             props.isDisabled && "opacity-50",
           )}
         >
           <AnimatedBlurView
             blurIntensity={blurIntensity}
-            tint="light"
+            tint={theme.chrome.controlBlurTint}
             style={StyleSheet.absoluteFill}
           />
           <View
             pointerEvents="none"
             style={StyleSheet.absoluteFill}
-            className="bg-white/15"
+            className={cn(theme.chrome.cardOverlayClassName)}
           />
           <Card.Body className="h-10" />
           <Card.Footer className="px-3 pb-4 flex-row items-end">

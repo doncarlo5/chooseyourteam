@@ -15,45 +15,45 @@ msgstr ""
 
 #. Visible player count. Keep number and unit placeholders so their separate styles are preserved.
 #. placeholder {0}: props.count
-#: src/screens/components/dialog-more-players.tsx:25
+#: src/screens/components/dialog-more-players.tsx:27
 msgid "{0, plural, one {<number>#</number><unit>player</unit>} other {<number>#</number><unit>players</unit>}}"
 msgstr "{0, plural, one {<number>#</number><unit>player</unit>} other {<number>#</number><unit>players</unit>}}"
 
 #. Visible team count. Keep number and unit placeholders so their separate styles are preserved.
 #. placeholder {0}: props.count
-#: src/screens/components/player-card.tsx:16
+#: src/screens/components/player-card.tsx:18
 msgid "{0, plural, one {<number>#</number><unit>team</unit>} other {<number>#</number><unit>teams</unit>}}"
 msgstr "{0, plural, one {<number>#</number><unit>team</unit>} other {<number>#</number><unit>teams</unit>}}"
 
 #. Accessibility label for choosing the total player count
 #. placeholder {0}: props.count
-#: src/screens/components/dialog-more-players.tsx:54
+#: src/screens/components/dialog-more-players.tsx:67
 msgid "{0, plural, one {Select # player} other {Select # players}}"
 msgstr "{0, plural, one {Select # player} other {Select # players}}"
 
 #. Accessibility label for choosing a number of teams
 #. placeholder {0}: props.count
-#: src/screens/components/player-card.tsx:45
+#: src/screens/components/player-card.tsx:54
 msgid "{0, plural, one {Select # team} other {Select # teams}}"
 msgstr "{0, plural, one {Select # team} other {Select # teams}}"
 
 #. Touch instruction. Keep the waiting, number, and unit elements so each line retains its styling.
-#: src/screens/components/round-screen.tsx:40
+#: src/screens/components/round-screen.tsx:45
 msgid "{count, plural, one {<waiting>Put at least</waiting><number>#</number><unit>finger</unit>} other {<waiting>Put at least</waiting><number>#</number><unit>fingers</unit>}}"
 msgstr "{count, plural, one {<waiting>Put at least</waiting><number>#</number><unit>finger</unit>} other {<waiting>Put at least</waiting><number>#</number><unit>fingers</unit>}}"
 
 #. Touch instruction. Keep the waiting, number, and unit elements so each line retains its styling.
-#: src/screens/components/round-screen.tsx:49
+#: src/screens/components/round-screen.tsx:54
 msgid "{count, plural, one {<waiting>Put</waiting><number>#</number><unit>finger</unit>} other {<waiting>Put</waiting><number>#</number><unit>fingers</unit>}}"
 msgstr "{count, plural, one {<waiting>Put</waiting><number>#</number><unit>finger</unit>} other {<waiting>Put</waiting><number>#</number><unit>fingers</unit>}}"
 
 #: src/screens/components/app-info-button.tsx:15
-#: src/screens/components/app-info-sheet.android.tsx:52
-#: src/screens/components/app-info-sheet.tsx:41
+#: src/screens/components/app-info-sheet.android.tsx:55
+#: src/screens/components/app-info-sheet.tsx:45
 msgid "About"
 msgstr "About"
 
-#: src/screens/components/dialog-more-players.tsx:144
+#: src/screens/components/dialog-more-players.tsx:160
 msgid "Add more players"
 msgstr "Add more players"
 
@@ -66,48 +66,48 @@ msgctxt "dismiss reduced-motion notification"
 msgid "Close"
 msgstr "Close"
 
-#: src/screens/components/allocation-back-button.tsx:36
+#: src/screens/components/allocation-back-button.tsx:39
 msgctxt "return from allocation to team selection"
 msgid "Close"
 msgstr "Close"
 
-#: src/screens/components/app-info-sheet.tsx:42
+#: src/screens/components/app-info-sheet.tsx:46
 msgid "Close About"
 msgstr "Close About"
 
-#: src/screens/components/app-info-sheet.android.tsx:57
-#: src/screens/components/app-info-sheet.ios.tsx:36
-#: src/screens/components/app-info-sheet.tsx:45
+#: src/screens/components/app-info-sheet.android.tsx:60
+#: src/screens/components/app-info-sheet.ios.tsx:40
+#: src/screens/components/app-info-sheet.tsx:49
 msgid "Credits"
 msgstr "Credits"
 
-#: src/screens/components/app-info-sheet.android.tsx:37
-#: src/screens/components/app-info-sheet.ios.tsx:57
-#: src/screens/components/app-info-sheet.tsx:16
+#: src/screens/components/app-info-sheet.android.tsx:40
+#: src/screens/components/app-info-sheet.ios.tsx:61
+#: src/screens/components/app-info-sheet.tsx:20
 msgid "English"
 msgstr "English"
 
-#: src/screens/components/app-review-button.tsx:100
+#: src/screens/components/app-review-button.tsx:107
 msgid "Give a review"
 msgstr "Give a review"
 
-#: src/screens/components/teams-selection.tsx:71
+#: src/screens/components/teams-selection.tsx:76
 msgid "How many teams?"
 msgstr "How many teams?"
 
-#: src/screens/components/app-info-sheet.android.tsx:61
-#: src/screens/components/app-info-sheet.ios.tsx:38
-#: src/screens/components/app-info-sheet.tsx:46
+#: src/screens/components/app-info-sheet.android.tsx:64
+#: src/screens/components/app-info-sheet.ios.tsx:42
+#: src/screens/components/app-info-sheet.tsx:50
 msgid "Ideas or suggestions?"
 msgstr "Ideas or suggestions?"
 
-#: src/screens/components/pairing-mode-toggle.tsx:34
+#: src/screens/components/pairing-mode-toggle.tsx:44
 msgid "Keeps the second and third players on the same team when fair allocation allows it"
 msgstr "Keeps the second and third players on the same team when fair allocation allows it"
 
-#: src/screens/components/app-info-sheet.android.tsx:76
-#: src/screens/components/app-info-sheet.ios.tsx:46
-#: src/screens/components/app-info-sheet.tsx:57
+#: src/screens/components/app-info-sheet.android.tsx:79
+#: src/screens/components/app-info-sheet.ios.tsx:50
+#: src/screens/components/app-info-sheet.tsx:61
 msgid "Language"
 msgstr "Language"
 
@@ -115,23 +115,23 @@ msgstr "Language"
 msgid "Maximum 5 fingers"
 msgstr "Maximum 5 fingers"
 
-#: src/screens/components/pairing-mode-toggle.tsx:28
+#: src/screens/components/pairing-mode-toggle.tsx:38
 msgid "Off"
 msgstr "Off"
 
-#: src/screens/components/pairing-mode-toggle.tsx:26
+#: src/screens/components/pairing-mode-toggle.tsx:36
 msgid "On · players 2 + 3 together"
 msgstr "On · players 2 + 3 together"
 
 #: src/screens/components/app-info-button.tsx:16
-msgid "Opens developer credits and language settings"
-msgstr "Opens developer credits and language settings"
+msgid "Opens developer credits, language, and theme settings"
+msgstr "Opens developer credits, language, and theme settings"
 
-#: src/screens/components/app-review-button.tsx:87
+#: src/screens/components/app-review-button.tsx:89
 msgid "Opens the App Store review page"
 msgstr "Opens the App Store review page"
 
-#: src/screens/components/dialog-more-players.tsx:145
+#: src/screens/components/dialog-more-players.tsx:161
 msgid "Opens the player count picker"
 msgstr "Opens the player count picker"
 
@@ -139,27 +139,27 @@ msgstr "Opens the player count picker"
 msgid "Opens the share sheet with the App Store link"
 msgstr "Opens the share sheet with the App Store link"
 
-#: src/screens/components/pairing-mode-toggle.tsx:22
-#: src/screens/components/pairing-mode-toggle.tsx:33
+#: src/screens/components/pairing-mode-toggle.tsx:30
+#: src/screens/components/pairing-mode-toggle.tsx:43
 msgid "Pairing mode"
 msgstr "Pairing mode"
 
-#: src/screens/components/teams-selection.tsx:74
+#: src/screens/components/teams-selection.tsx:84
 msgid "Pick a number to get started"
 msgstr "Pick a number to get started"
 
 #. placeholder {0}: props.team
-#: src/screens/components/revealed-player-label.tsx:43
+#: src/screens/components/revealed-player-label.tsx:55
 msgid "Player assigned to Team {0}"
 msgstr "Player assigned to Team {0}"
 
-#: src/screens/components/app-info-sheet.android.tsx:66
-#: src/screens/components/app-info-sheet.ios.tsx:41
-#: src/screens/components/app-info-sheet.tsx:52
+#: src/screens/components/app-info-sheet.android.tsx:69
+#: src/screens/components/app-info-sheet.ios.tsx:45
+#: src/screens/components/app-info-sheet.tsx:56
 msgid "Portfolio"
 msgstr "Portfolio"
 
-#: src/screens/components/app-review-button.tsx:86
+#: src/screens/components/app-review-button.tsx:88
 msgid "Rate this app"
 msgstr "Rate this app"
 
@@ -167,7 +167,7 @@ msgstr "Rate this app"
 msgid "Reduce motion enabled"
 msgstr "Reduce motion enabled"
 
-#: src/screens/components/allocation-back-button.tsx:40
+#: src/screens/components/allocation-back-button.tsx:43
 msgid "Returns to team selection"
 msgstr "Returns to team selection"
 
@@ -175,11 +175,17 @@ msgstr "Returns to team selection"
 msgid "Share {brandName}"
 msgstr "Share {brandName}"
 
-#: src/screens/components/app-info-sheet.android.tsx:36
-#: src/screens/components/app-info-sheet.ios.tsx:56
-#: src/screens/components/app-info-sheet.tsx:15
+#: src/screens/components/app-info-sheet.android.tsx:39
+#: src/screens/components/app-info-sheet.ios.tsx:60
+#: src/screens/components/app-info-sheet.tsx:19
 msgid "System"
 msgstr "System"
+
+#: src/screens/components/app-info-sheet.android.tsx:107
+#: src/screens/components/app-info-sheet.ios.tsx:65
+#: src/screens/components/app-info-sheet.tsx:82
+msgid "Theme"
+msgstr "Theme"
 
 #: src/screens/components/use-touch-allocation-feedback.ts:177
 msgid "Use +5."

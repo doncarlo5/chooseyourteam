@@ -1,4 +1,4 @@
-import type { TeamShape } from "@/src/domain/team-identity";
+import type { TeamShape } from "@/src/game-themes/team-encoding";
 import { Skia } from "@shopify/react-native-skia";
 
 type Point = { x: number; y: number };

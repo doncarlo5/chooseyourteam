@@ -1,4 +1,5 @@
 import { AppText } from "@/src/components/app-text";
+import { useGameTheme } from "@/src/game-themes/game-theme-provider";
 import { Trans } from "@lingui/react/macro";
 import { PressableFeedback, cn } from "heroui-native";
 import { View } from "react-native";
@@ -15,6 +16,7 @@ export default function TeamsSelection(props: {
   onPairingModeChange: (isEnabled: boolean) => void;
 }) {
   const insets = useSafeAreaInsets();
+  const { theme } = useGameTheme();
 
   if (props.selectedTeams) return null;
 
@@ -39,7 +41,10 @@ export default function TeamsSelection(props: {
           }}
         >
           <AppText
-            className={cn("px-0.5 text-center text-black/75")}
+            className={cn(
+              "px-0.5 text-center",
+              theme.chrome.brandTextClassName,
+            )}
             style={{
               fontFamily: "QuickSand",
               fontSize: 19,
@@ -60,7 +65,7 @@ export default function TeamsSelection(props: {
           className={cn("mb-8 px-2")}
         >
           <AppText
-            className={cn("text-center text-[#0B0B0B]")}
+            className={cn("text-center", theme.chrome.primaryTextClassName)}
             style={{
               fontFamily: "QuickSand",
               fontSize: 38,
@@ -70,7 +75,12 @@ export default function TeamsSelection(props: {
           >
             <Trans>How many teams?</Trans>
           </AppText>
-          <AppText className={cn("mt-2 text-center text-base text-black/55")}>
+          <AppText
+            className={cn(
+              "mt-2 text-center text-base",
+              theme.chrome.secondaryTextClassName,
+            )}
+          >
             <Trans>Pick a number to get started</Trans>
           </AppText>
         </Animated.View>

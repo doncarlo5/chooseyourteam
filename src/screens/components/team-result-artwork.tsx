@@ -1,9 +1,9 @@
 import {
-  getTeamIdentity,
-  TEAM_IDENTITIES,
-  type TeamNumber,
-  type TeamShape,
-} from "@/src/domain/team-identity";
+  DESERT_LAGOON_TEAM_ENCODINGS,
+  getDesertLagoonTeamEncoding,
+} from "@/src/game-themes/desert-lagoon-team-encoding";
+import type { TeamNumber } from "@/src/domain/team-identity";
+import type { TeamShape } from "@/src/game-themes/team-encoding";
 import { buildShapePath } from "@/src/screens/utils/dot-shapes";
 import {
   Circle,
@@ -106,18 +106,18 @@ function TeamArtworkLayers(props: {
 }
 
 export function TeamResultArtwork(props: { size: number; team: TeamNumber }) {
-  const identity = getTeamIdentity(props.team);
+  const encoding = getDesertLagoonTeamEncoding(props.team);
   const geometry = useMemo(() => {
     const ringThickness = Math.max(2, props.size * 0.08);
-    return buildArtworkGeometry(props.size, identity.shape, ringThickness);
-  }, [identity.shape, props.size]);
+    return buildArtworkGeometry(props.size, encoding.shape, ringThickness);
+  }, [encoding.shape, props.size]);
 
   return (
     <TeamArtworkLayers
       geometry={geometry}
       path={geometry.path}
-      color={identity.color}
-      shadowColors={[identity.color, "rgba(255,255,255,0)"]}
+      color={encoding.color}
+      shadowColors={[encoding.color, "rgba(255,255,255,0)"]}
     />
   );
 }
@@ -129,8 +129,8 @@ export function SharedTeamResultArtwork(props: {
   const ringThickness = Math.max(2, props.size * 0.08);
   const geometries = useMemo(
     () =>
-      TEAM_IDENTITIES.map((identity) =>
-        buildArtworkGeometry(props.size, identity.shape, ringThickness),
+      DESERT_LAGOON_TEAM_ENCODINGS.map((encoding) =>
+        buildArtworkGeometry(props.size, encoding.shape, ringThickness),
       ),
     [props.size, ringThickness],
   );
@@ -142,8 +142,11 @@ export function SharedTeamResultArtwork(props: {
   );
   const color = useDerivedValue<string>(() =>
     props.team.get() > 0
-      ? (TEAM_IDENTITIES[
-          Math.min(TEAM_IDENTITIES.length - 1, props.team.get() - 1)
+      ? (DESERT_LAGOON_TEAM_ENCODINGS[
+          Math.min(
+            DESERT_LAGOON_TEAM_ENCODINGS.length - 1,
+            props.team.get() - 1,
+          )
         ]?.color ?? "rgba(0,0,0,0)")
       : "rgba(0,0,0,0)",
   );
