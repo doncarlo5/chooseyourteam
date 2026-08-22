@@ -4,12 +4,9 @@ import { isGameThemeId } from "@/src/game-themes/game-theme-id";
 import { useGameTheme } from "@/src/game-themes/game-theme-provider";
 import { GAME_THEMES } from "@/src/game-themes/game-theme-registry";
 import { useLingui } from "@lingui/react/macro";
-import { Link } from "expo-router";
 import { Dialog, Label, Radio, RadioGroup, Separator, cn } from "heroui-native";
 import { View } from "react-native";
 import type { AppInfoSheetProps } from "./app-info-sheet.types";
-
-const PORTFOLIO_URL = "https://projulienthomas.vercel.app";
 
 export default function AppInfoSheet(props: AppInfoSheetProps) {
   const { t } = useLingui();
@@ -46,15 +43,24 @@ export default function AppInfoSheet(props: AppInfoSheetProps) {
             <Dialog.Close accessibilityLabel={t`Close About`} />
           </View>
           <View className={cn("mt-6 gap-3")}>
-            <Label className={cn("text-sm font-semibold")}>{t`Credits`}</Label>
-            <Label>{t`Ideas or suggestions?`}</Label>
-            <Link
-              href={PORTFOLIO_URL}
-              target="_blank"
-              className={cn("self-start px-4 py-2 text-blue-600")}
+            <Label className={cn("text-sm font-semibold")}>{t`Theme`}</Label>
+            <RadioGroup
+              animation="disable-all"
+              value={themeId}
+              onValueChange={(value) => {
+                if (isGameThemeId(value)) {
+                  void setThemeId(value);
+                }
+              }}
+              className={cn("gap-4")}
             >
-              {t`Portfolio`}
-            </Link>
+              {GAME_THEMES.map((theme) => (
+                <RadioGroup.Item key={theme.id} value={theme.id}>
+                  <Radio />
+                  <Label>{theme.displayName}</Label>
+                </RadioGroup.Item>
+              ))}
+            </RadioGroup>
           </View>
           <Separator className={cn("my-6")} />
           <View className={cn("gap-3")}>
@@ -78,26 +84,9 @@ export default function AppInfoSheet(props: AppInfoSheetProps) {
             </RadioGroup>
           </View>
           <Separator className={cn("my-6")} />
-          <View className={cn("gap-3")}>
-            <Label className={cn("text-sm font-semibold")}>{t`Theme`}</Label>
-            <RadioGroup
-              animation="disable-all"
-              value={themeId}
-              onValueChange={(value) => {
-                if (isGameThemeId(value)) {
-                  void setThemeId(value);
-                }
-              }}
-              className={cn("gap-4")}
-            >
-              {GAME_THEMES.map((theme) => (
-                <RadioGroup.Item key={theme.id} value={theme.id}>
-                  <Radio />
-                  <Label>{theme.displayName}</Label>
-                </RadioGroup.Item>
-              ))}
-            </RadioGroup>
-          </View>
+          <Label className={cn("text-center text-sm text-black/55")}>
+            {t`JT Company. Made in 🇫🇷`}
+          </Label>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog>

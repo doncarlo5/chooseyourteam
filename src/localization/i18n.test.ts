@@ -11,17 +11,17 @@ describe("localization catalogs", () => {
     expect(i18n._("LNZ6mg")).toBe("Combien d’équipes ?");
   });
 
-  it("localizes the About sheet while preserving language autonyms", () => {
+  it("localizes the settings sheet while preserving language autonyms", () => {
     const i18n = createAppI18n("en");
 
     expect(i18n._("uyJsf6")).toBe("About");
-    expect(i18n._("MRfUhu")).toBe("Ideas or suggestions?");
     expect(i18n._("D-NlUC")).toBe("System");
+    expect(i18n._("OnXNdD")).toBe("JT Company. Made in 🇫🇷");
 
     i18n.activate("fr");
     expect(i18n._("uyJsf6")).toBe("À propos");
-    expect(i18n._("MRfUhu")).toBe("Une idée, suggestions ?");
     expect(i18n._("D-NlUC")).toBe("Système");
+    expect(i18n._("OnXNdD")).toBe("JT Company. Fait en 🇫🇷");
     expect(i18n._("lYGfRP")).toBe("English");
   });
 

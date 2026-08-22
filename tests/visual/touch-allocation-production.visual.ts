@@ -35,17 +35,32 @@ test("changes and restores the game theme from settings", async ({ page }) => {
   await expect(home).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
 
   await page.getByRole("button", { name: "About" }).click();
-  await page
-    .getByRole("radiogroup")
-    .nth(1)
-    .locator('[role="radio"]')
-    .nth(2)
-    .click();
-  await expect(home).toHaveCSS("background-color", "rgb(0, 0, 0)");
+  const themeHeading = page.getByText("Theme", { exact: true });
+  const languageHeading = page.getByText("Language", { exact: true });
+  const companyCredit = page.getByText("JT Company. Made in 🇫🇷", {
+    exact: true,
+  });
+  await expect(themeHeading).toBeVisible();
+  await expect(languageHeading).toBeVisible();
+  await expect(companyCredit).toBeVisible();
+  expect((await themeHeading.boundingBox())?.y).toBeLessThan(
+    (await languageHeading.boundingBox())?.y ?? 0,
+  );
+  expect((await languageHeading.boundingBox())?.y).toBeLessThan(
+    (await companyCredit.boundingBox())?.y ?? 0,
+  );
+  await expect(page.getByRole("link")).toHaveCount(0);
+  await expect(page.getByText("Credits", { exact: true })).toHaveCount(0);
+  await page.getByRole("radio", { name: "Coral Sky" }).click();
+  await expect(page.getByTestId("coral-sky-background")).toBeVisible();
+  await expect(page.getByTestId("coral-sky-background")).toHaveCSS(
+    "background-color",
+    "rgb(117, 219, 255)",
+  );
 
   await page.reload();
-  await expect(page.getByTestId("home-screen")).toHaveCSS(
+  await expect(page.getByTestId("coral-sky-background")).toHaveCSS(
     "background-color",
-    "rgb(0, 0, 0)",
+    "rgb(117, 219, 255)",
   );
 });

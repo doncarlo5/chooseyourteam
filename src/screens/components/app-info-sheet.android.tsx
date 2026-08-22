@@ -11,25 +11,13 @@ import {
   Text,
 } from "@expo/ui/jetpack-compose";
 import {
-  clickable,
   fillMaxWidth,
   padding,
   selectable,
   selectableGroup,
 } from "@expo/ui/jetpack-compose/modifiers";
 import { useLingui } from "@lingui/react/macro";
-import { Linking } from "react-native";
 import type { AppInfoSheetProps } from "./app-info-sheet.types";
-
-const PORTFOLIO_URL = "https://projulienthomas.vercel.app";
-
-const openPortfolio = async () => {
-  try {
-    await Linking.openURL(PORTFOLIO_URL);
-  } catch (error) {
-    console.error("[About] Unable to open portfolio:", error);
-  }
-};
 
 export default function AppInfoSheet(props: AppInfoSheetProps) {
   const { t } = useLingui();
@@ -57,21 +45,30 @@ export default function AppInfoSheet(props: AppInfoSheetProps) {
             style={{ typography: "titleSmall" }}
             modifiers={[padding(0, 24, 0, 8)]}
           >
-            {t`Credits`}
+            {t`Theme`}
           </Text>
-          <ListItem>
-            <ListItem.HeadlineContent>
-              <Text>{t`Ideas or suggestions?`}</Text>
-            </ListItem.HeadlineContent>
-          </ListItem>
-          <ListItem modifiers={[clickable(() => void openPortfolio())]}>
-            <ListItem.HeadlineContent>
-              <Text>{t`Portfolio`}</Text>
-            </ListItem.HeadlineContent>
-            <ListItem.SupportingContent>
-              <Text>{PORTFOLIO_URL}</Text>
-            </ListItem.SupportingContent>
-          </ListItem>
+          <Column modifiers={[selectableGroup()]}>
+            {GAME_THEMES.map((theme) => (
+              <ListItem
+                key={theme.id}
+                modifiers={[
+                  fillMaxWidth(),
+                  selectable(
+                    themeId === theme.id,
+                    () => void setThemeId(theme.id),
+                    "radioButton",
+                  ),
+                ]}
+              >
+                <ListItem.HeadlineContent>
+                  <Text>{theme.displayName}</Text>
+                </ListItem.HeadlineContent>
+                <ListItem.TrailingContent>
+                  <RadioButton selected={themeId === theme.id} />
+                </ListItem.TrailingContent>
+              </ListItem>
+            ))}
+          </Column>
           <Text
             style={{ typography: "titleSmall" }}
             modifiers={[padding(0, 24, 0, 8)]}
@@ -101,33 +98,12 @@ export default function AppInfoSheet(props: AppInfoSheetProps) {
             ))}
           </Column>
           <Text
-            style={{ typography: "titleSmall" }}
-            modifiers={[padding(0, 24, 0, 8)]}
+            color="#737373"
+            style={{ typography: "bodySmall" }}
+            modifiers={[padding(0, 24, 0, 0)]}
           >
-            {t`Theme`}
+            {t`JT Company. Made in 🇫🇷`}
           </Text>
-          <Column modifiers={[selectableGroup()]}>
-            {GAME_THEMES.map((theme) => (
-              <ListItem
-                key={theme.id}
-                modifiers={[
-                  fillMaxWidth(),
-                  selectable(
-                    themeId === theme.id,
-                    () => void setThemeId(theme.id),
-                    "radioButton",
-                  ),
-                ]}
-              >
-                <ListItem.HeadlineContent>
-                  <Text>{theme.displayName}</Text>
-                </ListItem.HeadlineContent>
-                <ListItem.TrailingContent>
-                  <RadioButton selected={themeId === theme.id} />
-                </ListItem.TrailingContent>
-              </ListItem>
-            ))}
-          </Column>
         </Column>
       </ModalBottomSheet>
     </Host>

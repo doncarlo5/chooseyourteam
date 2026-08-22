@@ -48,8 +48,8 @@ msgid "{count, plural, one {<waiting>Put</waiting><number>#</number><unit>finger
 msgstr "{count, plural, one {<waiting>Put</waiting><number>#</number><unit>finger</unit>} other {<waiting>Put</waiting><number>#</number><unit>fingers</unit>}}"
 
 #: src/screens/components/app-info-button.tsx:15
-#: src/screens/components/app-info-sheet.android.tsx:55
-#: src/screens/components/app-info-sheet.tsx:45
+#: src/screens/components/app-info-sheet.android.tsx:43
+#: src/screens/components/app-info-sheet.tsx:42
 msgid "About"
 msgstr "About"
 
@@ -71,19 +71,13 @@ msgctxt "return from allocation to team selection"
 msgid "Close"
 msgstr "Close"
 
-#: src/screens/components/app-info-sheet.tsx:46
+#: src/screens/components/app-info-sheet.tsx:43
 msgid "Close About"
 msgstr "Close About"
 
-#: src/screens/components/app-info-sheet.android.tsx:60
-#: src/screens/components/app-info-sheet.ios.tsx:40
-#: src/screens/components/app-info-sheet.tsx:49
-msgid "Credits"
-msgstr "Credits"
-
-#: src/screens/components/app-info-sheet.android.tsx:40
-#: src/screens/components/app-info-sheet.ios.tsx:61
-#: src/screens/components/app-info-sheet.tsx:20
+#: src/screens/components/app-info-sheet.android.tsx:28
+#: src/screens/components/app-info-sheet.ios.tsx:62
+#: src/screens/components/app-info-sheet.tsx:17
 msgid "English"
 msgstr "English"
 
@@ -95,19 +89,19 @@ msgstr "Give a review"
 msgid "How many teams?"
 msgstr "How many teams?"
 
-#: src/screens/components/app-info-sheet.android.tsx:64
-#: src/screens/components/app-info-sheet.ios.tsx:42
-#: src/screens/components/app-info-sheet.tsx:50
-msgid "Ideas or suggestions?"
-msgstr "Ideas or suggestions?"
+#: src/screens/components/app-info-sheet.android.tsx:105
+#: src/screens/components/app-info-sheet.ios.tsx:50
+#: src/screens/components/app-info-sheet.tsx:88
+msgid "JT Company. Made in 🇫🇷"
+msgstr "JT Company. Made in 🇫🇷"
 
 #: src/screens/components/pairing-mode-toggle.tsx:44
 msgid "Keeps the second and third players on the same team when fair allocation allows it"
 msgstr "Keeps the second and third players on the same team when fair allocation allows it"
 
-#: src/screens/components/app-info-sheet.android.tsx:79
-#: src/screens/components/app-info-sheet.ios.tsx:50
-#: src/screens/components/app-info-sheet.tsx:61
+#: src/screens/components/app-info-sheet.android.tsx:76
+#: src/screens/components/app-info-sheet.ios.tsx:49
+#: src/screens/components/app-info-sheet.tsx:67
 msgid "Language"
 msgstr "Language"
 
@@ -153,12 +147,6 @@ msgstr "Pick a number to get started"
 msgid "Player assigned to Team {0}"
 msgstr "Player assigned to Team {0}"
 
-#: src/screens/components/app-info-sheet.android.tsx:69
-#: src/screens/components/app-info-sheet.ios.tsx:45
-#: src/screens/components/app-info-sheet.tsx:56
-msgid "Portfolio"
-msgstr "Portfolio"
-
 #: src/screens/components/app-review-button.tsx:88
 msgid "Rate this app"
 msgstr "Rate this app"
@@ -175,15 +163,15 @@ msgstr "Returns to team selection"
 msgid "Share {brandName}"
 msgstr "Share {brandName}"
 
-#: src/screens/components/app-info-sheet.android.tsx:39
-#: src/screens/components/app-info-sheet.ios.tsx:60
-#: src/screens/components/app-info-sheet.tsx:19
+#: src/screens/components/app-info-sheet.android.tsx:27
+#: src/screens/components/app-info-sheet.ios.tsx:61
+#: src/screens/components/app-info-sheet.tsx:16
 msgid "System"
 msgstr "System"
 
-#: src/screens/components/app-info-sheet.android.tsx:107
-#: src/screens/components/app-info-sheet.ios.tsx:65
-#: src/screens/components/app-info-sheet.tsx:82
+#: src/screens/components/app-info-sheet.android.tsx:48
+#: src/screens/components/app-info-sheet.ios.tsx:31
+#: src/screens/components/app-info-sheet.tsx:46
 msgid "Theme"
 msgstr "Theme"
 
