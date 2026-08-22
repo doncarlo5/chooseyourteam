@@ -92,7 +92,7 @@ function PlayerCountOption(props: {
         )}
         animation={{
           scale: {
-            value: 0.96,
+            value: 1.03,
             timingConfig: { duration: 150 },
           },
         }}
@@ -148,7 +148,7 @@ export default function DialogMorePlayers(props: {
         )}
         animation={{
           scale: {
-            value: 0.96,
+            value: 1.03,
             timingConfig: { duration: 170 },
           },
           highlight: {

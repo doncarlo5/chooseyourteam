@@ -29,7 +29,7 @@ export default function BottomActionButton(props: {
       feedbackVariant="scale"
       animation={{
         scale: {
-          value: 0.96,
+          value: 1.03,
           timingConfig: { duration: 170 },
         },
       }}
