@@ -47,3 +47,31 @@ for a few seconds, and the app reveals each player's team color and number.
 - Touch-safe controls: touches on the back button or +5 do not count as players.
 - Built for quick decisions: who breaks, who serves, who starts, and who teams
   up.
+
+## Release and TestFlight
+
+The app uses two independent iOS version values:
+
+- `expo.version` is the user-facing App Store version, such as `0.0.7`.
+- `ios.buildNumber` is the developer-facing build number, such as `48`.
+
+Keep `cli.appVersionSource` set to `remote` and
+`build.production.autoIncrement` set to `true` in `eas.json`. With this setup,
+`npx testflight` automatically increments the iOS build number for successive
+TestFlight builds of the same release.
+
+Update `expo.version` manually in `app.json` when starting a new App Store
+release. Expo recommends making this user-facing version an explicit release
+decision. EAS remote versioning intentionally does not support automatically
+incrementing it.
+
+If Apple reports that the version has already been submitted, increasing only
+the build number is insufficient because that App Store version is already
+closed. Increment `expo.version`, commit and push the change, then run
+`npx testflight` again. Do not increment `expo.version` for every TestFlight
+iteration while the current App Store version remains open.
+
+References:
+
+- [Expo app version management](https://docs.expo.dev/build-reference/app-versions/)
+- [Expo `npx testflight` command](https://docs.expo.dev/build-reference/npx-testflight/)
