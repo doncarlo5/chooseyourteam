@@ -1,4 +1,8 @@
-export const GAME_THEME_IDS = ["desert-lagoon", "neon-arena"] as const;
+export const GAME_THEME_IDS = [
+  "desert-lagoon",
+  "coral-sky",
+  "neon-arena",
+] as const;
 
 export type GameThemeId = (typeof GAME_THEME_IDS)[number];
 

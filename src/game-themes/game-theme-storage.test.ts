@@ -17,9 +17,9 @@ afterEach(() => {
 
 describe("game theme storage", () => {
   it("loads and validates a persisted theme", async () => {
-    const storage = createStorage("neon-arena");
+    const storage = createStorage("coral-sky");
 
-    await expect(loadGameThemeId(storage)).resolves.toBe("neon-arena");
+    await expect(loadGameThemeId(storage)).resolves.toBe("coral-sky");
     expect(storage.getItem).toHaveBeenCalledWith(GAME_THEME_STORAGE_KEY);
   });
 
@@ -40,10 +40,10 @@ describe("game theme storage", () => {
   it("persists under the versioned key", async () => {
     const storage = createStorage(null);
 
-    await expect(persistGameThemeId("neon-arena", storage)).resolves.toBe(true);
+    await expect(persistGameThemeId("coral-sky", storage)).resolves.toBe(true);
     expect(storage.setItem).toHaveBeenCalledWith(
       GAME_THEME_STORAGE_KEY,
-      "neon-arena",
+      "coral-sky",
     );
   });
 

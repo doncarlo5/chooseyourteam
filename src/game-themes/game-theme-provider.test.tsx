@@ -12,7 +12,7 @@ import type { GameThemeStorage } from "./game-theme-storage";
 
 vi.mock("./game-theme-registry", () => {
   const Empty = (() => null) as ComponentType;
-  const createTheme = (id: "desert-lagoon" | "neon-arena") =>
+  const createTheme = (id: "desert-lagoon" | "coral-sky" | "neon-arena") =>
     ({
       id,
       displayName: id,
@@ -21,6 +21,7 @@ vi.mock("./game-theme-registry", () => {
     }) as unknown as GameThemeDefinition;
   const themes = {
     "desert-lagoon": createTheme("desert-lagoon"),
+    "coral-sky": createTheme("coral-sky"),
     "neon-arena": createTheme("neon-arena"),
   };
   return {
@@ -83,12 +84,12 @@ describe("GameThemeProvider", () => {
     expect(getContext().themeId).toBe("desert-lagoon");
 
     await act(async () => {
-      resolveLoad?.("neon-arena");
+      resolveLoad?.("coral-sky");
       await Promise.resolve();
     });
     expect(getContext().isReady).toBe(true);
-    expect(getContext().themeId).toBe("neon-arena");
-    expect(getContext().theme.id).toBe("neon-arena");
+    expect(getContext().themeId).toBe("coral-sky");
+    expect(getContext().theme.id).toBe("coral-sky");
 
     renderer!.unmount();
   });
@@ -113,12 +114,12 @@ describe("GameThemeProvider", () => {
     });
 
     await act(async () => {
-      await getContext().setThemeId("neon-arena");
+      await getContext().setThemeId("coral-sky");
     });
-    expect(getContext().themeId).toBe("neon-arena");
+    expect(getContext().themeId).toBe("coral-sky");
     expect(storage.setItem).toHaveBeenCalledWith(
       "chooseyourteam.game-theme.v1",
-      "neon-arena",
+      "coral-sky",
     );
 
     renderer!.unmount();

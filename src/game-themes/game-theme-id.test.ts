@@ -8,7 +8,11 @@ import {
 
 describe("game theme IDs", () => {
   it("recognizes every supported theme", () => {
-    expect(GAME_THEME_IDS).toEqual(["desert-lagoon", "neon-arena"]);
+    expect(GAME_THEME_IDS).toEqual([
+      "desert-lagoon",
+      "coral-sky",
+      "neon-arena",
+    ]);
     expect(GAME_THEME_IDS.every(isGameThemeId)).toBe(true);
   });
 

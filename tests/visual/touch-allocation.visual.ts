@@ -36,6 +36,34 @@ for (const fixtureState of fixtureStates) {
   });
 }
 
+test("renders the Coral Sky background with Desert Lagoon artwork", async ({
+  page,
+}) => {
+  const pageErrors: string[] = [];
+  page.on("pageerror", (error) =>
+    pageErrors.push(error.stack ?? error.message),
+  );
+  await page.goto(
+    "/__visual__/touch-allocation?state=revealed&theme=coral-sky&background=1",
+  );
+  const scene = page.getByTestId("allocation-scene-fixture");
+  const background = scene.getByTestId("coral-sky-background");
+  await expect(scene).toBeVisible();
+  await expect(background).toHaveCSS(
+    "background-color",
+    "rgb(117, 219, 255)",
+  );
+  await expect(scene.getByTestId("allocation-scene-canvas")).toHaveCount(1);
+  await expect(
+    scene.getByTestId("allocation-scene-canvas").locator("canvas"),
+  ).toHaveCount(1);
+  await expect(scene.getByLabel(/Player assigned to Team/)).toHaveCount(3);
+  expect(pageErrors).toEqual([]);
+  await expect(scene).toHaveScreenshot("coral-sky-background.png", {
+    animations: "disabled",
+  });
+});
+
 for (const fixtureState of [
   "unrevealed",
   "countdown",

@@ -9,6 +9,9 @@ import {
   GAME_THEME_ARTWORK_REGISTRY,
   getGameThemeArtwork,
 } from "./game-theme-artwork-registry";
+import { coralSkyTheme } from "./coral-sky-theme";
+import { desertLagoonArtwork } from "./desert-lagoon-artwork";
+import { desertLagoonTheme } from "./desert-lagoon-theme";
 
 vi.mock("react-native", () => ({
   StyleSheet: { absoluteFill: {}, create: (styles: unknown) => styles },
@@ -62,5 +65,11 @@ describe("game theme registry", () => {
       expect(getGameTheme(theme.id)).toBe(theme);
       expect(GAME_THEME_ARTWORK_REGISTRY[theme.id]).toBe(artwork);
     }
+  });
+
+  it("changes only the background for Coral Sky", () => {
+    expect(coralSkyTheme.Background).not.toBe(desertLagoonTheme.Background);
+    expect(coralSkyTheme.chrome).toBe(desertLagoonTheme.chrome);
+    expect(getGameThemeArtwork("coral-sky")).toBe(desertLagoonArtwork);
   });
 });

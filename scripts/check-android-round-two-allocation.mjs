@@ -18,7 +18,8 @@ const frozenCount = process.env.ALLOCATION_FROZEN_COUNT ?? "5";
 const transitionMode = process.env.ALLOCATION_TRANSITION_MODE ?? "both";
 const liveCount = process.env.ALLOCATION_LIVE_COUNT ?? "3";
 const theme = process.env.ALLOCATION_THEME ?? "desert-lagoon";
-const backgroundQuery = theme === "neon-arena" ? "\\&background=1" : "";
+const backgroundQuery =
+  theme === "desert-lagoon" ? "" : "\\&background=1";
 const route = `chooseyourteam:///__visual__/touch-allocation?state=${fixtureState}\\&frozenCount=${frozenCount}\\&transitionMode=${transitionMode}\\&liveCount=${liveCount}\\&theme=${theme}${backgroundQuery}`;
 
 execFileSync("adb", [

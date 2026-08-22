@@ -15,7 +15,7 @@ const theme = process.env.ALLOCATION_THEME ?? "desert-lagoon";
 const fixtureState = process.env.ALLOCATION_FIXTURE_STATE ?? "dynamic";
 const liveCount = process.env.ALLOCATION_LIVE_COUNT ?? "3";
 const themeQuery =
-  theme === "neon-arena" ? "&theme=neon-arena&background=1" : "";
+  theme === "desert-lagoon" ? "" : `&theme=${theme}&background=1`;
 const route = `chooseyourteam:///__visual__/touch-allocation?state=${fixtureState}&liveCount=${liveCount}${themeQuery}`;
 const bundleIdentifier = "com.doncarlos.chooseyourteam";
 

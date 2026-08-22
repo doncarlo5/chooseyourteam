@@ -1,0 +1,20 @@
+export type MeshGradientBackgroundProps = {
+  cols?: number;
+  rows?: number;
+  amplitude?: number;
+  speed?: number;
+  baseColor?: string;
+  overlay?: string;
+  palette?: readonly string[];
+  vertexAlpha?: number;
+  darkenTop?: boolean;
+  blurSigma?: number;
+  blurMode?: "clamp" | "repeat" | "mirror" | "decal";
+  meshOverscan?: number;
+  useBandFade?: boolean;
+  bandFadeStrength?: number;
+  colorDarken?: number;
+  yellowWeight?: number;
+  isAnimationPaused?: boolean;
+  testID?: string;
+};

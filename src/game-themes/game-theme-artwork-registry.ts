@@ -5,6 +5,7 @@ import { neonArenaArtwork } from "./neon-arena-artwork";
 
 export const GAME_THEME_ARTWORK_REGISTRY = {
   "desert-lagoon": desertLagoonArtwork,
+  "coral-sky": desertLagoonArtwork,
   "neon-arena": neonArenaArtwork,
 } as const satisfies Record<GameThemeId, GameThemeArtwork>;
 

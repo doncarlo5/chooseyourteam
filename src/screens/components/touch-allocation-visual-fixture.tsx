@@ -223,14 +223,18 @@ export default function TouchAllocationVisualFixture() {
       testID="allocation-scene-fixture"
       className={cn(
         "flex-1",
-        fixtureTheme.id === "desert-lagoon" ? "bg-emerald-200" : "bg-black",
+        fixtureTheme.chrome.statusBarStyle === "dark"
+          ? "bg-emerald-200"
+          : "bg-black",
       )}
     >
       {shouldRenderBackground ? <fixtureTheme.Background /> : null}
       <AppText
         className={cn(
           "pt-20 text-center text-3xl",
-          fixtureTheme.id === "desert-lagoon" ? "text-black/70" : "text-white",
+          fixtureTheme.chrome.statusBarStyle === "dark"
+            ? "text-black/70"
+            : "text-white",
         )}
       >
         Allocation scene: {fixtureState}

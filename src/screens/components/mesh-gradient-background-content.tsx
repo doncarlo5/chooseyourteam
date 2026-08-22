@@ -17,6 +17,7 @@ import {
   useFrameCallback,
   useSharedValue,
 } from "react-native-reanimated";
+import type { MeshGradientBackgroundProps } from "./mesh-gradient-background.types";
 
 type Point = { x: number; y: number };
 type RGB = readonly [number, number, number];
@@ -143,27 +144,9 @@ const useIsAppActive = () => {
   return isActive;
 };
 
-export default function MeshGradientBackground(props: {
-  cols?: number;
-  rows?: number;
-  amplitude?: number;
-  speed?: number;
-  baseColor?: string;
-  overlay?: string;
-  palette?: string[];
-
-  vertexAlpha?: number; // 0..1
-  darkenTop?: boolean;
-  blurSigma?: number;
-  blurMode?: "clamp" | "repeat" | "mirror" | "decal";
-  meshOverscan?: number;
-  useBandFade?: boolean;
-  bandFadeStrength?: number; // 0..1
-  colorDarken?: number; // 0..1
-  yellowWeight?: number; // 0..1
-  isAnimationPaused?: boolean;
-  testID?: string;
-}) {
+export default function MeshGradientBackground(
+  props: MeshGradientBackgroundProps,
+) {
   const cols = props.cols ?? 6;
   const rows = props.rows ?? 10;
   const amplitude = props.amplitude ?? 18;

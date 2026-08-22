@@ -1,3 +1,4 @@
+import { coralSkyTheme } from "./coral-sky-theme";
 import { desertLagoonTheme } from "./desert-lagoon-theme";
 import { GAME_THEME_IDS, type GameThemeId } from "./game-theme-id";
 import type { GameThemeDefinition } from "./game-theme-types";
@@ -5,6 +6,7 @@ import { neonArenaTheme } from "./neon-arena-theme";
 
 export const GAME_THEME_REGISTRY = {
   "desert-lagoon": desertLagoonTheme,
+  "coral-sky": coralSkyTheme,
   "neon-arena": neonArenaTheme,
 } as const satisfies Record<GameThemeId, GameThemeDefinition>;
 
