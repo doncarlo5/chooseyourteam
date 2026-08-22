@@ -28,3 +28,24 @@ test("renders every admitted production touch", async ({ page, context }) => {
   expect(firstTouch).not.toEqual(firstBaseline);
   expect(secondTouch).not.toEqual(secondBaseline);
 });
+
+test("changes and restores the game theme from settings", async ({ page }) => {
+  await page.goto("/");
+  const home = page.getByTestId("home-screen");
+  await expect(home).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+
+  await page.getByRole("button", { name: "About" }).click();
+  await page
+    .getByRole("radiogroup")
+    .nth(1)
+    .locator('[role="radio"]')
+    .nth(2)
+    .click();
+  await expect(home).toHaveCSS("background-color", "rgb(0, 0, 0)");
+
+  await page.reload();
+  await expect(page.getByTestId("home-screen")).toHaveCSS(
+    "background-color",
+    "rgb(0, 0, 0)",
+  );
+});

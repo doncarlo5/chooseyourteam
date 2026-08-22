@@ -1,6 +1,9 @@
 import { AppText } from "@/src/components/app-text";
 import type { RevealedPlayer } from "@/src/domain/revealed-player";
 import type { TeamNumber } from "@/src/domain/team-identity";
+import { parseGameThemeId } from "@/src/game-themes/game-theme-id";
+import { getGameThemeArtwork } from "@/src/game-themes/game-theme-artwork-registry";
+import { getGameTheme } from "@/src/game-themes/game-theme-registry";
 import {
   AllocationSceneCanvas,
   type AllocationLiveSlot,
@@ -15,12 +18,26 @@ import { StyleSheet, View, useWindowDimensions } from "react-native";
 import { makeMutable, withSpring, withTiming } from "react-native-reanimated";
 import { scheduleOnUI } from "react-native-worklets";
 
-const activePositions = [
+const livePositions = [
   { x: 92, y: 300 },
   { x: 198, y: 420 },
   { x: 300, y: 310 },
+  { x: 82, y: 520 },
+  { x: 200, y: 565 },
+  { x: 310, y: 505 },
+  { x: 70, y: 650 },
+  { x: 185, y: 700 },
+  { x: 315, y: 650 },
+  { x: 95, y: 760 },
+  { x: 215, y: 760 },
+  { x: 325, y: 760 },
 ];
-const revealedTeams: TeamNumber[] = [1, 2, 3];
+const overlapPositions = [
+  { x: 195, y: 400 },
+  { x: 195, y: 465 },
+  ...livePositions.slice(2),
+];
+const revealedTeams: TeamNumber[] = [1, 2, 3, 4, 5];
 
 export default function TouchAllocationVisualFixture() {
   const params = useLocalSearchParams<{
@@ -28,10 +45,22 @@ export default function TouchAllocationVisualFixture() {
     round?: string;
     frozenCount?: string;
     transitionMode?: string;
+    theme?: string;
+    background?: string;
+    liveCount?: string;
   }>();
   const { width } = useWindowDimensions();
   const fixtureState = params.state ?? "unrevealed";
-  const isRevealed = fixtureState === "revealed";
+  const fixtureTheme = getGameTheme(parseGameThemeId(params.theme));
+  const fixtureArtwork = getGameThemeArtwork(fixtureTheme.id);
+  const shouldRenderBackground = params.background === "1";
+  const liveCount = Math.max(
+    0,
+    Math.min(12, Number.parseInt(params.liveCount ?? "3", 10) || 0),
+  );
+  const isOverlap = fixtureState === "overlap";
+  const isRevealed = fixtureState === "revealed" || isOverlap;
+  const activePositions = isOverlap ? overlapPositions : livePositions;
   const isFrozen = fixtureState === "frozen";
   const isScrolling = fixtureState === "scrolling";
   const isRoundTwoDynamic = fixtureState === "round-two-dynamic";
@@ -58,9 +87,7 @@ export default function TouchAllocationVisualFixture() {
           active: isDynamic
             ? slotActive[index]
             : makeMutable(
-                index < activePositions.length && !isFrozen && !isScrolling
-                  ? 1
-                  : 0,
+                index < liveCount && !isFrozen && !isScrolling ? 1 : 0,
               ),
           x: isDynamic ? slotX[index] : makeMutable(position.x),
           y: isDynamic ? slotY[index] : makeMutable(position.y),
@@ -79,6 +106,8 @@ export default function TouchAllocationVisualFixture() {
       isFrozen,
       isRevealed,
       isScrolling,
+      liveCount,
+      activePositions,
       slotActive,
       slotOpacity,
       slotRevealProgress,
@@ -154,8 +183,8 @@ export default function TouchAllocationVisualFixture() {
       buffers.liveSceneOpacity.set(1);
     }
     for (let index = 0; index < 2; index += 1) {
-      slots[index].x.set(activePositions[index].x);
-      slots[index].y.set(activePositions[index].y);
+      slots[index].x.set(livePositions[index].x);
+      slots[index].y.set(livePositions[index].y);
       slots[index].team.set(0);
       slots[index].revealProgress.set(0);
       slots[index].active.set(1);
@@ -180,18 +209,30 @@ export default function TouchAllocationVisualFixture() {
   useEffect(activateDynamicSlotsEffect, [activateDynamicSlots, isDynamic]);
 
   const visiblePlayers = isRevealed
-    ? activePositions.map((position, index) => ({
+    ? activePositions.slice(0, liveCount).map((position, index) => ({
         ...position,
-        team: revealedTeams[index],
+        team: revealedTeams[index % revealedTeams.length],
       }))
+    : [];
+  const revealedSlotIndexes = isRevealed
+    ? Array.from({ length: liveCount }, (_, index) => index)
     : [];
 
   return (
     <View
       testID="allocation-scene-fixture"
-      className={cn("flex-1 bg-emerald-200")}
+      className={cn(
+        "flex-1",
+        fixtureTheme.id === "desert-lagoon" ? "bg-emerald-200" : "bg-black",
+      )}
     >
-      <AppText className={cn("pt-20 text-center text-3xl text-black/70")}>
+      {shouldRenderBackground ? <fixtureTheme.Background /> : null}
+      <AppText
+        className={cn(
+          "pt-20 text-center text-3xl",
+          fixtureTheme.id === "desert-lagoon" ? "text-black/70" : "text-white",
+        )}
+      >
         Allocation scene: {fixtureState}
       </AppText>
       <AllocationSceneCanvas
@@ -205,12 +246,15 @@ export default function TouchAllocationVisualFixture() {
         shakeX={buffers.shakeX}
         holdProgress={buffers.holdProgress}
         shimmerClock={buffers.shimmerClock}
-        revealedSlotIndexes={isRevealed ? [0, 1, 2] : []}
+        revealedSlotIndexes={revealedSlotIndexes}
+        themeId={fixtureTheme.id}
+        artwork={fixtureArtwork}
       />
       {visiblePlayers.map((player, index) => (
         <RevealedPlayerLabel
           key={`${player.x}-${player.y}-${player.team}-${index}`}
           team={player.team}
+          isVisuallyHidden={fixtureTheme.id === "neon-arena"}
           style={[
             styles.label,
             {
@@ -230,6 +274,7 @@ export default function TouchAllocationVisualFixture() {
             transform={buffers.roundOneTransform}
             opacity={buffers.roundOneOpacity}
             isAccessibilityVisible={activeRound === 0}
+            isVisuallyHidden={fixtureTheme.id === "neon-arena"}
           />
           <RevealedPlayerLabelLayer
             testID="fixture-round-two-labels"
@@ -237,6 +282,7 @@ export default function TouchAllocationVisualFixture() {
             transform={buffers.roundTwoTransform}
             opacity={buffers.roundTwoOpacity}
             isAccessibilityVisible={activeRound === 1}
+            isVisuallyHidden={fixtureTheme.id === "neon-arena"}
           />
         </>
       ) : null}
