@@ -7,6 +7,19 @@
 - `npm run test:visual` covers five deterministic allocation states, asserts one dot Canvas, and checks that inactive revealed-result layers are hidden from accessibility.
 - With a Release simulator build installed and an iOS simulator booted, `npm run test:native-allocation` temporarily loads the production-disabled native fixture and asserts that two dynamically activated slots both render unrevealed rings. It restores the installed bundle afterward.
 - With a Release build containing the production-disabled fixture installed on Android, `node scripts/check-android-round-two-allocation.mjs` reproduces the Multi-Round transition with five revealed first-Round Players and asserts that both second-Round unrevealed rings render. `ALLOCATION_FROZEN_COUNT=1` through `5` exercises the complete first-Round range.
+- Set `ALLOCATION_THEME=neon-arena` on either native allocation command to validate the neon annuli and the independent grid background. The default remains Desert Lagoon so its existing checks stay unchanged.
+- `npm run test:native-allocation:ios:palette` and `npm run test:native-allocation:android:palette` render all five revealed Neon Arena Team Encodings. Each command checks the expected red, green, yellow, cyan, and violet ring pixels plus the white accessible number at the center.
+
+## Neon Arena performance gate
+
+Build with `EXPO_PUBLIC_ENABLE_NATIVE_PERF_FIXTURES=true`, then open `/__performance__/allocation` with `variant=simple|neon`, `scenario=live-12|frozen-5-live-2`, and `run=1|2|3`. Each run discards a three-second warmup, measures 15 seconds, records the device, OS, estimated refresh rate, median frame time, and p95 frame time, and logs one `[AllocationPerformance]` JSON record.
+
+Each completed native run also overwrites a deterministic `allocation-performance-{variant}-{scenario}-{run}.json` file in the app Documents directory. This makes Release results collectible from a physical Apple device with `devicectl device copy from` even when JavaScript console output is unavailable.
+
+After installing the fixture-enabled Release build on a physical iPhone, run `npm run test:performance:allocation:ios:collect -- <device-id> <reports.jsonl>`. The collector launches all twelve measurements, waits for each report, and copies the JSON records from the app container. Then pass the resulting JSONL file to `npm run test:performance:allocation -- <reports.jsonl>`.
+
+Collect three records per variant and scenario into a JSONL file and run `npm run test:performance:allocation -- <reports.jsonl>`. The gate fails when the median neon p95 is more than 10% slower than the simple baseline on the same device. Both the physical iPhone 17 and the physical Android device must pass before the artwork is considered performance-validated; simulator measurements are informational only.
+
 - Expo Doctor and the web production export are part of the release verification pass.
 - Debug native builds complete for the iOS simulator and Android with Java 17. Android Studio's bundled Java 25 runtime is not compatible with this native toolchain.
 

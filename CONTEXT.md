@@ -8,7 +8,14 @@ Choose Your Team divides participating Players into visually distinct Teams whil
 A group receiving Players during an allocation.
 
 **Team Identity**:
-The fixed number, color, and shape representing a Team for the lifetime of the app.
+The fixed number identifying a Team for the lifetime of a Session. Its visual representation may change with the active Game Theme.
+
+**Team Encoding**:
+The color, shape, and artwork a Game Theme uses to represent a Team Identity. The number remains the primary accessible signal when an encoding omits color or shape.
+
+**Game Theme**:
+A named visual identity that changes the background, artwork, and interface chrome without changing allocation rules or Team Identities.
+_Avoid_: App Theme, skin
 
 **Player**:
 One participating touch in an allocation.
@@ -41,7 +48,7 @@ _Avoid_: Inséparable
 
 The Pairing Mode control is available only before selecting a Team count. Long-pressing the setup heading reveals its current state, and enabling or disabling it produces distinct haptic feedback.
 
-## Canonical Team Identities
+## Desert Lagoon Team Encodings
 
 1. Team 1: `#415679`, spike
 2. Team 2: `#FB7185`, wave
