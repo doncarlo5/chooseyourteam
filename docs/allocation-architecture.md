@@ -17,7 +17,7 @@ flowchart TD
   Labels[React Native accessible labels]
   Mesh[Independent mesh Canvas]
 
-  Home -->|immutable Team count + Pairing Mode| Session
+  Home -->|immutable observed/declared Players + Team count + Pairing Mode| Session
   Session --> State
   Session --> Navigation
   Session --> Scene
@@ -29,7 +29,9 @@ flowchart TD
   Mesh -. setup and Session background .-> Home
 ```
 
-`Home` knows only whether setup or an active Session is visible. The Session's external interface is `configuration` plus `onExit`; Player count, Fair Allocation planning, snapshots, reset keys, touch state, Round mechanics, controls, and the pointer-safe exit handshake are private implementation details.
+`Home` owns only the platform-specific setup policy, editable setup values, and whether an active Session is visible. Android hides Player selection and always snapshots an Observed Player Count. On iOS and web, the visual `More players: 5+` entry still snapshots an Observed Player Count when left unchanged; pressing plus selects a Declared Player Count from 6 to 10. Team count appears first and remains part of the same immutable configuration as Player selection and Pairing Mode. The Session's external interface remains `configuration` plus `onExit`; Fair Allocation planning, snapshots, reset keys, touch state, Round mechanics, controls, and the pointer-safe exit handshake are private implementation details.
+
+An observed Android Round accepts the contacts actually reported by the device, from the selected Team count through the application's twelve-slot ceiling. The three-second stability countdown restarts whenever that observed count changes. Hardware may report fewer simultaneous contacts than the application supports; a thirteenth reported contact is ignored with localized capacity feedback. Planned iOS/web Rounds remain limited to five Players each.
 
 ## Reconciled feedback matrix
 
@@ -44,7 +46,7 @@ review decisions.
 | Shopify examples (adapted): one Canvas for live and revealed artwork | Implemented                                    | Twelve possible live slots and both Round snapshots share one allocation Canvas and one shimmer clock. Expensive revealed artwork mounts only for assigned slots; the independent mesh remains separate. |
 | Shopify examples: continuous values on the UI thread                 | Implemented                                    | Position, visibility, scale, countdown, reveal, shake, and scroll transforms use shared values/worklets.                                                                                                 |
 | Shopify examples: semantic JavaScript crossings                      | Implemented                                    | JavaScript receives discrete count, reveal, swipe-hint, navigation-settled, feedback, and exit-ready events; drag lifecycle and scrolling remain on the UI thread.                                       |
-| Shopify examples: deterministic reducer and injected planning        | Implemented                                    | Multi-Round planning occurs before the Session action; replaying the completed plan is deterministic.                                                                                                    |
+| Shopify examples: deterministic reducer and injected planning        | Implemented                                    | Multi-Round planning occurs once when the immutable Session configuration is mounted; deterministic tests inject the random source.                                                                      |
 | Shopify examples: a deeper allocation module                         | Implemented                                    | The active flow is behind `AllocationSessionScreen`; production and deterministic fake-clock tests use the same token-bearing transition and lifecycle-effect seam.                                      |
 | Shopify examples: visual regression                                  | Implemented                                    | Five deterministic baselines assert one Canvas; additional assertions cover both settled accessibility projections and duplicate-label absence.                                                          |
 | Medium: hybrid React Native/Skia screen                              | Implemented                                    | React Native owns controls, navigation, instructions, and accessibility; Skia owns artwork. ADR 0003 remains authoritative for this seam.                                                                |
@@ -90,13 +92,14 @@ The no-blur scenario retains the production 28-point overscan so blur is the onl
 
 | Evidence                                                                  | Status                                                                                                                                                                                                           |
 | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| TypeScript, lint, localization, 222 unit tests                            | Passed on 18 August 2026. Lint retained six pre-existing warnings in unrelated showcase controls and reported no errors.                                                                                         |
-| Five Playwright baselines, production-scene, and accessibility assertions | Seven checks passed on Desktop Chrome at a 390 × 844 viewport.                                                                                                                                                   |
+| TypeScript, lint, localization, 251 unit tests                            | Passed on 24 August 2026. Lint retained six pre-existing warnings in unrelated showcase controls and reported no errors.                                                                                         |
+| Playwright visual, production-scene, and accessibility assertions         | Nineteen checks passed on Desktop Chrome, including the iOS/web Player setup flow and compact home viewport.                                                                                                     |
 | Native repeated-slot rendering fixture                                    | Passed on the iPhone 17 simulator: two dynamically activated unrevealed rings were detected after the fixture route and screenshot assertions were corrected.                                                    |
 | Expo Doctor and web export                                                | Expo Doctor passed 21/21 checks; static web export completed.                                                                                                                                                    |
 | iOS and Android native builds                                             | iPhone 17 simulator Release and Android Debug builds completed successfully; the iOS build also launched without logged errors.                                                                                  |
-| Physical iPhone 17 matrix and profiling                                   | Partial: reveal-position freeze and the complete `+5` second-Round render passed on a physical iPhone 17 running iOS 26.5.2. The remaining interaction, VoiceOver, and profiling matrix is still pending.          |
-| Physical Android matrix, TalkBack, three-pointer ordering, and profiling  | Partial: the Multi-Round second-screen rendering regression passed on a Huawei EML-L29 with Android 10, including frozen counts one through five. TalkBack, full release ordering, and profiling remain pending. |
+| Physical iPhone 17 matrix and profiling                                   | Partial: reveal-position freeze and the complete six-to-ten-Player second-Round render passed on a physical iPhone 17 running iOS 26.5.2. The remaining interaction, VoiceOver, and profiling matrix is pending. |
+| Platform-specific setup on simulators                                     | Passed on iPhone 17 and Android API 36: iOS exposed Teams before the `More players: 5+` entry and opened an exact five-Player first Round for six declared Players; Android exposed only Team controls and opened an observed Round. |
+| Physical Android matrix, TalkBack, six-pointer ordering, and profiling    | Partial: the earlier Multi-Round rendering regression passed on a Huawei EML-L29 with Android 10. The new observed flow still requires six simultaneous physical contacts before release; no physical device was connected on 24 August 2026. |
 
 ### Native frozen-Round rendering finding
 

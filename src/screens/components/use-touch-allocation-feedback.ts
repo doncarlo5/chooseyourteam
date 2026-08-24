@@ -174,7 +174,16 @@ export default function useTouchAllocationFeedback(props: {
       id: "ios-touch-limit",
       variant: "warning",
       label: t`Maximum 5 fingers`,
-      description: t`Use +5.`,
+      description: t`Go back and select 6 or more players.`,
+    });
+  };
+
+  const showAndroidTouchLimitToast = () => {
+    toast.show({
+      id: "android-touch-limit",
+      variant: "warning",
+      label: t`Maximum 12 fingers`,
+      description: t`Only the first 12 detected fingers can join.`,
     });
   };
 
@@ -269,6 +278,7 @@ export default function useTouchAllocationFeedback(props: {
     clearPreRevealHaptics,
     playBubble,
     schedulePreRevealHaptics,
+    showAndroidTouchLimitToast,
     showIosTouchLimitToast,
   };
 }

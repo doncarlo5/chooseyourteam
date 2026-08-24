@@ -1,5 +1,10 @@
-import type { MultiRoundAssignmentPlan } from "@/src/domain/team-allocation";
-import type { RevealedPlayer } from "@/src/domain/revealed-player";
+import {
+  planMultiRoundAssignments,
+  type MultiRoundAssignmentPlan,
+  type RandomSource,
+} from "../../domain/team-allocation";
+import type { RevealedPlayer } from "../../domain/revealed-player";
+import type { AllocationSessionConfiguration } from "./allocation-setup-state";
 
 export type AllocationRound = 0 | 1;
 
@@ -18,11 +23,6 @@ export type AllocationSessionState = {
 
 export type AllocationSessionAction =
   | {
-      type: "selectPlayerCount";
-      playerCount: number;
-      plan: MultiRoundAssignmentPlan;
-    }
-  | {
       type: "revealCompleted";
       round: AllocationRound;
       players: RevealedPlayer[];
@@ -31,41 +31,37 @@ export type AllocationSessionAction =
   | { type: "navigationSettled"; round: number }
   | { type: "exitCompleted" };
 
-export const createAllocationSessionState = (): AllocationSessionState => ({
-  declaredPlayerCount: null,
-  multiRoundPlan: null,
-  currentRound: 0,
-  roundOneSnapshot: [],
-  isRoundOneFrozen: false,
-  roundTwoSnapshot: [],
-  isRoundTwoFrozen: false,
-  roundResetKey: 0,
-  navigationResetKey: 0,
-  hasShownSwipeHint: false,
-});
+export const createAllocationSessionState = (
+  configuration?: AllocationSessionConfiguration,
+  random: RandomSource = Math.random,
+): AllocationSessionState => {
+  const declaredPlayerCount =
+    configuration?.playerSelection.mode === "declared"
+      ? configuration.playerSelection.count
+      : null;
+  const multiRoundPlan =
+    declaredPlayerCount === null || !configuration
+      ? null
+      : planMultiRoundAssignments(
+          configuration.selectedTeams,
+          declaredPlayerCount,
+          random,
+          { pairingMode: configuration.isPairingModeEnabled },
+        );
 
-const resetRounds = (
-  state: AllocationSessionState,
-): Pick<
-  AllocationSessionState,
-  | "currentRound"
-  | "roundOneSnapshot"
-  | "isRoundOneFrozen"
-  | "roundTwoSnapshot"
-  | "isRoundTwoFrozen"
-  | "roundResetKey"
-  | "navigationResetKey"
-  | "hasShownSwipeHint"
-> => ({
-  currentRound: 0,
-  roundOneSnapshot: [],
-  isRoundOneFrozen: false,
-  roundTwoSnapshot: [],
-  isRoundTwoFrozen: false,
-  roundResetKey: state.roundResetKey + 1,
-  navigationResetKey: state.navigationResetKey + 1,
-  hasShownSwipeHint: false,
-});
+  return {
+    declaredPlayerCount,
+    multiRoundPlan,
+    currentRound: 0,
+    roundOneSnapshot: [],
+    isRoundOneFrozen: false,
+    roundTwoSnapshot: [],
+    isRoundTwoFrozen: false,
+    roundResetKey: 0,
+    navigationResetKey: 0,
+    hasShownSwipeHint: false,
+  };
+};
 
 export const clampAllocationRound = (round: number): AllocationRound =>
   round >= 1 ? 1 : 0;
@@ -76,15 +72,6 @@ export const allocationSessionReducer = (
 ): AllocationSessionState => {
   if (action.type === "exitCompleted") {
     return createAllocationSessionState();
-  }
-
-  if (action.type === "selectPlayerCount") {
-    return {
-      ...state,
-      declaredPlayerCount: action.playerCount,
-      multiRoundPlan: action.plan,
-      ...resetRounds(state),
-    };
   }
 
   if (action.type === "revealCompleted") {

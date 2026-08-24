@@ -1,6 +1,9 @@
-import type { MultiRoundAssignmentPlan } from "@/src/domain/team-allocation";
 import type { RevealedPlayer } from "@/src/domain/revealed-player";
 import { describe, expect, it } from "vitest";
+import type {
+  AllocationSessionConfiguration,
+  DeclaredPlayerCount,
+} from "./allocation-setup-state";
 import {
   allocationSessionReducer,
   createAllocationSessionState,
@@ -8,16 +11,28 @@ import {
 } from "./allocation-session-state";
 
 const revealedPlayer: RevealedPlayer = { x: 100, y: 200, team: 1 };
-const multiRoundPlan: MultiRoundAssignmentPlan = {
-  roundOne: [1, 2, 3, 4, 1],
-  roundTwo: [2, 3, 4],
+const createDeclaredConfiguration = (
+  count: DeclaredPlayerCount,
+): AllocationSessionConfiguration => ({
+  selectedTeams: 4,
+  playerSelection: { mode: "declared", count },
+  isPairingModeEnabled: false,
+});
+const observedConfiguration: AllocationSessionConfiguration = {
+  selectedTeams: 3,
+  playerSelection: { mode: "observed" },
+  isPairingModeEnabled: false,
 };
 
 describe("allocationSessionReducer", () => {
   it("projects a single-round Session from its immutable Team count", () => {
-    expect(
-      projectCurrentRound(createAllocationSessionState(), 3),
-    ).toMatchObject({
+    const state = createAllocationSessionState(observedConfiguration);
+
+    expect(state).toMatchObject({
+      declaredPlayerCount: null,
+      multiRoundPlan: null,
+    });
+    expect(projectCurrentRound(state, 3)).toMatchObject({
       round: 0,
       isMultiRound: false,
       expectedTouchCount: 3,
@@ -25,29 +40,24 @@ describe("allocationSessionReducer", () => {
     });
   });
 
-  it("stores an injected Multi-Round plan and resets prior Round state", () => {
-    const revealed = allocationSessionReducer(createAllocationSessionState(), {
-      type: "revealCompleted",
-      round: 0,
-      players: [revealedPlayer],
-    });
-    const state = allocationSessionReducer(revealed, {
-      type: "selectPlayerCount",
-      playerCount: 8,
-      plan: multiRoundPlan,
-    });
+  for (const count of [6, 7, 8, 9, 10] as const) {
+    it(`initializes an exact ${count}-Player Multi-Round Session`, () => {
+      const state = createAllocationSessionState(
+        createDeclaredConfiguration(count),
+        () => 0.25,
+      );
 
-    expect(state.multiRoundPlan).toBe(multiRoundPlan);
-    expect(state.roundOneSnapshot).toEqual([]);
-    expect(state.roundResetKey).toBe(1);
-    expect(state.navigationResetKey).toBe(1);
-    expect(projectCurrentRound(state, 4)).toMatchObject({
-      firstRoundCount: 5,
-      secondRoundCount: 3,
-      expectedTouchCount: 5,
-      allowOverExpected: false,
+      expect(state.declaredPlayerCount).toBe(count);
+      expect(state.multiRoundPlan?.roundOne).toHaveLength(5);
+      expect(state.multiRoundPlan?.roundTwo).toHaveLength(count - 5);
+      expect(projectCurrentRound(state, 4)).toMatchObject({
+        firstRoundCount: 5,
+        secondRoundCount: count - 5,
+        expectedTouchCount: 5,
+        allowOverExpected: false,
+      });
     });
-  });
+  }
 
   it("makes duplicate reveal completion idempotent", () => {
     const state = allocationSessionReducer(createAllocationSessionState(), {
@@ -90,12 +100,11 @@ describe("allocationSessionReducer", () => {
   });
 
   it("resets the complete Session when exit finishes", () => {
-    const selected = allocationSessionReducer(createAllocationSessionState(), {
-      type: "selectPlayerCount",
-      playerCount: 8,
-      plan: multiRoundPlan,
-    });
-    const revealed = allocationSessionReducer(selected, {
+    const configured = createAllocationSessionState(
+      createDeclaredConfiguration(8),
+      () => 0.25,
+    );
+    const revealed = allocationSessionReducer(configured, {
       type: "revealCompleted",
       round: 0,
       players: [revealedPlayer],

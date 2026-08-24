@@ -311,6 +311,12 @@ export default function useTouchAllocationController(props: {
         scheduleOnRN(handleReveal, revealToken.get(), effect.snapshot);
         continue;
       }
+      if (effect.type === "touchCapacityExceeded") {
+        if (Platform.OS === "android") {
+          scheduleOnRN(feedback.showAndroidTouchLimitToast);
+        }
+        continue;
+      }
 
       scheduleOnRN(handleCountChange, effect.count, revealToken.get());
       if (effect.countdownToken === null) {

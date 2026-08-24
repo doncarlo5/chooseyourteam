@@ -53,11 +53,14 @@ export const buildShapePath = (
   if (shape === "spike") {
     const points: Point[] = [];
     const spikes = 12;
-    const inner = radius * 0.7;
+    // Acute miter joins extend beyond the path itself. Give the spike a little
+    // more room so its outlined tips stay inside rasterized artwork bounds.
+    const spikeRadius = Math.max(1, size / 2 - strokeWidth * 1.5);
+    const inner = spikeRadius * 0.7;
     const total = spikes * 2;
     for (let i = 0; i < total; i += 1) {
       const angle = -Math.PI / 2 + (Math.PI * 2 * i) / total;
-      const r = i % 2 === 0 ? radius : inner;
+      const r = i % 2 === 0 ? spikeRadius : inner;
       points.push({ x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) });
     }
     return closePath(points);

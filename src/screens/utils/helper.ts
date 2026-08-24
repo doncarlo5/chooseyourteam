@@ -4,6 +4,11 @@ import { Platform } from "react-native";
 const isAndroid = Platform.OS === "android";
 
 export const H = {
+  selectionChange: () =>
+    isAndroid
+      ? Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Segment_Tick)
+      : Haptics.selectionAsync(),
+
   // Distinct toggle feedback: confirmation when enabled, crisp stop when disabled.
   pairingModeOn: () =>
     isAndroid

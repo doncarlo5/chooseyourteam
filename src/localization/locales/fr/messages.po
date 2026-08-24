@@ -13,30 +13,6 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#. Visible player count. Keep number and unit placeholders so their separate styles are preserved.
-#. placeholder {0}: props.count
-#: src/screens/components/dialog-more-players.tsx:27
-msgid "{0, plural, one {<number>#</number><unit>player</unit>} other {<number>#</number><unit>players</unit>}}"
-msgstr "{0, plural, one {<number>#</number><unit>joueur</unit>} other {<number>#</number><unit>joueurs</unit>}}"
-
-#. Visible team count. Keep number and unit placeholders so their separate styles are preserved.
-#. placeholder {0}: props.count
-#: src/screens/components/player-card.tsx:18
-msgid "{0, plural, one {<number>#</number><unit>team</unit>} other {<number>#</number><unit>teams</unit>}}"
-msgstr "{0, plural, one {<number>#</number><unit>équipe</unit>} other {<number>#</number><unit>équipes</unit>}}"
-
-#. Accessibility label for choosing the total player count
-#. placeholder {0}: props.count
-#: src/screens/components/dialog-more-players.tsx:67
-msgid "{0, plural, one {Select # player} other {Select # players}}"
-msgstr "{0, plural, one {Sélectionner # joueur} other {Sélectionner # joueurs}}"
-
-#. Accessibility label for choosing a number of teams
-#. placeholder {0}: props.count
-#: src/screens/components/player-card.tsx:54
-msgid "{0, plural, one {Select # team} other {Select # teams}}"
-msgstr "{0, plural, one {Sélectionner # équipe} other {Sélectionner # équipes}}"
-
 #. Touch instruction. Keep the waiting, number, and unit elements so each line retains its styling.
 #: src/screens/components/round-screen.tsx:45
 msgid "{count, plural, one {<waiting>Put at least</waiting><number>#</number><unit>finger</unit>} other {<waiting>Put at least</waiting><number>#</number><unit>fingers</unit>}}"
@@ -52,10 +28,6 @@ msgstr "{count, plural, one {<waiting>Poser</waiting><number>#</number><unit>doi
 #: src/screens/components/app-info-sheet.tsx:42
 msgid "About"
 msgstr "À propos"
-
-#: src/screens/components/dialog-more-players.tsx:160
-msgid "Add more players"
-msgstr "Ajouter des joueurs"
 
 #: src/app/(home)/_layout.tsx:20
 msgid "All animations will be disabled"
@@ -75,6 +47,14 @@ msgstr "Retour"
 msgid "Close About"
 msgstr "Fermer À propos"
 
+#: src/screens/components/allocation-setup.tsx:162
+msgid "Decrease players"
+msgstr "Diminuer le nombre de joueurs"
+
+#: src/screens/components/allocation-setup.tsx:237
+msgid "Decrease teams"
+msgstr "Diminuer le nombre d’équipes"
+
 #: src/screens/components/app-info-sheet.android.tsx:28
 #: src/screens/components/app-info-sheet.ios.tsx:62
 #: src/screens/components/app-info-sheet.tsx:17
@@ -85,9 +65,17 @@ msgstr "English"
 msgid "Give a review"
 msgstr "Donner un avis"
 
-#: src/screens/components/teams-selection.tsx:76
-msgid "How many teams?"
-msgstr "Combien d’équipes ?"
+#: src/screens/components/use-touch-allocation-feedback.ts:177
+msgid "Go back and select 6 or more players."
+msgstr "Revenez en arrière et sélectionnez 6 joueurs ou plus."
+
+#: src/screens/components/allocation-setup.tsx:166
+msgid "Increase players"
+msgstr "Augmenter le nombre de joueurs"
+
+#: src/screens/components/allocation-setup.tsx:238
+msgid "Increase teams"
+msgstr "Augmenter le nombre d’équipes"
 
 #: src/screens/components/app-info-sheet.android.tsx:105
 #: src/screens/components/app-info-sheet.ios.tsx:50
@@ -105,9 +93,17 @@ msgstr "Maintient les deuxième et troisième joueurs dans la même équipe lors
 msgid "Language"
 msgstr "Langue"
 
+#: src/screens/components/use-touch-allocation-feedback.ts:185
+msgid "Maximum 12 fingers"
+msgstr "12 doigts maximum"
+
 #: src/screens/components/use-touch-allocation-feedback.ts:176
 msgid "Maximum 5 fingers"
 msgstr "5 doigts maximum"
+
+#: src/screens/components/allocation-setup.tsx:252
+msgid "More players"
+msgstr "Plus de joueurs"
 
 #: src/screens/components/pairing-mode-toggle.tsx:38
 msgid "Off"
@@ -117,6 +113,10 @@ msgstr "Désactivé"
 msgid "On · players 2 + 3 together"
 msgstr "Activé · joueurs 2 et 3 ensemble"
 
+#: src/screens/components/use-touch-allocation-feedback.ts:186
+msgid "Only the first 12 detected fingers can join."
+msgstr "Seuls les 12 premiers doigts détectés participent."
+
 #: src/screens/components/app-info-button.tsx:16
 msgid "Opens developer credits, language, and theme settings"
 msgstr "Ouvre les crédits du développeur et les réglages de langue et de thème"
@@ -124,10 +124,6 @@ msgstr "Ouvre les crédits du développeur et les réglages de langue et de thè
 #: src/screens/components/app-review-button.tsx:89
 msgid "Opens the App Store review page"
 msgstr "Ouverture de la page d’avis de l’App Store"
-
-#: src/screens/components/dialog-more-players.tsx:161
-msgid "Opens the player count picker"
-msgstr "Ouverture du sélecteur du nombre de joueurs"
 
 #: src/screens/components/app-share-button.tsx:31
 msgid "Opens the share sheet with the App Store link"
@@ -138,14 +134,15 @@ msgstr "Ouverture du partage avec le lien de l’App Store"
 msgid "Pairing mode"
 msgstr "Mode duo"
 
-#: src/screens/components/teams-selection.tsx:84
-msgid "Pick a number to get started"
-msgstr "Sélectionner un nombre pour commencer"
-
 #. placeholder {0}: props.team
 #: src/screens/components/revealed-player-label.tsx:55
 msgid "Player assigned to Team {0}"
 msgstr "Joueur affecté à l’équipe {0}"
+
+#. placeholder {0}: props.playerSelection.count
+#: src/screens/components/allocation-setup.tsx:157
+msgid "Players, {0}"
+msgstr "Joueurs, {0}"
 
 #: src/screens/components/app-review-button.tsx:88
 msgid "Rate this app"
@@ -159,9 +156,18 @@ msgstr "Réduction des animations activée"
 msgid "Returns to team selection"
 msgstr "Retour à la sélection des équipes"
 
+#: src/screens/components/allocation-setup.tsx:165
+msgid "Select 6 players"
+msgstr "Sélectionner 6 joueurs"
+
 #: src/screens/components/app-share-button.tsx:30
 msgid "Share {brandName}"
 msgstr "Partager {brandName}"
+
+#: src/screens/components/allocation-setup.tsx:286
+#: src/screens/components/allocation-setup.tsx:301
+msgid "Start"
+msgstr "Commencer"
 
 #: src/screens/components/app-info-sheet.android.tsx:27
 #: src/screens/components/app-info-sheet.ios.tsx:61
@@ -169,12 +175,25 @@ msgstr "Partager {brandName}"
 msgid "System"
 msgstr "Système"
 
+#: src/screens/components/allocation-setup.tsx:234
+msgid "Teams"
+msgstr "Équipes"
+
+#. placeholder {0}: props.selectedTeams
+#: src/screens/components/allocation-setup.tsx:236
+msgid "Teams, {0}"
+msgstr "Équipes, {0}"
+
 #: src/screens/components/app-info-sheet.android.tsx:48
 #: src/screens/components/app-info-sheet.ios.tsx:31
 #: src/screens/components/app-info-sheet.tsx:46
 msgid "Theme"
 msgstr "Thème"
 
-#: src/screens/components/use-touch-allocation-feedback.ts:177
-msgid "Use +5."
-msgstr "Utiliser +5."
+#: src/screens/components/allocation-setup.tsx:156
+msgid "Up to 5 players"
+msgstr "Jusqu’à 5 joueurs"
+
+#: src/screens/components/allocation-setup.tsx:161
+msgid "Use up to 5 players"
+msgstr "Utiliser jusqu’à 5 joueurs"
