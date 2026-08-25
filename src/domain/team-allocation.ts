@@ -4,7 +4,8 @@ import {
   type TeamNumber,
 } from "./team-identity";
 
-export const MAX_FLEXIBLE_PLAYER_COUNT = 12;
+export const MAX_PLANNED_ROUND_PLAYER_COUNT = 5;
+export const MAX_OBSERVED_PLAYER_COUNT = 12;
 
 export type MultiRoundAssignmentPlan = {
   roundOne: RoundAssignment;
@@ -133,10 +134,10 @@ export const planBalancedRoundAssignment = (
   if (
     !Number.isInteger(playerCount) ||
     playerCount < teamCount ||
-    playerCount > MAX_FLEXIBLE_PLAYER_COUNT
+    playerCount > MAX_OBSERVED_PLAYER_COUNT
   ) {
     throw new RangeError(
-      `Player count must be an integer between ${teamCount} and ${MAX_FLEXIBLE_PLAYER_COUNT}.`,
+      `Player count must be an integer between ${teamCount} and ${MAX_OBSERVED_PLAYER_COUNT}.`,
     );
   }
 
@@ -169,7 +170,10 @@ export const planMultiRoundAssignments = (
   }
 
   const teamNumbers = getSelectedTeamNumbers(teamCount);
-  const roundOneVectors = enumerateBalancedCountVectors(teamCount, 5);
+  const roundOneVectors = enumerateBalancedCountVectors(
+    teamCount,
+    MAX_PLANNED_ROUND_PLAYER_COUNT,
+  );
   const roundTwoVectors = enumerateBalancedCountVectors(
     teamCount,
     declaredPlayerCount - 5,

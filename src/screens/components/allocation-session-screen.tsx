@@ -1,25 +1,19 @@
-import { planMultiRoundAssignments } from "@/src/domain/team-allocation";
 import type { RevealedPlayer } from "@/src/domain/revealed-player";
 import type { TouchRect } from "@/src/helpers/types/home-screen";
+import type { AllocationSessionConfiguration } from "@/src/screens/state/allocation-setup-state";
 import {
   allocationSessionReducer,
   createAllocationSessionState,
   projectCurrentRound,
   type AllocationRound,
 } from "@/src/screens/state/allocation-session-state";
-import { cn } from "heroui-native";
 import { useCallback, useMemo, useReducer, useState } from "react";
-import { View } from "react-native";
 import { useSharedValue } from "react-native-reanimated";
 import AllocationBackButton from "./allocation-back-button";
 import AllocationRoundNavigation from "./allocation-round-navigation";
-import DialogMorePlayers from "./dialog-more-players";
 import TouchAllocationScene from "./touch-allocation-scene";
 
-export type AllocationSessionConfiguration = {
-  selectedTeams: 2 | 3 | 4 | 5;
-  isPairingModeEnabled: boolean;
-};
+export type { AllocationSessionConfiguration } from "@/src/screens/state/allocation-setup-state";
 
 const emptyTouchRect = (): TouchRect => ({
   x: 0,
@@ -35,37 +29,21 @@ export default function AllocationSessionScreen(props: {
 }) {
   const [session, dispatchSession] = useReducer(
     allocationSessionReducer,
-    undefined,
+    props.configuration,
     createAllocationSessionState,
   );
   const [touchState, setTouchState] = useState({
     count: 0,
     isTouching: false,
   });
-  const [isPlayerCountDialogOpen, setIsPlayerCountDialogOpen] = useState(false);
   const [isExitRequested, setIsExitRequested] = useState(false);
-  const plusButtonRect = useSharedValue<TouchRect>(emptyTouchRect());
   const backButtonRect = useSharedValue<TouchRect>(emptyTouchRect());
-  const excludedTouchRects = useMemo(
-    () => [plusButtonRect, backButtonRect],
-    [backButtonRect, plusButtonRect],
-  );
+  const excludedTouchRects = useMemo(() => [backButtonRect], [backButtonRect]);
   const currentRound = projectCurrentRound(
     session,
     props.configuration.selectedTeams,
   );
-  const acceptsNewTouches =
-    !currentRound.isFrozen && !isPlayerCountDialogOpen && !isExitRequested;
-
-  const handlePlayerCountSelection = (playerCount: number) => {
-    const plan = planMultiRoundAssignments(
-      props.configuration.selectedTeams,
-      playerCount,
-      Math.random,
-      { pairingMode: props.configuration.isPairingModeEnabled },
-    );
-    dispatchSession({ type: "selectPlayerCount", playerCount, plan });
-  };
+  const acceptsNewTouches = !currentRound.isFrozen && !isExitRequested;
   const handleReveal = useCallback(
     (event: { round: AllocationRound; players: RevealedPlayer[] }) => {
       dispatchSession({
@@ -124,6 +102,7 @@ export default function AllocationSessionScreen(props: {
             round: currentRound.round,
             expectedTouchCount: currentRound.expectedTouchCount,
             allowOverExpected: currentRound.allowOverExpected,
+            maximumTouchCount: currentRound.maximumTouchCount,
             roundAssignment: currentRound.roundAssignment,
             isPairingModeEnabled: props.configuration.isPairingModeEnabled,
             acceptsNewTouches,
@@ -142,16 +121,6 @@ export default function AllocationSessionScreen(props: {
           exitRequested={isExitRequested}
           onExitReady={handleExitReady}
         >
-          <View
-            className={cn("absolute top-16 right-6 z-10 items-center gap-2")}
-          >
-            <DialogMorePlayers
-              selectedTeams={props.configuration.selectedTeams}
-              onSelectPlayerCount={handlePlayerCountSelection}
-              onOpenChange={setIsPlayerCountDialogOpen}
-              plusButtonRectSv={plusButtonRect}
-            />
-          </View>
           {navigationLayer}
           <AllocationBackButton
             rect={backButtonRect}

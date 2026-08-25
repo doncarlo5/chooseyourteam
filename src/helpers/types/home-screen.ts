@@ -5,10 +5,3 @@ export type TouchRect = {
   height: number;
   isReady: boolean;
 };
-
-export type PlayerCardProps = {
-  count: number;
-  index: number;
-  isDisabled: boolean;
-  onPress: () => void;
-};

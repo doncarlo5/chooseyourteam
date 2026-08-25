@@ -5,6 +5,19 @@
 - `npm run verify` covers type checking, linting, localization catalogs, and the current unit-test suite.
 - The controller tests call the same worklet-compatible lifecycle transition used by the production manual gesture for admission, visibility, count policy, countdown tokens, snapshots, reset/cancel, and exit readiness.
 - `npm run test:visual` covers five deterministic allocation states, asserts one dot Canvas, and checks that inactive revealed-result layers are hidden from accessibility.
+- Native frozen Revealed Players are cached at the device's full, uncapped
+  `PixelRatio`. The 150-point artwork and its 24-point overflow padding remain
+  unchanged in layout, while the artwork, gradients, strokes, halos, Neon Arena
+  number, optical offset, and padding are rendered in physical pixels. The
+  resulting image is displayed at 198 points with cubic sampling. Unit coverage
+  verifies 1x, 2x, 2.625x, 3x, and 4x densities: the physical image sizes are
+  respectively 198, 396, 520, 594, and 792 pixels.
+- The native fixture state `quality-frozen`, with `liveCount=5`, uses the same
+  five positions and Team Encodings as the `revealed` state. Capture both states
+  for Desert Lagoon, Coral Sky, and Neon Arena to compare the final live vector
+  frame against the frozen high-density cache. During a cold cache build, the
+  fixture and production scene retain the final live frame until all five Team
+  images are ready, so the swap cannot expose a blank or partial cache.
 - With a Release simulator build installed and an iOS simulator booted, `npm run test:native-allocation` temporarily loads the production-disabled native fixture and asserts that two dynamically activated slots both render unrevealed rings. It restores the installed bundle afterward.
 - With a Release build containing the production-disabled fixture installed on Android, `node scripts/check-android-round-two-allocation.mjs` reproduces the Multi-Round transition with five revealed first-Round Players and asserts that both second-Round unrevealed rings render. `ALLOCATION_FROZEN_COUNT=1` through `5` exercises the complete first-Round range.
 - Set `ALLOCATION_THEME=neon-arena` on either native allocation command to validate the neon annuli and the independent grid background. The default remains Desert Lagoon so its existing checks stay unchanged.
@@ -57,6 +70,37 @@ during this refactor:
   images changed the signal to `31,488 / 31,488` pixels for every frozen count
   from one through five. The user then confirmed the real `+5` flow renders
   second-Round touches correctly on the same device.
+
+On 25 August 2026, the iPhone 17 simulator at 3x passed paired live-vector and
+high-density-frozen captures for Desert Lagoon, Coral Sky, and Neon Arena. All
+five Team results were detected in both frozen non-Neon themes. Neon Arena's
+five ring-color counts differed by at most 16 pixels between live and frozen,
+all five white numbers were detected, and the frozen green halo retained 2,257
+pixels beyond the logical artwork bounds (2,129 in the live reference). These
+simulator results verify the physical-pixel cache and fixture instrumentation;
+the real iPhone and Android visual, cold-reveal, Multi-Round, and performance
+matrix remains required because neither physical device was connected for this
+change.
+
+Later on 25 August 2026, a physical iPhone 17 Release run crashed
+intermittently after entering the second Round. The system report identified a
+corrupted malloc free block while Worklets serialized an object and Skia drew
+the Metal canvas. The high-density Neon font initially used
+`SkFont.getTypeface()` to construct its physical-size variant; the installed
+Skia 2.11.0 implementation adopts that borrowed native pointer without adding a
+reference, matching Shopify's documented typeface use-after-free. The raster
+font now loads directly from the Inter asset at its physical size with
+`useFont`, and application code no longer calls `getTypeface()`. In the iPhone
+17 Release simulator, the corrected build passed 120 repeated two-Round cycles
+and 480 forced Canvas/font remounts. A real multi-touch two-Round replay remains
+required because the physical iPhone became unavailable before the corrected
+build could be installed.
+
+After reconnecting the devices, the corrected Release build also passed 60
+automated two-Round cycles on both the physical iPhone 17 and Huawei EML-L29.
+The Android five-frozen-plus-two-live pixel probe detected 11,871 and 11,873
+Neon Arena ring pixels respectively, with no process restart or fatal log
+marker. Real multi-touch replay remains the final device check.
 
 These targeted physical checks passed. The portions of the broader matrix not
 explicitly exercised below remain a merge gate.

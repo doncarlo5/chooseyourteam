@@ -35,6 +35,7 @@ export type TouchAllocationLifecycleStore = TouchSlotStore & {
 export type TouchAllocationLifecycleConfiguration = {
   expectedTouchCount: number;
   allowOverExpected: boolean;
+  maximumTouchCount: number;
 };
 
 export type TouchAllocationLifecycleEvent =
@@ -63,6 +64,7 @@ export type TouchAllocationLifecycleEvent =
 export type TouchAllocationLifecycleResult = {
   slotIndex: number;
   wasAllocated: boolean;
+  capacityExceeded: boolean;
   visibilityChanged: boolean;
   visibleCount: number;
   trackedCount: number;
@@ -79,6 +81,7 @@ export type TouchAllocationLifecycleEffect =
       countdownToken: number | null;
     }
   | { type: "revealReady"; snapshot: TouchSnapshot[] }
+  | { type: "touchCapacityExceeded" }
   | { type: "exitReady" };
 
 export const isPointInsideRect = (x: number, y: number, rect: TouchRect) => {
@@ -238,6 +241,7 @@ const createLifecycleResult = (
   return {
     slotIndex: -1,
     wasAllocated: false,
+    capacityExceeded: false,
     visibilityChanged: false,
     visibleCount: countVisibleTouches(store),
     trackedCount: countTrackedTouches(store),
@@ -295,6 +299,9 @@ export const getTouchAllocationLifecycleEffects = (
   }
   if (result.snapshot) {
     effects.push({ type: "revealReady", snapshot: result.snapshot });
+  }
+  if (result.capacityExceeded) {
+    effects.push({ type: "touchCapacityExceeded" });
   }
   if (result.exitReady) {
     effects.push({ type: "exitReady" });
@@ -375,6 +382,13 @@ export const transitionTouchAllocationLifecycle = (
       return result;
     }
     const existingSlot = findTouchSlot(store, event.touchId);
+    if (
+      existingSlot === -1 &&
+      countTrackedTouches(store) >= configuration.maximumTouchCount
+    ) {
+      result.capacityExceeded = true;
+      return result;
+    }
     result.slotIndex = allocateTouchSlot(
       store,
       event.touchId,
@@ -382,6 +396,7 @@ export const transitionTouchAllocationLifecycle = (
       event.y,
     );
     result.wasAllocated = existingSlot === -1 && result.slotIndex !== -1;
+    result.capacityExceeded = existingSlot === -1 && result.slotIndex === -1;
     if (result.slotIndex !== -1) {
       moveTouchSlot(store, event.touchId, event.x, event.y, true);
     }

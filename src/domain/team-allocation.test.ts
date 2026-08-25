@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  MAX_FLEXIBLE_PLAYER_COUNT,
+  MAX_OBSERVED_PLAYER_COUNT,
   planBalancedRoundAssignment,
   planMultiRoundAssignments,
 } from "./team-allocation";
@@ -78,11 +78,11 @@ describe("multi-round allocation", () => {
   }
 });
 
-describe("flexible single-round allocation", () => {
+describe("observed single-round allocation", () => {
   for (const teamCount of [2, 3, 4, 5] as const) {
     for (
       let playerCount = teamCount;
-      playerCount <= MAX_FLEXIBLE_PLAYER_COUNT;
+      playerCount <= MAX_OBSERVED_PLAYER_COUNT;
       playerCount += 1
     ) {
       it(`balances ${playerCount} touches across ${teamCount} teams`, () => {
@@ -107,10 +107,10 @@ describe("pairing mode allocation", () => {
   for (const teamCount of [2, 3, 4, 5] as const) {
     for (
       let playerCount = Math.max(teamCount, 3);
-      playerCount <= MAX_FLEXIBLE_PLAYER_COUNT;
+      playerCount <= MAX_OBSERVED_PLAYER_COUNT;
       playerCount += 1
     ) {
-      it(`handles flexible pairing mode with ${teamCount} teams and ${playerCount} players`, () => {
+      it(`handles observed pairing mode with ${teamCount} teams and ${playerCount} players`, () => {
         const teamNumbers = getSelectedTeamNumbers(teamCount);
         const normalAssignments = planBalancedRoundAssignment(
           teamCount,

@@ -6,6 +6,7 @@ import { PNG } from "pngjs";
 import {
   countBrightRingPixels,
   countNeonRingPixels,
+  countTeamGlowPixelsBeyondRasterBounds,
   countWhiteCenterPixels,
   measureWhiteNumberBounds,
   measureTeamColorRing,
@@ -47,7 +48,9 @@ const densityMatch = densityOutput.match(
   /(?:Override|Physical) density:\s*(\d+)/,
 );
 const scale = densityMatch ? Number(densityMatch[1]) / 160 : png.width / 360;
-const isPaletteCheck = theme === "neon-arena" && fixtureState === "revealed";
+const isPaletteCheck =
+  theme === "neon-arena" &&
+  (fixtureState === "revealed" || fixtureState === "quality-frozen");
 if (isPaletteCheck) {
   const positions = [
     { x: 92, y: 300, color: "#FF3B5C" },
@@ -82,14 +85,28 @@ if (isPaletteCheck) {
       numberCenterOffsetY: numberBounds.y - position.y,
     };
   });
-  console.log(JSON.stringify({ theme, fixtureState, teams }));
+  const glowPixelsBeyondRasterBounds = countTeamGlowPixelsBeyondRasterBounds(
+    png,
+    positions[1].x,
+    positions[1].y,
+    scale,
+    positions[1].color,
+  );
+  console.log(
+    JSON.stringify({
+      theme,
+      fixtureState,
+      teams,
+      glowPixelsBeyondRasterBounds,
+    }),
+  );
   if (
     teams.some(
       (team) =>
         team.ringPixels < 30 ||
         team.whiteNumberPixels < 30 ||
         Math.abs(team.numberCenterOffsetY) > 2,
-    )
+    ) || glowPixelsBeyondRasterBounds < 30
   ) {
     process.exitCode = 1;
   }
@@ -97,6 +114,23 @@ if (isPaletteCheck) {
 }
 const countRingPixels =
   theme === "neon-arena" ? countNeonRingPixels : countBrightRingPixels;
+if (fixtureState === "quality-frozen") {
+  const positions = [
+    { x: 92, y: 300 },
+    { x: 198, y: 420 },
+    { x: 300, y: 310 },
+    { x: 82, y: 520 },
+    { x: 200, y: 565 },
+  ];
+  const teamRingPixels = positions.map((position) =>
+    countRingPixels(png, position.x, position.y, scale),
+  );
+  console.log(JSON.stringify({ theme, fixtureState, teamRingPixels }));
+  if (teamRingPixels.some((pixels) => pixels < 100)) {
+    process.exitCode = 1;
+  }
+  process.exit();
+}
 const result = {
   theme,
   fixtureState,

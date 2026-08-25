@@ -25,7 +25,7 @@ A Player's final position and assigned Team after a Round reveal.
 _Avoid_: Frozen Dot, result dot
 
 **Round**:
-A group of up to five Players allocated together.
+A group of Players allocated together during one simultaneous reveal.
 
 **Session**:
 One Team allocation run. Changing the Team or Player count, or returning to Team selection, resets it.
@@ -33,11 +33,15 @@ One Team allocation run. Changing the Team or Player count, or returning to Team
 **Fair Allocation**:
 An allocation in which Team sizes differ by at most one within each Round and across the Session.
 
+**Observed Player Count**:
+The Player total established from the participating touches present when a Single-Round Session reveals.
+_Avoid_: Flexible Player Selection, Player Selection
+
 **Declared Player Count**:
 The exact total of six to ten Players used by a Multi-Round Session.
 
 **Single-Round Session**:
-A Session in which selecting two to five Teams establishes the minimum Player count and allocation may grow to the twelve-Player limit.
+A Session whose Observed Player Count is allocated in one simultaneous reveal. The selected Team count is its minimum Player count.
 
 **Multi-Round Session**:
 A Session with an exact Declared Player Count, split into a five-Player first Round and a second Round containing the remainder.
@@ -46,7 +50,7 @@ A Session with an exact Declared Player Count, split into a five-Player first Ro
 A hidden, session-only setup preference that assigns the second and third Players to the same Team when Fair Allocation permits it. It is cleared when returning to Team selection and ignored when every selected Team must receive exactly one Player, such as five Players across five Teams.
 _Avoid_: Inséparable
 
-The Pairing Mode control is available only before selecting a Team count. Long-pressing the setup heading reveals its current state, and enabling or disabling it produces distinct haptic feedback.
+The Pairing Mode control is available only during setup. Long-pressing the product name reveals its current state, and enabling or disabling it produces distinct haptic feedback.
 
 ## Desert Lagoon Team Encodings
 

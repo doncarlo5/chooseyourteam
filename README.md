@@ -13,10 +13,15 @@ for a few seconds, and the app reveals each player's team color and number.
 
 ## App flows
 
-### 1. Pick teams
+### 1. Configure the game
 
-- Choose how many teams you want (2 to 5).
-- If you have 6 to 10 players, tap +5 and choose the total player count.
+- Use the home steppers to choose 2 to 5 teams.
+- On Android, the number of Players is observed from the fingers on screen, up
+  to the application's twelve-contact limit and the device's own capability.
+- On iPhone, iPad, and web, `More players: 5+` is the entry point for selecting
+  an exact total from 6 to 10. Starting directly from `5+` still creates an
+  observed single Round of up to five Players.
+- Tap Start when the setup is ready.
 
 ### 2. Place fingers
 
@@ -28,7 +33,7 @@ for a few seconds, and the app reveals each player's team color and number.
 - Each dot flips to a colored badge with a team number.
 - If a finger lifts early, the countdown resets for a clean restart.
 
-### 4. Multi-round for 6-10 players
+### 4. Multi-round for 6–10 players on iOS and web
 
 - Round 1 handles the first five players and freezes the results.
 - Swipe to Round 2 for the remaining players, then swipe back to review both
@@ -44,7 +49,7 @@ for a few seconds, and the app reveals each player's team color and number.
 - Multi-touch input with no names or setup.
 - Countdown feedback with haptics, subtle sounds, and a nervous shake before
   reveal.
-- Touch-safe controls: touches on the back button or +5 do not count as players.
+- Touch-safe controls: touches on the back button do not count as players.
 - Built for quick decisions: who breaks, who serves, who starts, and who teams
   up.
 

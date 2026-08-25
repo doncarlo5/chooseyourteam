@@ -1,3 +1,4 @@
+import { MAX_OBSERVED_PLAYER_COUNT } from "@/src/domain/team-allocation";
 import { H, type Step, styleChargeBomb } from "@/src/screens/utils/helper";
 import {
   cancelTouchAllocationFeedback,
@@ -174,7 +175,16 @@ export default function useTouchAllocationFeedback(props: {
       id: "ios-touch-limit",
       variant: "warning",
       label: t`Maximum 5 fingers`,
-      description: t`Use +5.`,
+      description: t`Go back and select 6 or more players.`,
+    });
+  };
+
+  const showAndroidTouchLimitToast = () => {
+    toast.show({
+      id: "android-touch-limit",
+      variant: "warning",
+      label: t`Maximum ${MAX_OBSERVED_PLAYER_COUNT} fingers`,
+      description: t`Only the first ${MAX_OBSERVED_PLAYER_COUNT} detected fingers can join.`,
     });
   };
 
@@ -269,6 +279,7 @@ export default function useTouchAllocationFeedback(props: {
     clearPreRevealHaptics,
     playBubble,
     schedulePreRevealHaptics,
+    showAndroidTouchLimitToast,
     showIosTouchLimitToast,
   };
 }

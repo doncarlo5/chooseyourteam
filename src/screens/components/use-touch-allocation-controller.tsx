@@ -1,4 +1,5 @@
 import type { RevealedPlayer } from "@/src/domain/revealed-player";
+import { MAX_OBSERVED_PLAYER_COUNT } from "@/src/domain/team-allocation";
 import type { RoundAssignment, TeamNumber } from "@/src/domain/team-identity";
 import type { TouchRect } from "@/src/helpers/types/home-screen";
 import {
@@ -34,7 +35,6 @@ import useSlotSharedValues from "./use-slot-shared-values";
 import useTouchAllocationFeedback from "./use-touch-allocation-feedback";
 
 const HIGHLIGHT_DELAY_MS = 3000;
-const MAX_SLOTS = 12;
 const SHAKE_DURATION_MS = 1600;
 const PRE_REVEAL_SILENCE_MS = Math.max(
   0,
@@ -54,6 +54,7 @@ export default function useTouchAllocationController(props: {
   isRoundNavigationIdle: SharedValue<boolean>;
   expectedTouchCount?: number;
   allowOverExpected?: boolean;
+  maximumTouchCount: number;
   roundAssignment?: RoundAssignment;
   isPairingModeEnabled?: boolean;
   resetKey?: number;
@@ -119,8 +120,13 @@ export default function useTouchAllocationController(props: {
     () => ({
       expectedTouchCount: props.expectedTouchCount ?? 2,
       allowOverExpected: props.allowOverExpected ?? false,
+      maximumTouchCount: props.maximumTouchCount,
     }),
-    [props.allowOverExpected, props.expectedTouchCount],
+    [
+      props.allowOverExpected,
+      props.expectedTouchCount,
+      props.maximumTouchCount,
+    ],
   );
   const isGestureEnabled = props.acceptsNewTouches;
   // Keep the native handler attached while Android is still tracking pointers.
@@ -159,7 +165,7 @@ export default function useTouchAllocationController(props: {
       type: "reset",
     });
 
-    for (let i = 0; i < MAX_SLOTS; i += 1) {
+    for (let i = 0; i < MAX_OBSERVED_PLAYER_COUNT; i += 1) {
       cancelAnimation(slotOpacity[i]);
       cancelAnimation(slotScale[i]);
       slotOpacity[i].set(0);
@@ -219,7 +225,7 @@ export default function useTouchAllocationController(props: {
     }
     cancelAnimation(shakeX);
     shakeX.set(withTiming(0, { duration: 120 }));
-    for (let index = 0; index < MAX_SLOTS; index += 1) {
+    for (let index = 0; index < MAX_OBSERVED_PLAYER_COUNT; index += 1) {
       slotRevealTeams[index].set(0);
       slotRevealProgress[index].set(0);
     }
@@ -309,6 +315,14 @@ export default function useTouchAllocationController(props: {
       }
       if (effect.type === "revealReady") {
         scheduleOnRN(handleReveal, revealToken.get(), effect.snapshot);
+        continue;
+      }
+      if (effect.type === "touchCapacityExceeded") {
+        if (Platform.OS === "android") {
+          scheduleOnRN(feedback.showAndroidTouchLimitToast);
+        } else if (Platform.OS === "ios") {
+          scheduleOnRN(feedback.showIosTouchLimitToast);
+        }
         continue;
       }
 
@@ -493,7 +507,7 @@ export default function useTouchAllocationController(props: {
         return false;
       };
 
-      for (let i = 0; i < MAX_SLOTS; i += 1) {
+      for (let i = 0; i < MAX_OBSERVED_PLAYER_COUNT; i += 1) {
         const id = slotTouchId[i].get();
         if (id !== -1 && !isStillDown(id)) {
           slotTouchId[i].set(-1);

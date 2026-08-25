@@ -35,6 +35,7 @@ const createLifecycle = (slotCount = 12): TouchAllocationLifecycleStore => ({
 const exactTwo: TouchAllocationLifecycleConfiguration = {
   expectedTouchCount: 2,
   allowOverExpected: false,
+  maximumTouchCount: 12,
 };
 
 const admit = (
@@ -110,7 +111,42 @@ describe("touch allocation lifecycle", () => {
     expect(admit(store, 1).wasAllocated).toBe(true);
     expect(admit(store, 1).wasAllocated).toBe(false);
     expect(admit(store, 2).slotIndex).toBe(1);
-    expect(admit(store, 3).slotIndex).toBe(-1);
+    const exhausted = admit(store, 3);
+    expect(exhausted.slotIndex).toBe(-1);
+    expect(exhausted.capacityExceeded).toBe(true);
+    expect(getTouchAllocationLifecycleEffects(exhausted)).toContainEqual({
+      type: "touchCapacityExceeded",
+    });
+  });
+
+  it("reports only new over-capacity contacts and reuses released slots", () => {
+    const store = createLifecycle(12);
+    for (let touchId = 1; touchId <= 12; touchId += 1) {
+      expect(admit(store, touchId).wasAllocated).toBe(true);
+    }
+
+    const duplicate = admit(store, 12);
+    expect(duplicate.capacityExceeded).toBe(false);
+    expect(getTouchAllocationLifecycleEffects(duplicate)).not.toContainEqual({
+      type: "touchCapacityExceeded",
+    });
+
+    const thirteenth = admit(store, 13);
+    expect(thirteenth.capacityExceeded).toBe(true);
+    expect(getTouchAllocationLifecycleEffects(thirteenth)).toContainEqual({
+      type: "touchCapacityExceeded",
+    });
+
+    transitionTouchAllocationLifecycle(store, exactTwo, {
+      type: "release",
+      touchId: 4,
+    });
+    const reused = admit(store, 13);
+    expect(reused).toMatchObject({
+      slotIndex: 3,
+      wasAllocated: true,
+      capacityExceeded: false,
+    });
   });
 
   it("ignores excluded/control touches and disabled admission", () => {
@@ -190,13 +226,17 @@ describe("touch allocation lifecycle", () => {
     ).toHaveLength(1);
   });
 
-  it("allows over-count in flexible mode and creates one ordered snapshot", () => {
+  it("allows over-count in observed mode and creates one ordered snapshot", () => {
     const store = createLifecycle();
-    const flexible = { expectedTouchCount: 2, allowOverExpected: true };
-    admit(store, 1, flexible);
-    admit(store, 2, flexible);
-    const third = admit(store, 3, flexible);
-    const completed = transitionTouchAllocationLifecycle(store, flexible, {
+    const observed = {
+      expectedTouchCount: 2,
+      allowOverExpected: true,
+      maximumTouchCount: 12,
+    };
+    admit(store, 1, observed);
+    admit(store, 2, observed);
+    const third = admit(store, 3, observed);
+    const completed = transitionTouchAllocationLifecycle(store, observed, {
       type: "countdownCompleted",
       token: third.countdownToken!,
     });
@@ -206,11 +246,30 @@ describe("touch allocation lifecycle", () => {
       { slotIndex: 2, touchId: 3, x: 30, y: 60 },
     ]);
     expect(
-      transitionTouchAllocationLifecycle(store, flexible, {
+      transitionTouchAllocationLifecycle(store, observed, {
         type: "countdownCompleted",
         token: third.countdownToken!,
       }).snapshot,
     ).toBeNull();
+  });
+
+  it("rejects new observed contacts above the configured platform limit", () => {
+    const store = createLifecycle();
+    const webObserved = {
+      expectedTouchCount: 2,
+      allowOverExpected: true,
+      maximumTouchCount: 5,
+    };
+    for (let touchId = 1; touchId <= 5; touchId += 1) {
+      expect(admit(store, touchId, webObserved).wasAllocated).toBe(true);
+    }
+
+    expect(admit(store, 6, webObserved)).toMatchObject({
+      wasAllocated: false,
+      capacityExceeded: true,
+      trackedCount: 5,
+      visibleCount: 5,
+    });
   });
 
   it("freezes revealed positions while retaining pointer ownership", () => {
@@ -301,7 +360,7 @@ describe("touch allocation lifecycle", () => {
     ).toBe(true);
   });
 
-  it("uses planned assignment and deterministic flexible allocation", () => {
+  it("uses planned assignment and deterministic observed allocation", () => {
     const snapshot = [
       { slotIndex: 0, touchId: 10, x: 100, y: 200 },
       { slotIndex: 1, touchId: 11, x: 300, y: 400 },

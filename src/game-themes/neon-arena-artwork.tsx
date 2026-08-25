@@ -1,5 +1,5 @@
 import {
-  BlurMask,
+  Blur,
   Circle,
   Group,
   Path,
@@ -57,7 +57,7 @@ function NeonRings(props: { size: number }) {
         strokeWidth={glowWidth}
         color="rgba(40,107,255,0.55)"
       >
-        <BlurMask blur={props.size * 0.055} style="solid" respectCTM={false} />
+        <Blur blur={props.size * 0.055} mode="decal" />
       </Path>
       <Path
         path={outerPath}
@@ -71,7 +71,7 @@ function NeonRings(props: { size: number }) {
         strokeWidth={glowWidth}
         color="rgba(255,44,203,0.55)"
       >
-        <BlurMask blur={props.size * 0.05} style="solid" respectCTM={false} />
+        <Blur blur={props.size * 0.05} mode="decal" />
       </Path>
       <Path
         path={innerPath}
@@ -119,7 +119,7 @@ function NeonArenaUnrevealedOverlay(props: UnrevealedDotArtworkProps) {
         start={0}
         end={props.holdProgress}
       >
-        <BlurMask blur={props.size * 0.045} style="solid" respectCTM={false} />
+        <Blur blur={props.size * 0.045} mode="decal" />
       </Path>
       <Path
         path={progressPath}
@@ -166,7 +166,7 @@ function TeamNeonRings(props: {
         color={props.color}
         opacity={0.55}
       >
-        <BlurMask blur={props.size * 0.055} style="solid" respectCTM={false} />
+        <Blur blur={props.size * 0.055} mode="decal" />
       </Path>
       <Path
         path={outerPath}
@@ -181,7 +181,7 @@ function TeamNeonRings(props: {
         color={props.color}
         opacity={0.55}
       >
-        <BlurMask blur={props.size * 0.05} style="solid" respectCTM={false} />
+        <Blur blur={props.size * 0.05} mode="decal" />
       </Path>
       <Path
         path={innerPath}

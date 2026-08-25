@@ -5,10 +5,10 @@ import { createAppI18n, withEnglishFallback } from "./catalogs";
 describe("localization catalogs", () => {
   it("activates English and French messages", () => {
     const i18n = createAppI18n("en");
-    expect(i18n._("LNZ6mg")).toBe("How many teams?");
+    expect(i18n._("CAL6E9")).toBe("Teams");
 
     i18n.activate("fr");
-    expect(i18n._("LNZ6mg")).toBe("Combien d’équipes ?");
+    expect(i18n._("CAL6E9")).toBe("Équipes");
   });
 
   it("localizes the settings sheet while preserving language autonyms", () => {
@@ -25,32 +25,39 @@ describe("localization catalogs", () => {
     expect(i18n._("lYGfRP")).toBe("English");
   });
 
-  it("formats English and French plurals", () => {
+  it("formats English and French setup values and controls", () => {
     const i18n = createAppI18n("en");
-    expect(i18n._("C1flRB", { 0: 1 })).toBe("Select 1 team");
-    expect(i18n._("C1flRB", { 0: 3 })).toBe("Select 3 teams");
+    expect(i18n._("neJFcM")).toBe("More players");
+    expect(i18n._("IfUZk6")).toBe("Up to 5 players");
+    expect(i18n._("79s-vI")).toBe("Select 6 players");
+    expect(i18n._("CVVTS5")).toBe("Use up to 5 players");
+    expect(i18n._("WupljG", { 0: 6 })).toBe("Players, 6");
+    expect(i18n._("rlkLUZ", { 0: 3 })).toBe("Teams, 3");
 
     i18n.activate("fr");
-    expect(i18n._("C1flRB", { 0: 1 })).toBe("Sélectionner 1 équipe");
-    expect(i18n._("C1flRB", { 0: 3 })).toBe("Sélectionner 3 équipes");
+    expect(i18n._("neJFcM")).toBe("Plus de joueurs");
+    expect(i18n._("IfUZk6")).toBe("Jusqu’à 5 joueurs");
+    expect(i18n._("79s-vI")).toBe("Sélectionner 6 joueurs");
+    expect(i18n._("CVVTS5")).toBe("Utiliser jusqu’à 5 joueurs");
+    expect(i18n._("WupljG", { 0: 6 })).toBe("Joueurs, 6");
+    expect(i18n._("rlkLUZ", { 0: 3 })).toBe("Équipes, 3");
   });
 
-  it("formats complete visible team and player count labels", () => {
+  it("localizes the Android observed-touch capacity warning", () => {
     const i18n = createAppI18n("en");
-
-    expect(i18n._("K3-xS5", { 0: 2 })).toBe(
-      "<number>2</number><unit>teams</unit>",
+    expect(i18n._("GE7TqB", { MAX_OBSERVED_PLAYER_COUNT: 12 })).toBe(
+      "Maximum 12 fingers",
     );
-    expect(i18n._("hf29w4", { 0: 6 })).toBe(
-      "<number>6</number><unit>players</unit>",
+    expect(i18n._("BMQZnr", { MAX_OBSERVED_PLAYER_COUNT: 12 })).toBe(
+      "Only the first 12 detected fingers can join.",
     );
 
     i18n.activate("fr");
-    expect(i18n._("K3-xS5", { 0: 2 })).toBe(
-      "<number>2</number><unit>équipes</unit>",
+    expect(i18n._("GE7TqB", { MAX_OBSERVED_PLAYER_COUNT: 12 })).toBe(
+      "12 doigts maximum",
     );
-    expect(i18n._("hf29w4", { 0: 6 })).toBe(
-      "<number>6</number><unit>joueurs</unit>",
+    expect(i18n._("BMQZnr", { MAX_OBSERVED_PLAYER_COUNT: 12 })).toBe(
+      "Seuls les 12 premiers doigts détectés participent.",
     );
   });
 
@@ -76,7 +83,7 @@ describe("localization catalogs", () => {
   it("provides an expanded development pseudolocale", () => {
     const i18n = createAppI18n("pseudo");
 
-    expect(i18n._("LNZ6mg")).toMatch(/^⟦.+⟧$/);
+    expect(i18n._("CAL6E9")).toMatch(/^⟦.+⟧$/);
   });
 
   it("preserves the brand in the pseudolocalized share label", () => {
@@ -95,6 +102,6 @@ describe("localization catalogs", () => {
       },
     });
 
-    expect(i18n._("LNZ6mg")).toBe("How many teams?");
+    expect(i18n._("CAL6E9")).toBe("Teams");
   });
 });
