@@ -22,7 +22,11 @@ export function AllocationStartButton(props: {
       ]}
     >
       <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-        <Svg width="100%" height="100%" viewBox="0 0 300 86">
+        <Svg
+          style={StyleSheet.absoluteFill}
+          viewBox="0 0 300 86"
+          preserveAspectRatio="none"
+        >
           <Polygon
             points="19,2 281,2 298,19 298,67 281,84 19,84 2,67 2,19"
             fill={props.accentColor}
@@ -47,12 +51,10 @@ export function AllocationStartButton(props: {
 const styles = StyleSheet.create({
   button: {
     alignItems: "center",
-    alignSelf: "center",
+    alignSelf: "stretch",
     height: 86,
     justifyContent: "center",
     marginTop: 32,
-    maxWidth: 300,
-    width: "88%",
   },
   label: {
     color: "#FFFFFF",
