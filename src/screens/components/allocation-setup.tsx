@@ -7,7 +7,8 @@ import type {
 } from "@/src/screens/state/allocation-setup-state";
 import { getPlayerSelectionLabel } from "@/src/screens/state/allocation-setup-state";
 import { H } from "@/src/screens/utils/helper";
-import { Trans, useLingui } from "@lingui/react/macro";
+import { useLingui } from "@lingui/react/macro";
+import { Button as NativeButton, Host } from "@expo/ui";
 import { Button, PressableFeedback, cn } from "heroui-native";
 import { StyleSheet, View } from "react-native";
 import Animated, {
@@ -297,32 +298,18 @@ export default function AllocationSetup(props: {
             ) : null}
           </View>
 
-          <Button
-            size="lg"
-            className={cn("mt-5 h-14 w-full rounded-2xl")}
-            style={{
-              backgroundColor: theme.chrome.accentColor,
-              borderCurve: "continuous",
-            }}
-            accessibilityRole="button"
-            accessibilityLabel={t`Start`}
-            onPress={props.onStart}
-            animation={{
-              scale: {
-                value: 1.02,
-                timingConfig: { duration: 150 },
-              },
-            }}
+          <Host
+            seedColor={theme.chrome.accentColor}
+            style={{ marginTop: 20, width: "100%", height: 50 }}
           >
-            <Button.Label
-              className={cn(
-                "text-lg font-bold",
-                theme.chrome.primaryTextClassName,
-              )}
-            >
-              <Trans>Start</Trans>
-            </Button.Label>
-          </Button>
+            <NativeButton
+              label={t`Start`}
+              variant="filled"
+              style={{ width: "100%", height: 50 }}
+              onPress={props.onStart}
+              testID="start-button"
+            />
+          </Host>
         </Animated.View>
       </View>
     </View>

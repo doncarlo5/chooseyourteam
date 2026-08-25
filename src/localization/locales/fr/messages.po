@@ -47,11 +47,11 @@ msgstr "Retour"
 msgid "Close About"
 msgstr "Fermer À propos"
 
-#: src/screens/components/allocation-setup.tsx:182
+#: src/screens/components/allocation-setup.tsx:183
 msgid "Decrease players"
 msgstr "Diminuer le nombre de joueurs"
 
-#: src/screens/components/allocation-setup.tsx:258
+#: src/screens/components/allocation-setup.tsx:259
 msgid "Decrease teams"
 msgstr "Diminuer le nombre d’équipes"
 
@@ -69,11 +69,11 @@ msgstr "Donner un avis"
 msgid "Go back and select 6 or more players."
 msgstr "Revenez en arrière et sélectionnez 6 joueurs ou plus."
 
-#: src/screens/components/allocation-setup.tsx:186
+#: src/screens/components/allocation-setup.tsx:187
 msgid "Increase players"
 msgstr "Augmenter le nombre de joueurs"
 
-#: src/screens/components/allocation-setup.tsx:259
+#: src/screens/components/allocation-setup.tsx:260
 msgid "Increase teams"
 msgstr "Augmenter le nombre d’équipes"
 
@@ -101,7 +101,7 @@ msgstr "{MAX_OBSERVED_PLAYER_COUNT} doigts maximum"
 msgid "Maximum 5 fingers"
 msgstr "5 doigts maximum"
 
-#: src/screens/components/allocation-setup.tsx:274
+#: src/screens/components/allocation-setup.tsx:275
 msgid "More players"
 msgstr "Plus de joueurs"
 
@@ -140,7 +140,7 @@ msgid "Player assigned to Team {0}"
 msgstr "Joueur affecté à l’équipe {0}"
 
 #. placeholder {0}: props.playerSelection.count
-#: src/screens/components/allocation-setup.tsx:177
+#: src/screens/components/allocation-setup.tsx:178
 msgid "Players, {0}"
 msgstr "Joueurs, {0}"
 
@@ -156,7 +156,7 @@ msgstr "Réduction des animations activée"
 msgid "Returns to team selection"
 msgstr "Retour à la sélection des équipes"
 
-#: src/screens/components/allocation-setup.tsx:185
+#: src/screens/components/allocation-setup.tsx:186
 msgid "Select 6 players"
 msgstr "Sélectionner 6 joueurs"
 
@@ -164,8 +164,7 @@ msgstr "Sélectionner 6 joueurs"
 msgid "Share {brandName}"
 msgstr "Partager {brandName}"
 
-#: src/screens/components/allocation-setup.tsx:308
-#: src/screens/components/allocation-setup.tsx:323
+#: src/screens/components/allocation-setup.tsx:306
 msgid "Start"
 msgstr "Commencer"
 
@@ -175,12 +174,12 @@ msgstr "Commencer"
 msgid "System"
 msgstr "Système"
 
-#: src/screens/components/allocation-setup.tsx:255
+#: src/screens/components/allocation-setup.tsx:256
 msgid "Teams"
 msgstr "Équipes"
 
 #. placeholder {0}: props.selectedTeams
-#: src/screens/components/allocation-setup.tsx:257
+#: src/screens/components/allocation-setup.tsx:258
 msgid "Teams, {0}"
 msgstr "Équipes, {0}"
 
@@ -190,10 +189,10 @@ msgstr "Équipes, {0}"
 msgid "Theme"
 msgstr "Thème"
 
-#: src/screens/components/allocation-setup.tsx:176
+#: src/screens/components/allocation-setup.tsx:177
 msgid "Up to 5 players"
 msgstr "Jusqu’à 5 joueurs"
 
-#: src/screens/components/allocation-setup.tsx:181
+#: src/screens/components/allocation-setup.tsx:182
 msgid "Use up to 5 players"
 msgstr "Utiliser jusqu’à 5 joueurs"

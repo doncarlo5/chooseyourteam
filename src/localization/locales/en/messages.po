@@ -47,11 +47,11 @@ msgstr "Close"
 msgid "Close About"
 msgstr "Close About"
 
-#: src/screens/components/allocation-setup.tsx:182
+#: src/screens/components/allocation-setup.tsx:183
 msgid "Decrease players"
 msgstr "Decrease players"
 
-#: src/screens/components/allocation-setup.tsx:258
+#: src/screens/components/allocation-setup.tsx:259
 msgid "Decrease teams"
 msgstr "Decrease teams"
 
@@ -69,11 +69,11 @@ msgstr "Give a review"
 msgid "Go back and select 6 or more players."
 msgstr "Go back and select 6 or more players."
 
-#: src/screens/components/allocation-setup.tsx:186
+#: src/screens/components/allocation-setup.tsx:187
 msgid "Increase players"
 msgstr "Increase players"
 
-#: src/screens/components/allocation-setup.tsx:259
+#: src/screens/components/allocation-setup.tsx:260
 msgid "Increase teams"
 msgstr "Increase teams"
 
@@ -101,7 +101,7 @@ msgstr "Maximum {MAX_OBSERVED_PLAYER_COUNT} fingers"
 msgid "Maximum 5 fingers"
 msgstr "Maximum 5 fingers"
 
-#: src/screens/components/allocation-setup.tsx:274
+#: src/screens/components/allocation-setup.tsx:275
 msgid "More players"
 msgstr "More players"
 
@@ -140,7 +140,7 @@ msgid "Player assigned to Team {0}"
 msgstr "Player assigned to Team {0}"
 
 #. placeholder {0}: props.playerSelection.count
-#: src/screens/components/allocation-setup.tsx:177
+#: src/screens/components/allocation-setup.tsx:178
 msgid "Players, {0}"
 msgstr "Players, {0}"
 
@@ -156,7 +156,7 @@ msgstr "Reduce motion enabled"
 msgid "Returns to team selection"
 msgstr "Returns to team selection"
 
-#: src/screens/components/allocation-setup.tsx:185
+#: src/screens/components/allocation-setup.tsx:186
 msgid "Select 6 players"
 msgstr "Select 6 players"
 
@@ -164,8 +164,7 @@ msgstr "Select 6 players"
 msgid "Share {brandName}"
 msgstr "Share {brandName}"
 
-#: src/screens/components/allocation-setup.tsx:308
-#: src/screens/components/allocation-setup.tsx:323
+#: src/screens/components/allocation-setup.tsx:306
 msgid "Start"
 msgstr "Start"
 
@@ -175,12 +174,12 @@ msgstr "Start"
 msgid "System"
 msgstr "System"
 
-#: src/screens/components/allocation-setup.tsx:255
+#: src/screens/components/allocation-setup.tsx:256
 msgid "Teams"
 msgstr "Teams"
 
 #. placeholder {0}: props.selectedTeams
-#: src/screens/components/allocation-setup.tsx:257
+#: src/screens/components/allocation-setup.tsx:258
 msgid "Teams, {0}"
 msgstr "Teams, {0}"
 
@@ -190,10 +189,10 @@ msgstr "Teams, {0}"
 msgid "Theme"
 msgstr "Theme"
 
-#: src/screens/components/allocation-setup.tsx:176
+#: src/screens/components/allocation-setup.tsx:177
 msgid "Up to 5 players"
 msgstr "Up to 5 players"
 
-#: src/screens/components/allocation-setup.tsx:181
+#: src/screens/components/allocation-setup.tsx:182
 msgid "Use up to 5 players"
 msgstr "Use up to 5 players"
