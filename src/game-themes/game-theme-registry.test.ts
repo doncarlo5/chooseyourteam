@@ -67,9 +67,16 @@ describe("game theme registry", () => {
     }
   });
 
-  it("changes only the background for Coral Sky", () => {
+  it("gives Coral Sky its own background and accent color", () => {
     expect(coralSkyTheme.Background).not.toBe(desertLagoonTheme.Background);
-    expect(coralSkyTheme.chrome).toBe(desertLagoonTheme.chrome);
+    expect({
+      ...coralSkyTheme.chrome,
+      accentColor: desertLagoonTheme.chrome.accentColor,
+    }).toEqual(desertLagoonTheme.chrome);
+    expect(coralSkyTheme.chrome.accentColor).toBe("#FF6A21");
+    expect(coralSkyTheme.chrome.accentColor).not.toBe(
+      desertLagoonTheme.chrome.accentColor,
+    );
     expect(getGameThemeArtwork("coral-sky")).toBe(desertLagoonArtwork);
   });
 });
