@@ -67,6 +67,63 @@ const parseHexColor = (color) => ({
   blue: Number.parseInt(color.slice(5, 7), 16),
 });
 
+export const countTeamGlowPixelsBeyondRasterBounds = (
+  png,
+  x,
+  y,
+  scale,
+  color,
+) => {
+  const target = parseHexColor(color);
+  const channels = [target.red, target.green, target.blue];
+  const dominantChannel = channels.indexOf(Math.max(...channels));
+  const centerX = x * scale;
+  const centerY = y * scale;
+  const innerRadius = 76 * scale;
+  const outerRadius = 82 * scale;
+  const axisHalfAngle = 0.18;
+  let count = 0;
+
+  for (
+    let row = Math.max(0, Math.floor(centerY - outerRadius));
+    row <= Math.min(png.height - 1, centerY + outerRadius);
+    row += 1
+  ) {
+    for (
+      let column = Math.max(0, Math.floor(centerX - outerRadius));
+      column <= Math.min(png.width - 1, centerX + outerRadius);
+      column += 1
+    ) {
+      const deltaX = column - centerX;
+      const deltaY = row - centerY;
+      const distance = Math.hypot(deltaX, deltaY);
+      if (distance < innerRadius || distance > outerRadius) continue;
+
+      const angle = Math.abs(Math.atan2(deltaY, deltaX));
+      const distanceToAxis = Math.min(
+        angle % (Math.PI / 2),
+        Math.PI / 2 - (angle % (Math.PI / 2)),
+      );
+      if (distanceToAxis > axisHalfAngle) continue;
+
+      const offset = (row * png.width + column) * 4;
+      const pixelChannels = [
+        png.data[offset],
+        png.data[offset + 1],
+        png.data[offset + 2],
+      ];
+      const competingChannel = Math.max(
+        ...pixelChannels.filter((_, index) => index !== dominantChannel),
+      );
+      if (pixelChannels[dominantChannel] - competingChannel > 2) {
+        count += 1;
+      }
+    }
+  }
+
+  return count;
+};
+
 export const measureTeamColorRing = (png, x, y, scale, color) => {
   const target = parseHexColor(color);
   const expectedX = x * scale;

@@ -7,8 +7,9 @@ import type { GameThemeArtwork } from "@/src/game-themes/game-theme-types";
 import type { TouchRect } from "@/src/helpers/types/home-screen";
 import { Inter_800ExtraBold } from "@expo-google-fonts/inter";
 import {
-  BlurMask,
+  Blur,
   Canvas,
+  CubicSampling,
   drawAsImage,
   Group,
   Image,
@@ -38,11 +39,15 @@ import Animated, {
 } from "react-native-reanimated";
 import RevealedPlayerLabel from "./revealed-player-label";
 import useTouchAllocationController from "./use-touch-allocation-controller";
-import { shouldRasterizeFrozenArtwork } from "../touch-allocation-rendering-policy";
+import {
+  getFrozenArtworkRasterMetrics,
+  shouldRasterizeFrozenArtwork,
+} from "../touch-allocation-rendering-policy";
 
 const BASE_CIRCLE_SIZE = 120;
 const REVEAL_CIRCLE_SIZE = 150;
 const REVEAL_NUMBER_FONT_SIZE = 72;
+const RASTER_ARTWORK_PADDING = 24;
 const TEAM_ONE_OPTICAL_OFFSET_X = -3;
 const TEAM_NUMBERS = [1, 2, 3, 4, 5] as const;
 
@@ -51,22 +56,25 @@ function getRevealedNumberBaseline(size: number, font: SkFont) {
   return size / 2 - (metrics.ascent + metrics.descent) / 2;
 }
 
-function getRevealedNumberOffsetX(team: number) {
+function getRevealedNumberOffsetX(team: number, size: number) {
   "worklet";
-  return team === 1 ? TEAM_ONE_OPTICAL_OFFSET_X : 0;
+  return team === 1
+    ? TEAM_ONE_OPTICAL_OFFSET_X * (size / REVEAL_CIRCLE_SIZE)
+    : 0;
 }
 
 function StaticRevealedNumber(props: {
   size: number;
   team: TeamNumber;
   font: SkFont;
+  blur?: number;
 }) {
   const text = String(props.team);
   const bounds = props.font.measureText(text);
   const x =
     (props.size - bounds.width) / 2 -
     bounds.x +
-    getRevealedNumberOffsetX(props.team);
+    getRevealedNumberOffsetX(props.team, props.size);
   const y = getRevealedNumberBaseline(props.size, props.font);
 
   return (
@@ -79,7 +87,7 @@ function StaticRevealedNumber(props: {
         color="white"
         opacity={0.75}
       >
-        <BlurMask blur={5} style="solid" respectCTM={false} />
+        <Blur blur={props.blur ?? 5} mode="decal" />
       </SkiaText>
       <SkiaText x={x} y={y} text={text} font={props.font} color="white" />
     </>
@@ -104,7 +112,7 @@ function SharedRevealedNumber(props: {
     return bounds
       ? (props.size - bounds.width) / 2 -
           bounds.x +
-          getRevealedNumberOffsetX(props.team.get())
+          getRevealedNumberOffsetX(props.team.get(), props.size)
       : 0;
   });
   const y = props.font ? getRevealedNumberBaseline(props.size, props.font) : 0;
@@ -123,7 +131,7 @@ function SharedRevealedNumber(props: {
         color="white"
         opacity={0.75}
       >
-        <BlurMask blur={5} style="solid" respectCTM={false} />
+        <Blur blur={5} mode="decal" />
       </SkiaText>
       <SkiaText x={x} y={y} text={text} font={props.font} color="white" />
     </>
@@ -131,7 +139,7 @@ function SharedRevealedNumber(props: {
 }
 
 async function renderTeamResultImages(
-  size: number,
+  metrics: ReturnType<typeof getFrozenArtworkRasterMetrics>,
   RevealedDot: GameThemeArtwork["RevealedDot"],
   showRevealedNumber: boolean,
   font: SkFont | null,
@@ -139,13 +147,29 @@ async function renderTeamResultImages(
   return Promise.all(
     TEAM_NUMBERS.map((team) =>
       drawAsImage(
-        <>
-          <RevealedDot size={size} team={team} />
+        <Group
+          transform={[
+            { translateX: metrics.physicalPadding },
+            { translateY: metrics.physicalPadding },
+          ]}
+        >
+          <RevealedDot size={metrics.physicalContentSize} team={team} />
           {showRevealedNumber && font ? (
-            <StaticRevealedNumber size={size} team={team} font={font} />
+            <StaticRevealedNumber
+              size={metrics.physicalContentSize}
+              team={team}
+              font={font}
+              blur={
+                5 *
+                (metrics.physicalContentSize / metrics.logicalContentSize)
+              }
+            />
           ) : null}
-        </>,
-        { width: size, height: size },
+        </Group>,
+        {
+          width: metrics.physicalImageSize,
+          height: metrics.physicalImageSize,
+        },
       ),
     ),
   );
@@ -159,7 +183,7 @@ function disposeTeamResultImages(images: (SkImage | null)[]) {
 
 function loadTeamResultImages(
   isEnabled: boolean,
-  size: number,
+  metrics: ReturnType<typeof getFrozenArtworkRasterMetrics>,
   RevealedDot: GameThemeArtwork["RevealedDot"],
   showRevealedNumber: boolean,
   font: SkFont | null,
@@ -169,22 +193,25 @@ function loadTeamResultImages(
     return () => undefined;
   }
   let isCancelled = false;
-  void renderTeamResultImages(size, RevealedDot, showRevealedNumber, font).then(
-    (images) => {
-      if (isCancelled) {
-        disposeTeamResultImages(images);
-        return;
-      }
-      setImages(images);
-    },
-  );
+  void renderTeamResultImages(
+    metrics,
+    RevealedDot,
+    showRevealedNumber,
+    font,
+  ).then((images) => {
+    if (isCancelled) {
+      disposeTeamResultImages(images);
+      return;
+    }
+    setImages(images);
+  });
   return () => {
     isCancelled = true;
   };
 }
 
 function useTeamResultImages(
-  size: number,
+  metrics: ReturnType<typeof getFrozenArtworkRasterMetrics>,
   isEnabled: boolean,
   RevealedDot: GameThemeArtwork["RevealedDot"],
   showRevealedNumber: boolean,
@@ -195,7 +222,7 @@ function useTeamResultImages(
   function loadImagesEffect() {
     return loadTeamResultImages(
       isEnabled,
-      size,
+      metrics,
       RevealedDot,
       showRevealedNumber,
       font,
@@ -212,10 +239,15 @@ function useTeamResultImages(
     isEnabled,
     RevealedDot,
     showRevealedNumber,
-    size,
+    metrics,
   ]);
   useEffect(disposeImagesEffect, [images]);
-  return images;
+  return {
+    images,
+    isReady:
+      !isEnabled ||
+      (images.length === TEAM_NUMBERS.length && images.every(Boolean)),
+  };
 }
 
 async function renderUnrevealedBaseImage(
@@ -224,10 +256,21 @@ async function renderUnrevealedBaseImage(
 ) {
   const pixelRatio = PixelRatio.get();
   const rasterSize = Math.ceil(size * pixelRatio);
-  return drawAsImage(<RasterizedBase size={rasterSize} />, {
-    width: rasterSize,
-    height: rasterSize,
-  });
+  const rasterPadding = Math.ceil(RASTER_ARTWORK_PADDING * pixelRatio);
+  return drawAsImage(
+    <Group
+      transform={[
+        { translateX: rasterPadding },
+        { translateY: rasterPadding },
+      ]}
+    >
+      <RasterizedBase size={rasterSize} />
+    </Group>,
+    {
+      width: rasterSize + rasterPadding * 2,
+      height: rasterSize + rasterPadding * 2,
+    },
+  );
 }
 
 function loadUnrevealedBaseImage(
@@ -360,10 +403,10 @@ function LiveDotArtwork(props: {
           <>
             <Image
               image={props.unrevealedBaseImage}
-              x={0}
-              y={0}
-              width={BASE_CIRCLE_SIZE}
-              height={BASE_CIRCLE_SIZE}
+              x={-RASTER_ARTWORK_PADDING}
+              y={-RASTER_ARTWORK_PADDING}
+              width={BASE_CIRCLE_SIZE + RASTER_ARTWORK_PADDING * 2}
+              height={BASE_CIRCLE_SIZE + RASTER_ARTWORK_PADDING * 2}
             />
             <UnrevealedOverlay
               size={BASE_CIRCLE_SIZE}
@@ -423,10 +466,11 @@ function FrozenRoundArtwork(props: {
           {shouldRasterize ? (
             <Image
               image={props.teamImages[player.team - 1] ?? null}
-              x={0}
-              y={0}
-              width={REVEAL_CIRCLE_SIZE}
-              height={REVEAL_CIRCLE_SIZE}
+              x={-RASTER_ARTWORK_PADDING}
+              y={-RASTER_ARTWORK_PADDING}
+              width={REVEAL_CIRCLE_SIZE + RASTER_ARTWORK_PADDING * 2}
+              height={REVEAL_CIRCLE_SIZE + RASTER_ARTWORK_PADDING * 2}
+              sampling={CubicSampling}
             />
           ) : (
             <>
@@ -547,21 +591,36 @@ export function AllocationSceneCanvas(props: {
   artwork?: GameThemeArtwork;
 }) {
   const { themeId: selectedThemeId } = useGameTheme();
+  const windowDimensions = useWindowDimensions();
   const activeThemeId = props.themeId ?? selectedThemeId;
   const artwork = props.artwork ?? getGameThemeArtwork(activeThemeId);
   const showRevealedNumber = activeThemeId === "neon-arena";
+  const shouldRasterize = shouldRasterizeFrozenArtwork(Platform.OS);
   const liveShimmerClock = useClock();
+  const rasterMetrics = useMemo(
+    () =>
+      getFrozenArtworkRasterMetrics(
+        REVEAL_CIRCLE_SIZE,
+        RASTER_ARTWORK_PADDING,
+        windowDimensions.scale,
+      ),
+    [windowDimensions.scale],
+  );
   const revealedNumberFont = useFont(
     Inter_800ExtraBold,
     REVEAL_NUMBER_FONT_SIZE,
   );
-  const shouldRasterize = shouldRasterizeFrozenArtwork(Platform.OS);
-  const teamResultImages = useTeamResultImages(
-    REVEAL_CIRCLE_SIZE,
+  const rasterRevealedNumberFont = useFont(
+    shouldRasterize && showRevealedNumber ? Inter_800ExtraBold : null,
+    REVEAL_NUMBER_FONT_SIZE *
+      (rasterMetrics.physicalContentSize / rasterMetrics.logicalContentSize),
+  );
+  const teamResultImageCache = useTeamResultImages(
+    rasterMetrics,
     shouldRasterize,
     artwork.RevealedDot,
     showRevealedNumber,
-    revealedNumberFont,
+    rasterRevealedNumberFont,
   );
   const unrevealedBaseImage = useUnrevealedBaseImage(
     BASE_CIRCLE_SIZE,
@@ -569,6 +628,17 @@ export function AllocationSceneCanvas(props: {
   );
   const shimmerClock = props.shimmerClock ?? liveShimmerClock;
   const revealedSlotIndexes = props.revealedSlotIndexes ?? [];
+  const hasFrozenArtwork =
+    props.frozenRounds.roundOne.length > 0 ||
+    props.frozenRounds.roundTwo.length > 0;
+  const shouldKeepLastLiveFrame =
+    shouldRasterize &&
+    hasFrozenArtwork &&
+    revealedSlotIndexes.length > 0 &&
+    !teamResultImageCache.isReady;
+  const effectiveLiveSceneOpacity = useDerivedValue(() =>
+    shouldKeepLastLiveFrame ? 1 : props.liveSceneOpacity.get(),
+  );
   const activeUnrevealedBaseImage =
     revealedSlotIndexes.length === 0 ? unrevealedBaseImage : null;
 
@@ -583,7 +653,7 @@ export function AllocationSceneCanvas(props: {
           players={props.frozenRounds.roundOne}
           transform={props.roundOneTransform}
           opacity={props.roundOneOpacity}
-          teamImages={teamResultImages}
+          teamImages={teamResultImageCache.images}
           RevealedDot={artwork.RevealedDot}
           revealedNumberFont={revealedNumberFont}
           showRevealedNumber={showRevealedNumber}
@@ -592,7 +662,7 @@ export function AllocationSceneCanvas(props: {
           players={props.frozenRounds.roundTwo}
           transform={props.roundTwoTransform}
           opacity={props.roundTwoOpacity}
-          teamImages={teamResultImages}
+          teamImages={teamResultImageCache.images}
           RevealedDot={artwork.RevealedDot}
           revealedNumberFont={revealedNumberFont}
           showRevealedNumber={showRevealedNumber}
@@ -607,7 +677,7 @@ export function AllocationSceneCanvas(props: {
             scale={slot.scale}
             shakeX={props.shakeX}
             holdProgress={props.holdProgress}
-            sceneOpacity={props.liveSceneOpacity}
+            sceneOpacity={effectiveLiveSceneOpacity}
             shimmerClock={shimmerClock}
             team={slot.team}
             revealProgress={slot.revealProgress}

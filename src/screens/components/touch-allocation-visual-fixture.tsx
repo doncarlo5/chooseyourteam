@@ -13,7 +13,7 @@ import RevealedPlayerLabel from "@/src/screens/components/revealed-player-label"
 import useSlotSharedValues from "@/src/screens/components/use-slot-shared-values";
 import { useLocalSearchParams } from "expo-router";
 import { cn } from "heroui-native";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import { makeMutable, withSpring, withTiming } from "react-native-reanimated";
 import { scheduleOnUI } from "react-native-worklets";
@@ -38,6 +38,17 @@ const overlapPositions = [
   ...livePositions.slice(2),
 ];
 const revealedTeams: TeamNumber[] = [1, 2, 3, 4, 5];
+const multiRoundCycleRoundOne: RevealedPlayer[] = [
+  { x: 300, y: 600, team: 1 },
+  { x: 100, y: 620, team: 2 },
+  { x: 275, y: 540, team: 3 },
+  { x: 100, y: 520, team: 1 },
+  { x: 200, y: 650, team: 2 },
+];
+const multiRoundCycleRoundTwo: RevealedPlayer[] = [
+  { x: 95, y: 300, team: 4 },
+  { x: 285, y: 420, team: 5 },
+];
 
 export default function TouchAllocationVisualFixture() {
   const params = useLocalSearchParams<{
@@ -59,12 +70,17 @@ export default function TouchAllocationVisualFixture() {
     Math.min(12, Number.parseInt(params.liveCount ?? "3", 10) || 0),
   );
   const isOverlap = fixtureState === "overlap";
-  const isRevealed = fixtureState === "revealed" || isOverlap;
+  const isQualityFrozen = fixtureState === "quality-frozen";
+  const isRevealed =
+    fixtureState === "revealed" || isOverlap || isQualityFrozen;
   const activePositions = isOverlap ? overlapPositions : livePositions;
-  const isFrozen = fixtureState === "frozen";
+  const isFrozen = fixtureState === "frozen" || isQualityFrozen;
   const isScrolling = fixtureState === "scrolling";
   const isRoundTwoDynamic = fixtureState === "round-two-dynamic";
-  const isDynamic = fixtureState === "dynamic" || isRoundTwoDynamic;
+  const isMultiRoundCycle = fixtureState === "multi-round-cycle";
+  const isDynamic =
+    fixtureState === "dynamic" || isRoundTwoDynamic || isMultiRoundCycle;
+  const [multiRoundCyclePhase, setMultiRoundCyclePhase] = useState(0);
   const slotActive = useSlotSharedValues(0);
   const slotX = useSlotSharedValues(0);
   const slotY = useSlotSharedValues(0);
@@ -87,7 +103,11 @@ export default function TouchAllocationVisualFixture() {
           active: isDynamic
             ? slotActive[index]
             : makeMutable(
-                index < liveCount && !isFrozen && !isScrolling ? 1 : 0,
+                index < liveCount &&
+                  (!isFrozen || isQualityFrozen) &&
+                  !isScrolling
+                  ? 1
+                  : 0,
               ),
           x: isDynamic ? slotX[index] : makeMutable(position.x),
           y: isDynamic ? slotY[index] : makeMutable(position.y),
@@ -104,6 +124,7 @@ export default function TouchAllocationVisualFixture() {
     [
       isDynamic,
       isFrozen,
+      isQualityFrozen,
       isRevealed,
       isScrolling,
       liveCount,
@@ -121,31 +142,62 @@ export default function TouchAllocationVisualFixture() {
     roundOne: RevealedPlayer[];
     roundTwo: RevealedPlayer[];
   }>(() => {
-    if (!isFrozen && !isScrolling && !isRoundTwoDynamic) {
+    if (
+      !isFrozen &&
+      !isScrolling &&
+      !isRoundTwoDynamic &&
+      !isMultiRoundCycle
+    ) {
       return { roundOne: [], roundTwo: [] };
     }
     const roundTwo = [
       { x: 95, y: 300, team: 4 as const },
       { x: 285, y: 420, team: 5 as const },
     ];
-    const roundOne: RevealedPlayer[] = isRoundTwoDynamic
-      ? [
-          { x: 300, y: 600, team: 1 },
-          { x: 100, y: 620, team: 2 },
-          { x: 275, y: 540, team: 3 },
-          { x: 100, y: 520, team: 1 },
-          { x: 200, y: 650, team: 2 },
-        ]
-      : [
-          { x: 90, y: 310, team: 1 },
-          { x: 195, y: 430, team: 2 },
-          { x: 300, y: 320, team: 3 },
-        ];
+    const roundOne: RevealedPlayer[] = isMultiRoundCycle
+      ? multiRoundCycleRoundOne
+      : isQualityFrozen
+      ? livePositions.slice(0, liveCount).map((position, index) => ({
+          ...position,
+          team: revealedTeams[index % revealedTeams.length],
+        }))
+      : isRoundTwoDynamic
+        ? [
+            { x: 300, y: 600, team: 1 },
+            { x: 100, y: 620, team: 2 },
+            { x: 275, y: 540, team: 3 },
+            { x: 100, y: 520, team: 1 },
+            { x: 200, y: 650, team: 2 },
+          ]
+        : [
+            { x: 90, y: 310, team: 1 },
+            { x: 195, y: 430, team: 2 },
+            { x: 300, y: 320, team: 3 },
+          ];
     return {
-      roundOne: roundOne.slice(0, frozenCount),
-      roundTwo: isScrolling || activeRound === 1 ? roundTwo : [],
+      roundOne:
+        isMultiRoundCycle && multiRoundCyclePhase === 0
+          ? []
+          : roundOne.slice(0, frozenCount),
+      roundTwo: isMultiRoundCycle
+        ? multiRoundCyclePhase === 3
+          ? multiRoundCycleRoundTwo
+          : []
+        : isScrolling || activeRound === 1
+          ? roundTwo
+          : [],
     };
-  }, [activeRound, frozenCount, isFrozen, isRoundTwoDynamic, isScrolling]);
+  }, [
+    activeRound,
+    frozenCount,
+    isFrozen,
+    isQualityFrozen,
+    isRoundTwoDynamic,
+    isMultiRoundCycle,
+    isScrolling,
+    liveCount,
+    multiRoundCyclePhase,
+  ]);
   const buffers = useMemo(() => {
     const scrollOffset = isScrolling
       ? width * 0.5
@@ -163,12 +215,12 @@ export default function TouchAllocationVisualFixture() {
       roundTwoOpacity: makeMutable(
         isScrolling ? 0.5 : activeRound === 1 ? 1 : 0,
       ),
-      liveSceneOpacity: makeMutable(1),
+      liveSceneOpacity: makeMutable(isQualityFrozen ? 0 : 1),
       shakeX: makeMutable(0),
       holdProgress: makeMutable(holdProgress),
       shimmerClock: makeMutable(450),
     };
-  }, [activeRound, holdProgress, isScrolling, width]);
+  }, [activeRound, holdProgress, isQualityFrozen, isScrolling, width]);
   const activateDynamicSlots = useCallback(() => {
     "worklet";
     if (isRoundTwoDynamic) {
@@ -208,15 +260,92 @@ export default function TouchAllocationVisualFixture() {
 
   useEffect(activateDynamicSlotsEffect, [activateDynamicSlots, isDynamic]);
 
+  const applyMultiRoundCyclePhase = useCallback(
+    (
+      phase: number,
+      assignments: { slotIndex: number; team: TeamNumber }[],
+      players: RevealedPlayer[],
+    ) => {
+      "worklet";
+      const isLivePhase = phase === 0 || phase === 2;
+      const isRoundTwo = phase >= 2;
+      buffers.roundOneTransform.set([
+        { translateX: isRoundTwo ? -width : 0 },
+      ]);
+      buffers.roundTwoTransform.set([
+        { translateX: isRoundTwo ? 0 : width },
+      ]);
+      buffers.roundOneOpacity.set(isRoundTwo ? 0 : 1);
+      buffers.roundTwoOpacity.set(isRoundTwo ? 1 : 0);
+      buffers.liveSceneOpacity.set(isLivePhase ? 1 : 0);
+
+      for (let index = 0; index < slots.length; index += 1) {
+        slots[index].active.set(0);
+        slots[index].opacity.set(0);
+        slots[index].team.set(0);
+        slots[index].revealProgress.set(0);
+      }
+      for (let index = 0; index < assignments.length; index += 1) {
+        const assignment = assignments[index];
+        const player = players[index];
+        slots[assignment.slotIndex].x.set(player.x);
+        slots[assignment.slotIndex].y.set(player.y);
+        slots[assignment.slotIndex].team.set(assignment.team);
+        slots[assignment.slotIndex].revealProgress.set(1);
+        slots[assignment.slotIndex].active.set(1);
+        slots[assignment.slotIndex].opacity.set(1);
+      }
+    },
+    [buffers, slots, width],
+  );
+
+  function advanceMultiRoundCycleEffect() {
+    if (!isMultiRoundCycle) {
+      return;
+    }
+    const players =
+      multiRoundCyclePhase === 0
+        ? multiRoundCycleRoundOne
+        : multiRoundCyclePhase === 2
+          ? multiRoundCycleRoundTwo
+          : [];
+    const assignments = players.map((player, slotIndex) => ({
+      slotIndex,
+      team: player.team,
+    }));
+    scheduleOnUI(
+      applyMultiRoundCyclePhase,
+      multiRoundCyclePhase,
+      assignments,
+      players,
+    );
+    const timeout = setTimeout(() => {
+      setMultiRoundCyclePhase((phase) => (phase + 1) % 4);
+    }, 250);
+    return () => clearTimeout(timeout);
+  }
+
+  useEffect(advanceMultiRoundCycleEffect, [
+    applyMultiRoundCyclePhase,
+    isMultiRoundCycle,
+    multiRoundCyclePhase,
+  ]);
+
   const visiblePlayers = isRevealed
     ? activePositions.slice(0, liveCount).map((position, index) => ({
         ...position,
         team: revealedTeams[index % revealedTeams.length],
       }))
     : [];
-  const revealedSlotIndexes = isRevealed
-    ? Array.from({ length: liveCount }, (_, index) => index)
-    : [];
+  const revealedSlotIndexes = isMultiRoundCycle
+    ? multiRoundCyclePhase === 0
+      ? [0, 1, 2, 3, 4]
+      : multiRoundCyclePhase === 2
+        ? [0, 1]
+        : []
+    : isRevealed
+      ? Array.from({ length: liveCount }, (_, index) => index)
+      : [];
 
   return (
     <View

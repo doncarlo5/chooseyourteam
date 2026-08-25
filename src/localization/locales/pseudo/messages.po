@@ -125,8 +125,12 @@ msgstr ""
 msgid "Opens the App Store review page"
 msgstr ""
 
-#: src/screens/components/app-share-button.tsx:31
+#: src/screens/components/app-share-button.tsx:42
 msgid "Opens the share sheet with the App Store link"
+msgstr ""
+
+#: src/screens/components/app-share-button.tsx:41
+msgid "Opens the share sheet with the Google Play link"
 msgstr ""
 
 #: src/screens/components/pairing-mode-toggle.tsx:30
@@ -160,7 +164,7 @@ msgstr ""
 msgid "Select 6 players"
 msgstr ""
 
-#: src/screens/components/app-share-button.tsx:30
+#: src/screens/components/app-share-button.tsx:38
 msgid "Share {brandName}"
 msgstr ""
 

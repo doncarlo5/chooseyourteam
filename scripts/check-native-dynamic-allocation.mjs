@@ -6,6 +6,7 @@ import { PNG } from "pngjs";
 import {
   countBrightRingPixels,
   countNeonRingPixels,
+  countTeamGlowPixelsBeyondRasterBounds,
   countWhiteCenterPixels,
   measureTeamColorRing,
 } from "./screenshot-analysis.mjs";
@@ -82,7 +83,9 @@ try {
 
 const screenshot = PNG.sync.read(await readFile(screenshotPath));
 const scale = screenshot.width / 390;
-const isPaletteCheck = theme === "neon-arena" && fixtureState === "revealed";
+const isPaletteCheck =
+  theme === "neon-arena" &&
+  (fixtureState === "revealed" || fixtureState === "quality-frozen");
 if (isPaletteCheck) {
   const positions = [
     { x: 92, y: 300, color: "#FF3B5C" },
@@ -102,6 +105,8 @@ if (isPaletteCheck) {
     return {
       team: index + 1,
       ringPixels: measurement.ringPixels,
+      x: measurement.x,
+      y: measurement.y,
       whiteNumberPixels: countWhiteCenterPixels(
         screenshot,
         measurement.x,
@@ -110,9 +115,24 @@ if (isPaletteCheck) {
       ),
     };
   });
-  console.log(JSON.stringify({ theme, fixtureState, teams }));
+  const glowPixelsBeyondRasterBounds = countTeamGlowPixelsBeyondRasterBounds(
+    screenshot,
+    teams[1].x,
+    teams[1].y,
+    scale,
+    "#39FF88",
+  );
+  console.log(
+    JSON.stringify({
+      theme,
+      fixtureState,
+      teams,
+      glowPixelsBeyondRasterBounds,
+    }),
+  );
   if (
-    teams.some((team) => team.ringPixels < 30 || team.whiteNumberPixels < 30)
+    teams.some((team) => team.ringPixels < 30 || team.whiteNumberPixels < 30) ||
+    glowPixelsBeyondRasterBounds < 30
   ) {
     process.exitCode = 1;
   }
@@ -137,6 +157,23 @@ if (
 }
 const countRingPixels =
   theme === "neon-arena" ? countNeonRingPixels : countBrightRingPixels;
+if (fixtureState === "quality-frozen") {
+  const positions = [
+    { x: 92, y: 300 },
+    { x: 198, y: 420 },
+    { x: 300, y: 310 },
+    { x: 82, y: 520 },
+    { x: 200, y: 565 },
+  ];
+  const teamRingPixels = positions.map((position) =>
+    countRingPixels(screenshot, position.x, position.y, scale),
+  );
+  console.log(JSON.stringify({ theme, fixtureState, teamRingPixels }));
+  if (teamRingPixels.some((pixels) => pixels < 100)) {
+    process.exitCode = 1;
+  }
+  process.exit();
+}
 const firstRingPixels = countRingPixels(screenshot, 92, 300, scale);
 const secondRingPixels = countRingPixels(screenshot, 198, 420, scale);
 console.log(

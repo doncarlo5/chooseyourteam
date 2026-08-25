@@ -125,9 +125,13 @@ msgstr "Ouvre les crédits du développeur et les réglages de langue et de thè
 msgid "Opens the App Store review page"
 msgstr "Ouverture de la page d’avis de l’App Store"
 
-#: src/screens/components/app-share-button.tsx:31
+#: src/screens/components/app-share-button.tsx:42
 msgid "Opens the share sheet with the App Store link"
 msgstr "Ouverture du partage avec le lien de l’App Store"
+
+#: src/screens/components/app-share-button.tsx:41
+msgid "Opens the share sheet with the Google Play link"
+msgstr "Ouverture du partage avec le lien de Google Play"
 
 #: src/screens/components/pairing-mode-toggle.tsx:30
 #: src/screens/components/pairing-mode-toggle.tsx:43
@@ -160,7 +164,7 @@ msgstr "Retour à la sélection des équipes"
 msgid "Select 6 players"
 msgstr "Sélectionner 6 joueurs"
 
-#: src/screens/components/app-share-button.tsx:30
+#: src/screens/components/app-share-button.tsx:38
 msgid "Share {brandName}"
 msgstr "Partager {brandName}"
 
