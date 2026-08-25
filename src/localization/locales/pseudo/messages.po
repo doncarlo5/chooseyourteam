@@ -47,11 +47,11 @@ msgstr ""
 msgid "Close About"
 msgstr ""
 
-#: src/screens/components/allocation-setup.tsx:162
+#: src/screens/components/allocation-setup.tsx:182
 msgid "Decrease players"
 msgstr ""
 
-#: src/screens/components/allocation-setup.tsx:237
+#: src/screens/components/allocation-setup.tsx:258
 msgid "Decrease teams"
 msgstr ""
 
@@ -65,15 +65,15 @@ msgstr ""
 msgid "Give a review"
 msgstr ""
 
-#: src/screens/components/use-touch-allocation-feedback.ts:177
+#: src/screens/components/use-touch-allocation-feedback.ts:178
 msgid "Go back and select 6 or more players."
 msgstr ""
 
-#: src/screens/components/allocation-setup.tsx:166
+#: src/screens/components/allocation-setup.tsx:186
 msgid "Increase players"
 msgstr ""
 
-#: src/screens/components/allocation-setup.tsx:238
+#: src/screens/components/allocation-setup.tsx:259
 msgid "Increase teams"
 msgstr ""
 
@@ -93,15 +93,15 @@ msgstr ""
 msgid "Language"
 msgstr ""
 
-#: src/screens/components/use-touch-allocation-feedback.ts:185
-msgid "Maximum 12 fingers"
+#: src/screens/components/use-touch-allocation-feedback.ts:186
+msgid "Maximum {MAX_OBSERVED_PLAYER_COUNT} fingers"
 msgstr ""
 
-#: src/screens/components/use-touch-allocation-feedback.ts:176
+#: src/screens/components/use-touch-allocation-feedback.ts:177
 msgid "Maximum 5 fingers"
 msgstr ""
 
-#: src/screens/components/allocation-setup.tsx:252
+#: src/screens/components/allocation-setup.tsx:274
 msgid "More players"
 msgstr ""
 
@@ -113,8 +113,8 @@ msgstr ""
 msgid "On · players 2 + 3 together"
 msgstr ""
 
-#: src/screens/components/use-touch-allocation-feedback.ts:186
-msgid "Only the first 12 detected fingers can join."
+#: src/screens/components/use-touch-allocation-feedback.ts:187
+msgid "Only the first {MAX_OBSERVED_PLAYER_COUNT} detected fingers can join."
 msgstr ""
 
 #: src/screens/components/app-info-button.tsx:16
@@ -140,7 +140,7 @@ msgid "Player assigned to Team {0}"
 msgstr ""
 
 #. placeholder {0}: props.playerSelection.count
-#: src/screens/components/allocation-setup.tsx:157
+#: src/screens/components/allocation-setup.tsx:177
 msgid "Players, {0}"
 msgstr ""
 
@@ -156,7 +156,7 @@ msgstr ""
 msgid "Returns to team selection"
 msgstr ""
 
-#: src/screens/components/allocation-setup.tsx:165
+#: src/screens/components/allocation-setup.tsx:185
 msgid "Select 6 players"
 msgstr ""
 
@@ -164,8 +164,8 @@ msgstr ""
 msgid "Share {brandName}"
 msgstr ""
 
-#: src/screens/components/allocation-setup.tsx:286
-#: src/screens/components/allocation-setup.tsx:301
+#: src/screens/components/allocation-setup.tsx:308
+#: src/screens/components/allocation-setup.tsx:323
 msgid "Start"
 msgstr ""
 
@@ -175,12 +175,12 @@ msgstr ""
 msgid "System"
 msgstr ""
 
-#: src/screens/components/allocation-setup.tsx:234
+#: src/screens/components/allocation-setup.tsx:255
 msgid "Teams"
 msgstr ""
 
 #. placeholder {0}: props.selectedTeams
-#: src/screens/components/allocation-setup.tsx:236
+#: src/screens/components/allocation-setup.tsx:257
 msgid "Teams, {0}"
 msgstr ""
 
@@ -190,10 +190,10 @@ msgstr ""
 msgid "Theme"
 msgstr ""
 
-#: src/screens/components/allocation-setup.tsx:156
+#: src/screens/components/allocation-setup.tsx:176
 msgid "Up to 5 players"
 msgstr ""
 
-#: src/screens/components/allocation-setup.tsx:161
+#: src/screens/components/allocation-setup.tsx:181
 msgid "Use up to 5 players"
 msgstr ""

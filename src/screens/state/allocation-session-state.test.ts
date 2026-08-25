@@ -1,4 +1,8 @@
 import type { RevealedPlayer } from "@/src/domain/revealed-player";
+import {
+  MAX_OBSERVED_PLAYER_COUNT,
+  MAX_PLANNED_ROUND_PLAYER_COUNT,
+} from "../../domain/team-allocation";
 import { describe, expect, it } from "vitest";
 import type {
   AllocationSessionConfiguration,
@@ -16,11 +20,13 @@ const createDeclaredConfiguration = (
 ): AllocationSessionConfiguration => ({
   selectedTeams: 4,
   playerSelection: { mode: "declared", count },
+  maximumObservedPlayerCount: MAX_PLANNED_ROUND_PLAYER_COUNT,
   isPairingModeEnabled: false,
 });
 const observedConfiguration: AllocationSessionConfiguration = {
   selectedTeams: 3,
   playerSelection: { mode: "observed" },
+  maximumObservedPlayerCount: MAX_PLANNED_ROUND_PLAYER_COUNT,
   isPairingModeEnabled: false,
 };
 
@@ -37,6 +43,20 @@ describe("allocationSessionReducer", () => {
       isMultiRound: false,
       expectedTouchCount: 3,
       allowOverExpected: true,
+      maximumTouchCount: MAX_PLANNED_ROUND_PLAYER_COUNT,
+    });
+  });
+
+  it("projects Android observed Sessions with the twelve-contact capacity", () => {
+    const state = createAllocationSessionState({
+      ...observedConfiguration,
+      maximumObservedPlayerCount: MAX_OBSERVED_PLAYER_COUNT,
+    });
+
+    expect(projectCurrentRound(state, 3)).toMatchObject({
+      expectedTouchCount: 3,
+      allowOverExpected: true,
+      maximumTouchCount: MAX_OBSERVED_PLAYER_COUNT,
     });
   });
 
@@ -55,6 +75,7 @@ describe("allocationSessionReducer", () => {
         secondRoundCount: count - 5,
         expectedTouchCount: 5,
         allowOverExpected: false,
+        maximumTouchCount: MAX_OBSERVED_PLAYER_COUNT,
       });
     });
   }

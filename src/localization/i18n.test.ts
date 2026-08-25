@@ -45,14 +45,18 @@ describe("localization catalogs", () => {
 
   it("localizes the Android observed-touch capacity warning", () => {
     const i18n = createAppI18n("en");
-    expect(i18n._("GRi3W4")).toBe("Maximum 12 fingers");
-    expect(i18n._("cxJOdK")).toBe(
+    expect(i18n._("GE7TqB", { MAX_OBSERVED_PLAYER_COUNT: 12 })).toBe(
+      "Maximum 12 fingers",
+    );
+    expect(i18n._("BMQZnr", { MAX_OBSERVED_PLAYER_COUNT: 12 })).toBe(
       "Only the first 12 detected fingers can join.",
     );
 
     i18n.activate("fr");
-    expect(i18n._("GRi3W4")).toBe("12 doigts maximum");
-    expect(i18n._("cxJOdK")).toBe(
+    expect(i18n._("GE7TqB", { MAX_OBSERVED_PLAYER_COUNT: 12 })).toBe(
+      "12 doigts maximum",
+    );
+    expect(i18n._("BMQZnr", { MAX_OBSERVED_PLAYER_COUNT: 12 })).toBe(
       "Seuls les 12 premiers doigts détectés participent.",
     );
   });

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  MAX_OBSERVED_PLAYER_COUNT,
+  MAX_PLANNED_ROUND_PLAYER_COUNT,
+} from "../../domain/team-allocation";
+import {
   DEFAULT_PLAYER_SELECTION,
   DEFAULT_SELECTED_TEAMS,
   decrementPlayerSelection,
@@ -70,16 +74,18 @@ describe("allocation setup state", () => {
     ).toEqual({
       showsPlayerSelection: false,
       sessionPlayerSelection: { mode: "observed" },
+      maximumObservedPlayerCount: MAX_OBSERVED_PLAYER_COUNT,
     });
   });
 
-  it.each(["ios", "web"])(
+  it.each(["ios", "web"] as const)(
     "keeps Player selection visible on %s",
     (platform) => {
       const selection: PlayerSelection = { mode: "declared", count: 8 };
       expect(getAllocationSetupPolicy(platform, selection)).toEqual({
         showsPlayerSelection: true,
         sessionPlayerSelection: selection,
+        maximumObservedPlayerCount: MAX_PLANNED_ROUND_PLAYER_COUNT,
       });
     },
   );

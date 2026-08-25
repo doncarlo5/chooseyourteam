@@ -35,6 +35,7 @@ export type TouchAllocationLifecycleStore = TouchSlotStore & {
 export type TouchAllocationLifecycleConfiguration = {
   expectedTouchCount: number;
   allowOverExpected: boolean;
+  maximumTouchCount: number;
 };
 
 export type TouchAllocationLifecycleEvent =
@@ -381,6 +382,13 @@ export const transitionTouchAllocationLifecycle = (
       return result;
     }
     const existingSlot = findTouchSlot(store, event.touchId);
+    if (
+      existingSlot === -1 &&
+      countTrackedTouches(store) >= configuration.maximumTouchCount
+    ) {
+      result.capacityExceeded = true;
+      return result;
+    }
     result.slotIndex = allocateTouchSlot(
       store,
       event.touchId,
@@ -388,8 +396,7 @@ export const transitionTouchAllocationLifecycle = (
       event.y,
     );
     result.wasAllocated = existingSlot === -1 && result.slotIndex !== -1;
-    result.capacityExceeded =
-      existingSlot === -1 && result.slotIndex === -1;
+    result.capacityExceeded = existingSlot === -1 && result.slotIndex === -1;
     if (result.slotIndex !== -1) {
       moveTouchSlot(store, event.touchId, event.x, event.y, true);
     }

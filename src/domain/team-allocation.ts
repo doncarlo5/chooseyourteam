@@ -4,6 +4,7 @@ import {
   type TeamNumber,
 } from "./team-identity";
 
+export const MAX_PLANNED_ROUND_PLAYER_COUNT = 5;
 export const MAX_OBSERVED_PLAYER_COUNT = 12;
 
 export type MultiRoundAssignmentPlan = {
@@ -169,7 +170,10 @@ export const planMultiRoundAssignments = (
   }
 
   const teamNumbers = getSelectedTeamNumbers(teamCount);
-  const roundOneVectors = enumerateBalancedCountVectors(teamCount, 5);
+  const roundOneVectors = enumerateBalancedCountVectors(
+    teamCount,
+    MAX_PLANNED_ROUND_PLAYER_COUNT,
+  );
   const roundTwoVectors = enumerateBalancedCountVectors(
     teamCount,
     declaredPlayerCount - 5,

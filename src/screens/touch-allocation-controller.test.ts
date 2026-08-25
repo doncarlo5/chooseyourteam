@@ -35,6 +35,7 @@ const createLifecycle = (slotCount = 12): TouchAllocationLifecycleStore => ({
 const exactTwo: TouchAllocationLifecycleConfiguration = {
   expectedTouchCount: 2,
   allowOverExpected: false,
+  maximumTouchCount: 12,
 };
 
 const admit = (
@@ -227,7 +228,11 @@ describe("touch allocation lifecycle", () => {
 
   it("allows over-count in observed mode and creates one ordered snapshot", () => {
     const store = createLifecycle();
-    const observed = { expectedTouchCount: 2, allowOverExpected: true };
+    const observed = {
+      expectedTouchCount: 2,
+      allowOverExpected: true,
+      maximumTouchCount: 12,
+    };
     admit(store, 1, observed);
     admit(store, 2, observed);
     const third = admit(store, 3, observed);
@@ -246,6 +251,25 @@ describe("touch allocation lifecycle", () => {
         token: third.countdownToken!,
       }).snapshot,
     ).toBeNull();
+  });
+
+  it("rejects new observed contacts above the configured platform limit", () => {
+    const store = createLifecycle();
+    const webObserved = {
+      expectedTouchCount: 2,
+      allowOverExpected: true,
+      maximumTouchCount: 5,
+    };
+    for (let touchId = 1; touchId <= 5; touchId += 1) {
+      expect(admit(store, touchId, webObserved).wasAllocated).toBe(true);
+    }
+
+    expect(admit(store, 6, webObserved)).toMatchObject({
+      wasAllocated: false,
+      capacityExceeded: true,
+      trackedCount: 5,
+      visibleCount: 5,
+    });
   });
 
   it("freezes revealed positions while retaining pointer ownership", () => {

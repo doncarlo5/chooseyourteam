@@ -44,6 +44,7 @@ export default function Home() {
     setActiveConfiguration({
       playerSelection: setupPolicy.sessionPlayerSelection,
       selectedTeams,
+      maximumObservedPlayerCount: setupPolicy.maximumObservedPlayerCount,
       isPairingModeEnabled,
     });
   };

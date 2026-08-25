@@ -1,3 +1,4 @@
+import { MAX_OBSERVED_PLAYER_COUNT } from "@/src/domain/team-allocation";
 import { H, type Step, styleChargeBomb } from "@/src/screens/utils/helper";
 import {
   cancelTouchAllocationFeedback,
@@ -182,8 +183,8 @@ export default function useTouchAllocationFeedback(props: {
     toast.show({
       id: "android-touch-limit",
       variant: "warning",
-      label: t`Maximum 12 fingers`,
-      description: t`Only the first 12 detected fingers can join.`,
+      label: t`Maximum ${MAX_OBSERVED_PLAYER_COUNT} fingers`,
+      description: t`Only the first ${MAX_OBSERVED_PLAYER_COUNT} detected fingers can join.`,
     });
   };
 

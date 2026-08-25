@@ -102,6 +102,7 @@ export default function AllocationSessionScreen(props: {
             round: currentRound.round,
             expectedTouchCount: currentRound.expectedTouchCount,
             allowOverExpected: currentRound.allowOverExpected,
+            maximumTouchCount: currentRound.maximumTouchCount,
             roundAssignment: currentRound.roundAssignment,
             isPairingModeEnabled: props.configuration.isPairingModeEnabled,
             acceptsNewTouches,

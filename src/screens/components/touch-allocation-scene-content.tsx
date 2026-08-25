@@ -276,6 +276,7 @@ export type TouchAllocationConfiguration = {
   round: 0 | 1;
   expectedTouchCount: number;
   allowOverExpected: boolean;
+  maximumTouchCount: number;
   roundAssignment?: RoundAssignment;
   isPairingModeEnabled: boolean;
   acceptsNewTouches: boolean;
@@ -637,6 +638,7 @@ export default function TouchAllocationScene(props: TouchAllocationSceneProps) {
     isRoundNavigationIdle: props.isRoundNavigationIdle,
     expectedTouchCount: props.configuration.expectedTouchCount,
     allowOverExpected: props.configuration.allowOverExpected,
+    maximumTouchCount: props.configuration.maximumTouchCount,
     roundAssignment: props.configuration.roundAssignment,
     isPairingModeEnabled: props.configuration.isPairingModeEnabled,
     resetKey: props.configuration.resetKey,

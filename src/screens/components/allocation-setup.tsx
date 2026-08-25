@@ -22,6 +22,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 function StepperButton(props: {
   accessibilityLabel: string;
   isDisabled: boolean;
+  nativeID: string;
   symbol: "−" | "+";
   onPress: () => void;
 }) {
@@ -38,6 +39,7 @@ function StepperButton(props: {
       accessibilityRole="button"
       accessibilityLabel={props.accessibilityLabel}
       accessibilityState={{ disabled: props.isDisabled }}
+      nativeID={props.nativeID}
       isDisabled={props.isDisabled}
       onPress={() => {
         void H.selectionChange();
@@ -66,6 +68,7 @@ function StepperButton(props: {
 }
 
 function AllocationStepper(props: {
+  accessibilityID: "players" | "teams";
   decrementAccessibilityLabel: string;
   incrementAccessibilityLabel: string;
   isDecrementDisabled: boolean;
@@ -78,10 +81,24 @@ function AllocationStepper(props: {
   onIncrement: () => void;
 }) {
   const { theme } = useGameTheme();
+  const labelID = `${props.accessibilityID}-label`;
+  const decrementID = `${props.accessibilityID}-decrement`;
+  const valueID = `${props.accessibilityID}-value`;
+  const incrementID = `${props.accessibilityID}-increment`;
+  const accessibilityOrder = props.showsDecrementButton
+    ? [labelID, decrementID, valueID, incrementID]
+    : [labelID, valueID, incrementID];
+  const accessibilityProps = {
+    experimental_accessibilityOrder: accessibilityOrder,
+  };
 
   return (
-    <View className={cn("flex-row items-center gap-2 py-4")}>
+    <View
+      {...accessibilityProps}
+      className={cn("flex-row items-center gap-2 py-4")}
+    >
       <AppText
+        nativeID={labelID}
         className={cn(
           "min-w-24 flex-1 text-base font-semibold",
           theme.chrome.primaryTextClassName,
@@ -94,6 +111,7 @@ function AllocationStepper(props: {
           symbol="−"
           isDisabled={props.isDecrementDisabled}
           accessibilityLabel={props.decrementAccessibilityLabel}
+          nativeID={decrementID}
           onPress={props.onDecrement}
         />
       ) : (
@@ -112,6 +130,7 @@ function AllocationStepper(props: {
             .reduceMotion(ReduceMotion.System)}
           accessible
           accessibilityLabel={props.valueAccessibilityLabel}
+          nativeID={valueID}
         >
           <AppText
             className={cn(
@@ -128,6 +147,7 @@ function AllocationStepper(props: {
         symbol="+"
         isDisabled={props.isIncrementDisabled}
         accessibilityLabel={props.incrementAccessibilityLabel}
+        nativeID={incrementID}
         onPress={props.onIncrement}
       />
     </View>
@@ -231,6 +251,7 @@ export default function AllocationSetup(props: {
               className={cn(theme.chrome.cardOverlayClassName)}
             />
             <AllocationStepper
+              accessibilityID="teams"
               label={t`Teams`}
               value={String(props.selectedTeams)}
               valueAccessibilityLabel={t`Teams, ${props.selectedTeams}`}
@@ -249,6 +270,7 @@ export default function AllocationSetup(props: {
                   style={{ backgroundColor: theme.chrome.controlIconColor }}
                 />
                 <AllocationStepper
+                  accessibilityID="players"
                   label={t`More players`}
                   value={playerValue}
                   valueAccessibilityLabel={playerValueAccessibilityLabel}

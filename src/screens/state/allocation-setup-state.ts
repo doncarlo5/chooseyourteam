@@ -1,3 +1,9 @@
+import {
+  MAX_OBSERVED_PLAYER_COUNT,
+  MAX_PLANNED_ROUND_PLAYER_COUNT,
+} from "../../domain/team-allocation";
+import type { PlatformOSType } from "react-native";
+
 export const DECLARED_PLAYER_COUNTS = [6, 7, 8, 9, 10] as const;
 
 export type DeclaredPlayerCount = (typeof DECLARED_PLAYER_COUNTS)[number];
@@ -9,11 +15,15 @@ export type PlayerSelection =
 export type AllocationSetupPolicy = {
   showsPlayerSelection: boolean;
   sessionPlayerSelection: PlayerSelection;
+  maximumObservedPlayerCount:
+    typeof MAX_PLANNED_ROUND_PLAYER_COUNT | typeof MAX_OBSERVED_PLAYER_COUNT;
 };
 
 export type AllocationSessionConfiguration = {
   selectedTeams: SelectedTeamCount;
   playerSelection: PlayerSelection;
+  maximumObservedPlayerCount:
+    typeof MAX_PLANNED_ROUND_PLAYER_COUNT | typeof MAX_OBSERVED_PLAYER_COUNT;
   isPairingModeEnabled: boolean;
 };
 
@@ -21,19 +31,21 @@ export const DEFAULT_PLAYER_SELECTION: PlayerSelection = { mode: "observed" };
 export const DEFAULT_SELECTED_TEAMS: SelectedTeamCount = 2;
 
 export const getAllocationSetupPolicy = (
-  platform: string,
+  platform: PlatformOSType,
   playerSelection: PlayerSelection,
 ): AllocationSetupPolicy => {
   if (platform === "android") {
     return {
       showsPlayerSelection: false,
       sessionPlayerSelection: DEFAULT_PLAYER_SELECTION,
+      maximumObservedPlayerCount: MAX_OBSERVED_PLAYER_COUNT,
     };
   }
 
   return {
     showsPlayerSelection: true,
     sessionPlayerSelection: playerSelection,
+    maximumObservedPlayerCount: MAX_PLANNED_ROUND_PLAYER_COUNT,
   };
 };
 

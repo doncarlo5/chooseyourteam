@@ -1,4 +1,6 @@
 import {
+  MAX_OBSERVED_PLAYER_COUNT,
+  MAX_PLANNED_ROUND_PLAYER_COUNT,
   planMultiRoundAssignments,
   type MultiRoundAssignmentPlan,
   type RandomSource,
@@ -19,6 +21,7 @@ export type AllocationSessionState = {
   roundResetKey: number;
   navigationResetKey: number;
   hasShownSwipeHint: boolean;
+  maximumObservedPlayerCount: AllocationSessionConfiguration["maximumObservedPlayerCount"];
 };
 
 export type AllocationSessionAction =
@@ -60,6 +63,9 @@ export const createAllocationSessionState = (
     roundResetKey: 0,
     navigationResetKey: 0,
     hasShownSwipeHint: false,
+    maximumObservedPlayerCount:
+      configuration?.maximumObservedPlayerCount ??
+      MAX_PLANNED_ROUND_PLAYER_COUNT,
   };
 };
 
@@ -137,6 +143,9 @@ export const projectCurrentRound = (
     expectedTouchCount:
       state.currentRound === 0 ? firstRoundCount : secondRoundCount,
     allowOverExpected: !isMultiRound,
+    maximumTouchCount: isMultiRound
+      ? MAX_OBSERVED_PLAYER_COUNT
+      : state.maximumObservedPlayerCount,
     isFrozen,
     roundAssignment:
       state.currentRound === 0
