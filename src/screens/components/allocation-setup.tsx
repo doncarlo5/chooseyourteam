@@ -1,6 +1,7 @@
 import { AnimatedBlurView } from "@/src/components/animated-blur-view";
 import { AppText } from "@/src/components/app-text";
 import { useGameTheme } from "@/src/game-themes/game-theme-provider";
+import { AllocationStartButton } from "@/src/screens/components/allocation-start-button";
 import type {
   PlayerSelection,
   SelectedTeamCount,
@@ -8,7 +9,6 @@ import type {
 import { getPlayerSelectionLabel } from "@/src/screens/state/allocation-setup-state";
 import { H } from "@/src/screens/utils/helper";
 import { useLingui } from "@lingui/react/macro";
-import { Button as NativeButton, Host } from "@expo/ui";
 import { Button, PressableFeedback, cn } from "heroui-native";
 import { StyleSheet, View } from "react-native";
 import Animated, {
@@ -298,18 +298,11 @@ export default function AllocationSetup(props: {
             ) : null}
           </View>
 
-          <Host
-            seedColor={theme.chrome.accentColor}
-            style={{ marginTop: 20, width: "100%", height: 50 }}
-          >
-            <NativeButton
-              label={t`Start`}
-              variant="filled"
-              style={{ width: "100%", height: 50 }}
-              onPress={props.onStart}
-              testID="start-button"
-            />
-          </Host>
+          <AllocationStartButton
+            label={t`Start`}
+            accentColor={theme.chrome.accentColor}
+            onPress={props.onStart}
+          />
         </Animated.View>
       </View>
     </View>

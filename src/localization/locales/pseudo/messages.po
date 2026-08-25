@@ -164,7 +164,7 @@ msgstr ""
 msgid "Share {brandName}"
 msgstr ""
 
-#: src/screens/components/allocation-setup.tsx:306
+#: src/screens/components/allocation-setup.tsx:302
 msgid "Start"
 msgstr ""
 
