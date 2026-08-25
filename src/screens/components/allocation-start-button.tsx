@@ -1,4 +1,4 @@
-import { Button, Host } from "@expo/ui";
+import { Button, Column, Host, Text } from "@expo/ui";
 
 export function AllocationStartButton(props: {
   accentColor: string;
@@ -8,15 +8,21 @@ export function AllocationStartButton(props: {
   return (
     <Host
       seedColor={props.accentColor}
-      style={{ alignSelf: "center", height: 58, marginTop: 20, width: 260 }}
+      style={{ alignSelf: "center", height: 124, marginTop: 20, width: 124 }}
     >
       <Button
-        label={props.label}
         variant="filled"
-        style={{ height: 52, width: 260 }}
+        style={{ borderRadius: 58, height: 116, width: 116 }}
         onPress={props.onPress}
         testID="start-button"
-      />
+      >
+        <Column alignment="center" spacing={4}>
+          <Text textStyle={{ fontSize: 30, lineHeight: 32 }}>▶</Text>
+          <Text textStyle={{ fontSize: 16, fontWeight: "700" }}>
+            {props.label}
+          </Text>
+        </Column>
+      </Button>
     </Host>
   );
 }

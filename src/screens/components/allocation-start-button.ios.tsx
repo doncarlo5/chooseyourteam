@@ -1,10 +1,12 @@
-import { Button, Host } from "@expo/ui/swift-ui";
+import { Host } from "@expo/ui";
+import { Button, Image, Text, VStack } from "@expo/ui/swift-ui";
 import {
   accessibilityIdentifier,
   buttonBorderShape,
   buttonStyle,
   controlSize,
   frame,
+  font,
   tint,
 } from "@expo/ui/swift-ui/modifiers";
 import { Platform } from "react-native";
@@ -19,23 +21,31 @@ export function AllocationStartButton(props: {
   return (
     <Host
       seedColor={props.accentColor}
-      style={{ alignSelf: "center", height: 58, marginTop: 20, width: 280 }}
+      style={{ alignSelf: "center", height: 124, marginTop: 20, width: 124 }}
     >
       <Button
-        label={props.label}
-        systemImage="play.fill"
         onPress={props.onPress}
         modifiers={[
-          frame({ width: 280, height: 52 }),
           buttonStyle(
             supportsLiquidGlass ? "glassProminent" : "borderedProminent",
           ),
-          buttonBorderShape("capsule"),
-          controlSize("large"),
+          buttonBorderShape("circle"),
+          controlSize("extraLarge"),
           tint(props.accentColor),
           accessibilityIdentifier("start-button"),
         ]}
-      />
+      >
+        <VStack
+          alignment="center"
+          spacing={5}
+          modifiers={[frame({ width: 88, height: 88 })]}
+        >
+          <Image systemName="play.fill" size={32} />
+          <Text modifiers={[font({ size: 17, weight: "semibold" })]}>
+            {props.label}
+          </Text>
+        </VStack>
+      </Button>
     </Host>
   );
 }
