@@ -61,7 +61,7 @@ msgstr "Decrease teams"
 msgid "English"
 msgstr "English"
 
-#: src/screens/components/app-review-button.tsx:107
+#: src/screens/components/app-review-button.tsx:121
 msgid "Give a review"
 msgstr "Give a review"
 
@@ -121,9 +121,13 @@ msgstr "Only the first {MAX_OBSERVED_PLAYER_COUNT} detected fingers can join."
 msgid "Opens developer credits, language, and theme settings"
 msgstr "Opens developer credits, language, and theme settings"
 
-#: src/screens/components/app-review-button.tsx:89
+#: src/screens/components/app-review-button.tsx:102
 msgid "Opens the App Store review page"
 msgstr "Opens the App Store review page"
+
+#: src/screens/components/app-review-button.tsx:101
+msgid "Opens the Google Play review page"
+msgstr "Opens the Google Play review page"
 
 #: src/screens/components/app-share-button.tsx:42
 msgid "Opens the share sheet with the App Store link"
@@ -148,7 +152,7 @@ msgstr "Player assigned to Team {0}"
 msgid "Players, {0}"
 msgstr "Players, {0}"
 
-#: src/screens/components/app-review-button.tsx:88
+#: src/screens/components/app-review-button.tsx:98
 msgid "Rate this app"
 msgstr "Rate this app"
 

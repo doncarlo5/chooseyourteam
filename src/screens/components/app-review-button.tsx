@@ -11,8 +11,18 @@ import { Linking, Platform, View } from "react-native";
 
 const RATE_OPEN_COUNT_KEY = "rate_open_count_v1";
 const RATE_HAS_OPENED_RATING_PAGE_KEY = "rate_has_opened_rating_page_v1";
+const GOOGLE_PLAY_URL =
+  "https://play.google.com/store/apps/details?id=com.doncarlos.chooseyourteam";
 
 const getStoreReviewUrl = () => {
+  if (Platform.OS === "android") {
+    return GOOGLE_PLAY_URL;
+  }
+
+  if (Platform.OS !== "ios") {
+    return null;
+  }
+
   try {
     const baseUrl = StoreReview.storeUrl();
     if (!baseUrl) {
@@ -30,7 +40,7 @@ export default function AppReviewButton(props: { isVisible: boolean }) {
   const { t } = useLingui();
   const { theme } = useGameTheme();
   const canUseStoreReview =
-    Platform.OS === "ios" &&
+    (Platform.OS === "ios" || Platform.OS === "android") &&
     !__DEV__ &&
     Constants.executionEnvironment !== ExecutionEnvironment.StoreClient;
   const [storeReviewUrl] = useState(() =>
@@ -86,7 +96,11 @@ export default function AppReviewButton(props: { isVisible: boolean }) {
         className={cn("rounded-full px-5", theme.chrome.reviewSurfaceClassName)}
         accessibilityRole="button"
         accessibilityLabel={t`Rate this app`}
-        accessibilityHint={t`Opens the App Store review page`}
+        accessibilityHint={
+          Platform.OS === "android"
+            ? t`Opens the Google Play review page`
+            : t`Opens the App Store review page`
+        }
         onPress={async () => {
           try {
             await Linking.openURL(storeReviewUrl);

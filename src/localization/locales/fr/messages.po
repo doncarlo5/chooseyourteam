@@ -61,7 +61,7 @@ msgstr "Diminuer le nombre d’équipes"
 msgid "English"
 msgstr "English"
 
-#: src/screens/components/app-review-button.tsx:107
+#: src/screens/components/app-review-button.tsx:121
 msgid "Give a review"
 msgstr "Donner un avis"
 
@@ -121,9 +121,13 @@ msgstr "Seuls les {MAX_OBSERVED_PLAYER_COUNT} premiers doigts détectés partici
 msgid "Opens developer credits, language, and theme settings"
 msgstr "Ouvre les crédits du développeur et les réglages de langue et de thème"
 
-#: src/screens/components/app-review-button.tsx:89
+#: src/screens/components/app-review-button.tsx:102
 msgid "Opens the App Store review page"
 msgstr "Ouverture de la page d’avis de l’App Store"
+
+#: src/screens/components/app-review-button.tsx:101
+msgid "Opens the Google Play review page"
+msgstr "Ouvre la page d’avis Google Play"
 
 #: src/screens/components/app-share-button.tsx:42
 msgid "Opens the share sheet with the App Store link"
@@ -148,7 +152,7 @@ msgstr "Joueur affecté à l’équipe {0}"
 msgid "Players, {0}"
 msgstr "Joueurs, {0}"
 
-#: src/screens/components/app-review-button.tsx:88
+#: src/screens/components/app-review-button.tsx:98
 msgid "Rate this app"
 msgstr "Noter l’application"
 

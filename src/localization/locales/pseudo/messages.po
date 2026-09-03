@@ -61,7 +61,7 @@ msgstr ""
 msgid "English"
 msgstr ""
 
-#: src/screens/components/app-review-button.tsx:107
+#: src/screens/components/app-review-button.tsx:121
 msgid "Give a review"
 msgstr ""
 
@@ -121,8 +121,12 @@ msgstr ""
 msgid "Opens developer credits, language, and theme settings"
 msgstr ""
 
-#: src/screens/components/app-review-button.tsx:89
+#: src/screens/components/app-review-button.tsx:102
 msgid "Opens the App Store review page"
+msgstr ""
+
+#: src/screens/components/app-review-button.tsx:101
+msgid "Opens the Google Play review page"
 msgstr ""
 
 #: src/screens/components/app-share-button.tsx:42
@@ -148,7 +152,7 @@ msgstr ""
 msgid "Players, {0}"
 msgstr ""
 
-#: src/screens/components/app-review-button.tsx:88
+#: src/screens/components/app-review-button.tsx:98
 msgid "Rate this app"
 msgstr ""
 
