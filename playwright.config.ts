@@ -3,7 +3,10 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/visual",
   testMatch: "**/*.visual.ts",
-  fullyParallel: true,
+  // Concurrent Skia/WebGL pages can lose their Canvas on this test host.
+  // Serialize visual tests rather than hiding missing renders with retries.
+  workers: 1,
+  fullyParallel: false,
   retries: 0,
   reporter: "line",
   use: {
