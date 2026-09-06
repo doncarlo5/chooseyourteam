@@ -1,3 +1,4 @@
+import { Quicksand_700Bold } from "@expo-google-fonts/quicksand";
 import type { RevealedPlayer } from "@/src/domain/revealed-player";
 import type { RoundAssignment, TeamNumber } from "@/src/domain/team-identity";
 import { getGameThemeArtwork } from "@/src/game-themes/game-theme-artwork-registry";
@@ -5,7 +6,7 @@ import type { GameThemeId } from "@/src/game-themes/game-theme-id";
 import { useGameTheme } from "@/src/game-themes/game-theme-provider";
 import type { GameThemeArtwork } from "@/src/game-themes/game-theme-types";
 import type { TouchRect } from "@/src/helpers/types/home-screen";
-import { Inter_800ExtraBold } from "@expo-google-fonts/inter";
+import { Inter_900Black } from "@expo-google-fonts/inter";
 import {
   Blur,
   Canvas,
@@ -46,22 +47,15 @@ import {
 
 const BASE_CIRCLE_SIZE = 120;
 const REVEAL_CIRCLE_SIZE = 150;
-const REVEAL_NUMBER_FONT_SIZE = 72;
+// One proportion for every team leaves room inside the narrowest shape (the star).
+const REVEAL_NUMBER_FONT_SIZE = REVEAL_CIRCLE_SIZE * 0.4;
 const RASTER_ARTWORK_PADDING = 24;
-const TEAM_ONE_OPTICAL_OFFSET_X = -3;
+const REVEALED_NUMBER_FONTS = {
+  "desert-lagoon": Quicksand_700Bold,
+  "coral-sky": Inter_900Black,
+  "neon-arena": require("../../../assets/fonts/SpaceMono-Regular.ttf"),
+};
 const TEAM_NUMBERS = [1, 2, 3, 4, 5] as const;
-
-function getRevealedNumberBaseline(size: number, font: SkFont) {
-  const metrics = font.getMetrics();
-  return size / 2 - (metrics.ascent + metrics.descent) / 2;
-}
-
-function getRevealedNumberOffsetX(team: number, size: number) {
-  "worklet";
-  return team === 1
-    ? TEAM_ONE_OPTICAL_OFFSET_X * (size / REVEAL_CIRCLE_SIZE)
-    : 0;
-}
 
 function StaticRevealedNumber(props: {
   size: number;
@@ -71,11 +65,8 @@ function StaticRevealedNumber(props: {
 }) {
   const text = String(props.team);
   const bounds = props.font.measureText(text);
-  const x =
-    (props.size - bounds.width) / 2 -
-    bounds.x +
-    getRevealedNumberOffsetX(props.team, props.size);
-  const y = getRevealedNumberBaseline(props.size, props.font);
+  const x = (props.size - bounds.width) / 2 - bounds.x;
+  const y = (props.size - bounds.height) / 2 - bounds.y;
 
   return (
     <>
@@ -84,10 +75,11 @@ function StaticRevealedNumber(props: {
         y={y}
         text={text}
         font={props.font}
-        color="white"
-        opacity={0.75}
+        color="rgba(0,0,0,0.8)"
+        style="stroke"
+        strokeWidth={props.size * 0.025}
       >
-        <Blur blur={props.blur ?? 5} mode="decal" />
+        <Blur blur={props.blur ?? 1} mode="decal" />
       </SkiaText>
       <SkiaText x={x} y={y} text={text} font={props.font} color="white" />
     </>
@@ -109,13 +101,12 @@ function SharedRevealedNumber(props: {
   const text = useDerivedValue(() => String(props.team.get()));
   const x = useDerivedValue(() => {
     const bounds = widths[props.team.get() - 1];
-    return bounds
-      ? (props.size - bounds.width) / 2 -
-          bounds.x +
-          getRevealedNumberOffsetX(props.team.get(), props.size)
-      : 0;
+    return bounds ? (props.size - bounds.width) / 2 - bounds.x : 0;
   });
-  const y = props.font ? getRevealedNumberBaseline(props.size, props.font) : 0;
+  const y = useDerivedValue(() => {
+    const bounds = widths[props.team.get() - 1];
+    return bounds ? (props.size - bounds.height) / 2 - bounds.y : 0;
+  });
 
   if (!props.font) {
     return null;
@@ -128,10 +119,11 @@ function SharedRevealedNumber(props: {
         y={y}
         text={text}
         font={props.font}
-        color="white"
-        opacity={0.75}
+        color="rgba(0,0,0,0.8)"
+        style="stroke"
+        strokeWidth={props.size * 0.025}
       >
-        <Blur blur={5} mode="decal" />
+        <Blur blur={1} mode="decal" />
       </SkiaText>
       <SkiaText x={x} y={y} text={text} font={props.font} color="white" />
     </>
@@ -159,10 +151,7 @@ async function renderTeamResultImages(
               size={metrics.physicalContentSize}
               team={team}
               font={font}
-              blur={
-                5 *
-                (metrics.physicalContentSize / metrics.logicalContentSize)
-              }
+              blur={metrics.physicalContentSize / metrics.logicalContentSize}
             />
           ) : null}
         </Group>,
@@ -259,10 +248,7 @@ async function renderUnrevealedBaseImage(
   const rasterPadding = Math.ceil(RASTER_ARTWORK_PADDING * pixelRatio);
   return drawAsImage(
     <Group
-      transform={[
-        { translateX: rasterPadding },
-        { translateY: rasterPadding },
-      ]}
+      transform={[{ translateX: rasterPadding }, { translateY: rasterPadding }]}
     >
       <RasterizedBase size={rasterSize} />
     </Group>,
@@ -512,6 +498,7 @@ function LiveTeamLabel(props: {
   return (
     <RevealedPlayerLabel
       team={props.team}
+      isVisuallyHidden
       style={[styles.teamLabel, style]}
       isAnimated
     />
@@ -546,7 +533,7 @@ export function RevealedPlayerLabelLayer(props: {
           key={`${player.x}-${player.y}-${player.team}-${index}`}
           team={player.team}
           isAccessibilityVisible={props.isAccessibilityVisible}
-          isVisuallyHidden={props.isVisuallyHidden}
+          isVisuallyHidden={props.isVisuallyHidden ?? true}
           style={[
             styles.teamLabel,
             {
@@ -594,7 +581,8 @@ export function AllocationSceneCanvas(props: {
   const windowDimensions = useWindowDimensions();
   const activeThemeId = props.themeId ?? selectedThemeId;
   const artwork = props.artwork ?? getGameThemeArtwork(activeThemeId);
-  const showRevealedNumber = activeThemeId === "neon-arena";
+  const showRevealedNumber = true;
+  const numberFontSource = REVEALED_NUMBER_FONTS[activeThemeId];
   const shouldRasterize = shouldRasterizeFrozenArtwork(Platform.OS);
   const liveShimmerClock = useClock();
   const rasterMetrics = useMemo(
@@ -606,12 +594,9 @@ export function AllocationSceneCanvas(props: {
       ),
     [windowDimensions.scale],
   );
-  const revealedNumberFont = useFont(
-    Inter_800ExtraBold,
-    REVEAL_NUMBER_FONT_SIZE,
-  );
+  const revealedNumberFont = useFont(numberFontSource, REVEAL_NUMBER_FONT_SIZE);
   const rasterRevealedNumberFont = useFont(
-    shouldRasterize && showRevealedNumber ? Inter_800ExtraBold : null,
+    shouldRasterize ? numberFontSource : null,
     REVEAL_NUMBER_FONT_SIZE *
       (rasterMetrics.physicalContentSize / rasterMetrics.logicalContentSize),
   );

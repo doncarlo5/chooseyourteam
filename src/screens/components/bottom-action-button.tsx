@@ -19,6 +19,8 @@ export default function BottomActionButton(props: {
 
   return (
     <Button
+      background={null}
+      style={theme.surfaces.control}
       ref={props.buttonRef}
       size="md"
       className={cn(
@@ -39,11 +41,13 @@ export default function BottomActionButton(props: {
       onPress={props.onPress}
       isIconOnly
     >
-      <AnimatedBlurView
-        blurIntensity={blurIntensity}
-        tint={theme.chrome.controlBlurTint}
-        style={StyleSheet.absoluteFill}
-      />
+      {theme.surfaces.blur ? (
+        <AnimatedBlurView
+          blurIntensity={blurIntensity}
+          tint={theme.chrome.controlBlurTint}
+          style={StyleSheet.absoluteFill}
+        />
+      ) : null}
       <View
         pointerEvents="none"
         style={StyleSheet.absoluteFill}

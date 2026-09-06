@@ -18,7 +18,7 @@ import type {
 } from "./game-theme-types";
 
 function DesertLagoonUnrevealedDot(props: UnrevealedDotArtworkProps) {
-  const ringThickness = props.size * 0.08;
+  const ringThickness = props.size * 0.045;
   const ringRadius = props.size / 2 - ringThickness / 2;
   const progressPath = useMemo(
     () =>
@@ -46,7 +46,7 @@ function DesertLagoonUnrevealedDot(props: UnrevealedDotArtworkProps) {
       <Group
         origin={vec(props.size / 2, props.size / 2)}
         transform={shimmerTransform}
-        opacity={0.9}
+        opacity={0.45}
       >
         <Circle
           cx={props.size / 2}

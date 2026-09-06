@@ -14,6 +14,7 @@ export default function PairingModeToggle(props: {
 
   return (
     <Animated.View
+      style={theme.surfaces.card}
       entering={FadeInDown.duration(260).easing(Easing.out(Easing.cubic))}
       className={cn(
         "mt-3 min-h-14 w-full max-w-72 flex-row items-center justify-between rounded-2xl px-4 py-2",
@@ -22,6 +23,7 @@ export default function PairingModeToggle(props: {
     >
       <View className={cn("mr-4 flex-1")}>
         <AppText
+          style={theme.typography.body}
           className={cn(
             "text-[15px] font-semibold",
             theme.chrome.pairingPrimaryTextClassName,
@@ -30,6 +32,7 @@ export default function PairingModeToggle(props: {
           <Trans>Pairing mode</Trans>
         </AppText>
         <AppText
+          style={theme.typography.body}
           className={cn("text-xs", theme.chrome.pairingSecondaryTextClassName)}
         >
           {props.isEnabled ? (

@@ -22,7 +22,7 @@ import type { AppInfoSheetProps } from "./app-info-sheet.types";
 export default function AppInfoSheet(props: AppInfoSheetProps) {
   const { t } = useLingui();
   const { localePreference, setLocalePreference } = useLocalization();
-  const { themeId, setThemeId } = useGameTheme();
+  const { theme, themeId, setThemeId } = useGameTheme();
   const options: { label: string; value: LocalePreference }[] = [
     { label: t`System`, value: "system" },
     { label: t`English`, value: "en" },
@@ -34,14 +34,24 @@ export default function AppInfoSheet(props: AppInfoSheetProps) {
   }
 
   return (
-    <Host matchContents>
+    <Host
+      matchContents
+      seedColor={theme.chrome.accentColor}
+      colorScheme={theme.chrome.statusBarStyle === "light" ? "dark" : "light"}
+    >
       <ModalBottomSheet
         onDismissRequest={() => props.onIsPresentedChange(false)}
+        contentColor={theme.chrome.controlIconColor}
+        containerColor={theme.chrome.dialogSurfaceColor}
         skipPartiallyExpanded
       >
         <Column modifiers={[fillMaxWidth(), padding(24, 8, 24, 24)]}>
-          <Text style={{ typography: "headlineSmall" }}>{t`About`}</Text>
           <Text
+            color={theme.chrome.controlIconColor}
+            style={{ typography: "headlineSmall" }}
+          >{t`About`}</Text>
+          <Text
+            color={theme.chrome.controlIconColor}
             style={{ typography: "titleSmall" }}
             modifiers={[padding(0, 24, 0, 8)]}
           >
@@ -70,6 +80,7 @@ export default function AppInfoSheet(props: AppInfoSheetProps) {
             ))}
           </Column>
           <Text
+            color={theme.chrome.controlIconColor}
             style={{ typography: "titleSmall" }}
             modifiers={[padding(0, 24, 0, 8)]}
           >
@@ -98,7 +109,9 @@ export default function AppInfoSheet(props: AppInfoSheetProps) {
             ))}
           </Column>
           <Text
-            color="#737373"
+            color={
+              theme.chrome.statusBarStyle === "light" ? "#BDBDBD" : "#666666"
+            }
             style={{ typography: "bodySmall" }}
             modifiers={[padding(0, 24, 0, 0)]}
           >

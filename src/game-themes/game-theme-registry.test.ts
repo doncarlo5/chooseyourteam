@@ -69,14 +69,20 @@ describe("game theme registry", () => {
 
   it("gives Coral Sky its own background and accent color", () => {
     expect(coralSkyTheme.Background).not.toBe(desertLagoonTheme.Background);
-    expect({
-      ...coralSkyTheme.chrome,
-      accentColor: desertLagoonTheme.chrome.accentColor,
-    }).toEqual(desertLagoonTheme.chrome);
+    expect(coralSkyTheme.chrome.cardClassName).not.toBe(
+      desertLagoonTheme.chrome.cardClassName,
+    );
+    expect(
+      new Set(GAME_THEMES.map((theme) => theme.typography.title.fontFamily))
+        .size,
+    ).toBe(3);
+    expect(new Set(GAME_THEMES.map((theme) => theme.start.variant)).size).toBe(
+      3,
+    );
     expect(coralSkyTheme.chrome.accentColor).toBe("#FF6A21");
     expect(coralSkyTheme.chrome.accentColor).not.toBe(
       desertLagoonTheme.chrome.accentColor,
     );
-    expect(getGameThemeArtwork("coral-sky")).toBe(desertLagoonArtwork);
+    expect(getGameThemeArtwork("coral-sky")).not.toBe(desertLagoonArtwork);
   });
 });

@@ -4,30 +4,49 @@ import { isGameThemeId } from "@/src/game-themes/game-theme-id";
 import { useGameTheme } from "@/src/game-themes/game-theme-provider";
 import { GAME_THEMES } from "@/src/game-themes/game-theme-registry";
 import { Host } from "@expo/ui";
+import { BottomSheet, Form, Picker, Section, Text } from "@expo/ui/swift-ui";
 import {
-  BottomSheet,
-  Form,
-  Picker,
-  Section,
-  Text,
-} from "@expo/ui/swift-ui";
-import { frame, padding, pickerStyle, tag } from "@expo/ui/swift-ui/modifiers";
+  background,
+  environment,
+  foregroundStyle,
+  scrollContentBackground,
+  frame,
+  padding,
+  pickerStyle,
+  tag,
+} from "@expo/ui/swift-ui/modifiers";
 import { useLingui } from "@lingui/react/macro";
 import type { AppInfoSheetProps } from "./app-info-sheet.types";
 
 export default function AppInfoSheet(props: AppInfoSheetProps) {
   const { t } = useLingui();
   const { localePreference, setLocalePreference } = useLocalization();
-  const { themeId, setThemeId } = useGameTheme();
+  const { theme, themeId, setThemeId } = useGameTheme();
 
   return (
-    <Host matchContents>
+    <Host
+      matchContents
+      seedColor={theme.chrome.accentColor}
+      colorScheme={theme.chrome.statusBarStyle === "light" ? "dark" : "light"}
+    >
       <BottomSheet
         isPresented={props.isPresented}
         onIsPresentedChange={props.onIsPresentedChange}
         fitToContents
       >
-        <Form modifiers={[padding({ top: 12 }), frame({ height: 520 })]}>
+        <Form
+          modifiers={[
+            environment(
+              "colorScheme",
+              theme.chrome.statusBarStyle === "light" ? "dark" : "light",
+            ),
+            foregroundStyle(theme.chrome.controlIconColor),
+            padding({ top: 12 }),
+            frame({ height: 520 }),
+            scrollContentBackground("hidden"),
+            background(theme.chrome.dialogSurfaceColor),
+          ]}
+        >
           <Section title={t`Theme`}>
             <Picker
               selection={themeId}

@@ -3,22 +3,53 @@ import { Platform } from "react-native";
 
 const isAndroid = Platform.OS === "android";
 
+let pairingFeedbackToken = 0;
+
+async function playPairingFeedback(isEnabled: boolean) {
+  const token = ++pairingFeedbackToken;
+  if (Platform.OS === "web") return;
+  const impacts = isEnabled
+    ? [
+        Haptics.ImpactFeedbackStyle.Rigid,
+        Haptics.ImpactFeedbackStyle.Heavy,
+        Haptics.ImpactFeedbackStyle.Heavy,
+      ]
+    : [Haptics.ImpactFeedbackStyle.Heavy, Haptics.ImpactFeedbackStyle.Rigid];
+
+  for (let index = 0; index < impacts.length; index += 1) {
+    // A new toggle cancels the remaining pulses of the previous pattern.
+    if (token !== pairingFeedbackToken) return;
+    await (isAndroid
+      ? Haptics.performAndroidHapticsAsync(
+          index === impacts.length - 1
+            ? isEnabled
+              ? Haptics.AndroidHaptics.Confirm
+              : Haptics.AndroidHaptics.Reject
+            : Haptics.AndroidHaptics.Context_Click,
+        )
+      : Haptics.impactAsync(impacts[index]));
+    if (index < impacts.length - 1) {
+      await new Promise<void>((resolve) =>
+        setTimeout(resolve, isEnabled ? 70 : 90),
+      );
+    }
+  }
+}
+
 export const H = {
+  startPress: () =>
+    isAndroid
+      ? Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Virtual_Key)
+      : Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),
+
   selectionChange: () =>
     isAndroid
       ? Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Segment_Tick)
       : Haptics.selectionAsync(),
 
-  // Distinct toggle feedback: confirmation when enabled, crisp stop when disabled.
-  pairingModeOn: () =>
-    isAndroid
-      ? Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Toggle_On)
-      : Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success),
-
-  pairingModeOff: () =>
-    isAndroid
-      ? Haptics.performAndroidHapticsAsync(Haptics.AndroidHaptics.Toggle_Off)
-      : Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid),
+  // A forceful triple pulse on activation, a sharp double pulse on deactivation.
+  pairingModeOn: () => playPairingFeedback(true),
+  pairingModeOff: () => playPairingFeedback(false),
 
   // Strong “I registered your first touch”
   touchDown: () =>

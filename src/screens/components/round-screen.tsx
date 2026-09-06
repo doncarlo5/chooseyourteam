@@ -28,18 +28,18 @@ const startSkeletonPulse = (progress: SharedValue<number>) => {
 function RoundInstruction(props: { count: number; requiresAtLeast: boolean }) {
   const { theme } = useGameTheme();
   const waitingClassName = cn(
-    "text-4xl font-medium text-center leading-none",
+    "text-4xl font-medium text-center",
     theme.chrome.instructionTextClassName,
   );
   const numberClassName = cn(
-    "text-7xl font-medium text-center leading-none mt-3",
+    "text-7xl font-medium text-center mt-3",
     theme.chrome.instructionNumberTextClassName,
   );
   const unitClassName = cn(
     "pb-1 text-4xl font-medium text-center",
     theme.chrome.instructionTextClassName,
   );
-  const sharedStyle = { fontFamily: "QuickSand" };
+  const sharedStyle = theme.typography.body;
   const count = props.count;
   const descriptor = props.requiresAtLeast
     ? msg({
@@ -64,7 +64,12 @@ function RoundInstruction(props: { count: number; requiresAtLeast: boolean }) {
     ...descriptor,
     components: {
       waiting: <AppText className={waitingClassName} style={sharedStyle} />,
-      number: <AppText className={numberClassName} style={sharedStyle} />,
+      number: (
+        <AppText
+          className={numberClassName}
+          style={[theme.typography.number, { lineHeight: 100 }]}
+        />
+      ),
       unit: <AppText className={unitClassName} style={sharedStyle} />,
     },
   });

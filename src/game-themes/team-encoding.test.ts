@@ -1,3 +1,4 @@
+import { CORAL_SKY_TEAM_ENCODINGS } from "./coral-sky-team-encoding";
 import { describe, expect, it } from "vitest";
 import {
   DESERT_LAGOON_TEAM_ENCODINGS,
@@ -24,7 +25,7 @@ describe("team encodings", () => {
     });
   });
 
-  it("defines the shape-free Neon Arena palette", () => {
+  it("preserves the circular Neon Arena palette", () => {
     expect(NEON_ARENA_TEAM_ENCODINGS).toEqual([
       { team: 1, color: "#FF3B5C" },
       { team: 2, color: "#39FF88" },
@@ -33,8 +34,8 @@ describe("team encodings", () => {
       { team: 5, color: "#B66CFF" },
     ]);
     expect(
-      NEON_ARENA_TEAM_ENCODINGS.every((encoding) => !("shape" in encoding)),
-    ).toBe(true);
+      NEON_ARENA_TEAM_ENCODINGS.every((encoding) => "shape" in encoding),
+    ).toBe(false);
     expect(getNeonArenaTeamEncoding(5)).toEqual({
       team: 5,
       color: "#B66CFF",
@@ -43,12 +44,19 @@ describe("team encodings", () => {
 
   it("keeps every theme encoding complete and uniquely ordered", () => {
     for (const encodings of [
+      CORAL_SKY_TEAM_ENCODINGS,
       DESERT_LAGOON_TEAM_ENCODINGS,
       NEON_ARENA_TEAM_ENCODINGS,
     ]) {
       expect(encodings.map((encoding) => encoding.team)).toEqual([
         1, 2, 3, 4, 5,
       ]);
+      if (encodings !== NEON_ARENA_TEAM_ENCODINGS)
+        expect(
+          encodings.map((encoding) =>
+            "shape" in encoding ? encoding.shape : undefined,
+          ),
+        ).toEqual(["spike", "wave", "hexagon", "diamond", "squircle"]);
       expect(new Set(encodings.map((encoding) => encoding.color)).size).toBe(5);
     }
   });

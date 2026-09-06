@@ -1,13 +1,74 @@
 import CoralSkyBackground from "./coral-sky-background";
-import { desertLagoonTheme } from "./desert-lagoon-theme";
 import type { GameThemeDefinition } from "./game-theme-types";
 
 export const coralSkyTheme: GameThemeDefinition = {
   id: "coral-sky",
   displayName: "Coral Sky",
   Background: CoralSkyBackground,
+  typography: {
+    body: { fontFamily: "Inter_400Regular", fontWeight: "normal" },
+    title: { fontFamily: "Inter_900Black", fontWeight: "normal" },
+    number: { fontFamily: "Inter_900Black", fontWeight: "normal" },
+  },
+  surfaces: {
+    card: {
+      borderRadius: 20,
+      borderWidth: 1,
+      borderCurve: "continuous",
+      boxShadow: "3px 4px 0 rgba(47,35,30,0.22)",
+    },
+    control: {
+      backgroundColor: "#FFF8EF",
+      borderColor: "rgba(57,37,27,0.25)",
+      borderWidth: 1,
+      borderRadius: 14,
+    },
+    blur: false,
+  },
+  start: {
+    variant: "raised",
+    backgroundColor: "#FF6A21",
+    foregroundColor: "#FFFFFF",
+    borderColor: "#C5420B",
+    style: { borderRadius: 24, boxShadow: "0 5px 0 #B83B10" },
+    pressedStyle: {
+      transform: [{ translateY: 5 }],
+      boxShadow: "none",
+    },
+  },
   chrome: {
-    ...desertLagoonTheme.chrome,
+    screenBackgroundColor: "transparent",
+    brandTextClassName: "text-black/75",
+    primaryTextClassName: "text-[#0B0B0B]",
+    secondaryTextClassName: "text-black/55",
+    instructionTextClassName: "text-black/25",
+    instructionNumberTextClassName: "text-black/30",
+    cardClassName: "bg-[#FFF8EF] border-[#39251B]/25",
+    cardSecondaryTextClassName: "text-black/60",
+    cardOverlayClassName: "bg-transparent",
+    cardActiveClassName: "active:bg-white/40",
+    pairingSurfaceClassName: "bg-[#FFF8EF]",
+    pairingPrimaryTextClassName: "text-black/80",
+    pairingSecondaryTextClassName: "text-black/50",
+    controlClassName: "border-[#39251B]/25 bg-[#FFF8EF] active:bg-orange-100",
+    controlOverlayClassName: "bg-transparent",
+    controlBlurTint: "light",
+    controlIconColor: "rgba(0,0,0,0.8)",
+    navigationIconColor: "#0B0B0B",
+    paginationInactiveColor: "#8D8D8D",
+    paginationActiveColor: "#D6D6D6",
+    dialogSurfaceColor: "#FFF8EF",
+    dialogOptionClassName: "border-white/55",
+    dialogOptionOverlayClassName: "bg-white/10",
+    dialogOptionGradient: [
+      "rgba(91, 202, 186, 0.58)",
+      "rgba(246, 187, 91, 0.68)",
+    ],
+    reviewSurfaceClassName: "bg-[#0B0B0B]/20",
+    reviewForegroundClassName: "text-white/80",
+    reviewIconColor: "#FFFFFF",
+    revealedLabelClassName: "text-white",
     accentColor: "#FF6A21",
+    statusBarStyle: "dark",
   },
 };

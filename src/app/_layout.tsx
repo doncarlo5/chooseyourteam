@@ -1,8 +1,14 @@
 import {
+  Quicksand_400Regular,
+  Quicksand_700Bold,
+} from "@expo-google-fonts/quicksand";
+import { Rajdhani_700Bold } from "@expo-google-fonts/rajdhani";
+import {
   Inter_400Regular,
   Inter_500Medium,
   Inter_600SemiBold,
   Inter_700Bold,
+  Inter_900Black,
 } from "@expo-google-fonts/inter";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -95,6 +101,10 @@ export default function Layout() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
+    Inter_900Black,
+    Quicksand_400Regular,
+    Quicksand_700Bold,
+    Rajdhani_700Bold,
     SpaceMono: require("../../assets/fonts/SpaceMono-Regular.ttf"),
     QuickSand: require("../../assets/fonts/Quicksand.ttf"),
     ...AntDesign.font,

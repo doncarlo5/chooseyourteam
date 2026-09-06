@@ -36,10 +36,9 @@ export default function RevealedPlayerLabel(
         theme.chrome.revealedLabelClassName,
       )}
       style={[
+        theme.typography.number,
         theme.chrome.revealedLabelStyle,
-        (props.isVisuallyHidden ?? theme.id === "neon-arena")
-          ? { opacity: 0 }
-          : undefined,
+        props.isVisuallyHidden ? { opacity: 0 } : undefined,
       ]}
     >
       {props.team}

@@ -1,6 +1,6 @@
 import type { TeamNumber } from "../domain/team-identity";
 import type { ComponentType } from "react";
-import type { ColorValue, TextStyle } from "react-native";
+import type { ColorValue, TextStyle, ViewStyle } from "react-native";
 import type { SharedValue } from "react-native-reanimated";
 
 export type GameThemeChrome = {
@@ -71,5 +71,19 @@ export type GameThemeDefinition = {
   id: import("./game-theme-id").GameThemeId;
   displayName: string;
   Background: ComponentType;
+  typography: Record<"body" | "title" | "number", TextStyle>;
+  surfaces: {
+    card: ViewStyle;
+    control: ViewStyle;
+    blur: boolean;
+  };
+  start: {
+    variant: "pill" | "raised" | "beveled";
+    backgroundColor: string;
+    foregroundColor: string;
+    borderColor: string;
+    style: ViewStyle;
+    pressedStyle: ViewStyle;
+  };
   chrome: GameThemeChrome;
 };

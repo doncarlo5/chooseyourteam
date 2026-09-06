@@ -130,6 +130,7 @@ if (isPaletteCheck) {
       glowPixelsBeyondRasterBounds,
     }),
   );
+  // The original circular rings retain their soft outer halo.
   if (
     teams.some((team) => team.ringPixels < 30 || team.whiteNumberPixels < 30) ||
     glowPixelsBeyondRasterBounds < 30

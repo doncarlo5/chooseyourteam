@@ -11,7 +11,7 @@ A group receiving Players during an allocation.
 The fixed number identifying a Team for the lifetime of a Session. Its visual representation may change with the active Game Theme.
 
 **Team Encoding**:
-The color, shape, and artwork a Game Theme uses to represent a Team Identity. The number remains the primary accessible signal when an encoding omits color or shape.
+The color, shape, visible number, and artwork a Game Theme uses to represent a Team Identity. Desert Lagoon and Coral Sky preserve the same shape for each Team Identity. Neon Arena uses colored circular rings for all Teams. Colors and materials may differ across Game Themes. The number is also announced to assistive technology.
 
 **Game Theme**:
 A named visual identity that changes the background, artwork, and interface chrome without changing allocation rules or Team Identities.

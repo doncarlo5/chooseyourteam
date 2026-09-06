@@ -7,6 +7,29 @@ export const neonArenaTheme: GameThemeDefinition = {
   id: "neon-arena",
   displayName: "Neon Arena",
   Background: NeonArenaBackground,
+  typography: {
+    body: { fontFamily: "Inter_400Regular", fontWeight: "normal" },
+    title: { fontFamily: "Rajdhani_700Bold", fontWeight: "normal" },
+    number: { fontFamily: "SpaceMono", fontWeight: "normal" },
+  },
+  surfaces: {
+    card: { borderRadius: 8, borderWidth: 1, borderCurve: "continuous" },
+    control: {
+      backgroundColor: "#090909",
+      borderColor: "#EF233C",
+      borderWidth: 1,
+      borderRadius: 8,
+    },
+    blur: false,
+  },
+  start: {
+    variant: "beveled",
+    backgroundColor: "#090909",
+    foregroundColor: "#FFFFFF",
+    borderColor: "#EF233C",
+    style: {},
+    pressedStyle: { transform: [{ translateY: 2 }, { scale: 0.99 }] },
+  },
   chrome: {
     screenBackgroundColor: "#000000",
     brandTextClassName: "text-white/80",
@@ -14,7 +37,7 @@ export const neonArenaTheme: GameThemeDefinition = {
     secondaryTextClassName: "text-white/60",
     instructionTextClassName: "text-white/45",
     instructionNumberTextClassName: "text-white/65",
-    cardClassName: "bg-black/60 border-red-500/60",
+    cardClassName: "bg-[#090909] border-red-500/60",
     cardSecondaryTextClassName: "text-white/60",
     cardOverlayClassName: "bg-red-950/20",
     cardActiveClassName: "active:bg-red-950/60",

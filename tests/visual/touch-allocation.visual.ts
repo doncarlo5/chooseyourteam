@@ -36,7 +36,7 @@ for (const fixtureState of fixtureStates) {
   });
 }
 
-test("renders the Coral Sky background with Desert Lagoon artwork", async ({
+test("renders the Coral Sky background with its own sticker artwork", async ({
   page,
 }) => {
   const pageErrors: string[] = [];

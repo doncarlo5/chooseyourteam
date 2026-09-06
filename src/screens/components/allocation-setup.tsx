@@ -11,6 +11,7 @@ import { H } from "@/src/screens/utils/helper";
 import { useLingui } from "@lingui/react/macro";
 import { Button, PressableFeedback, cn } from "heroui-native";
 import { StyleSheet, View } from "react-native";
+import Svg, { Line } from "react-native-svg";
 import Animated, {
   Easing,
   FadeIn,
@@ -31,6 +32,8 @@ function StepperButton(props: {
 
   return (
     <Button
+      background={null}
+      style={theme.surfaces.control}
       size="md"
       className={cn(
         "size-12 items-center justify-center rounded-full border px-0",
@@ -54,16 +57,39 @@ function StepperButton(props: {
       }}
       isIconOnly
     >
-      <Button.Label>
-        <AppText
-          className={cn(
-            "text-2xl font-semibold leading-none",
-            theme.chrome.primaryTextClassName,
-          )}
-        >
-          {props.symbol}
-        </AppText>
-      </Button.Label>
+      <View
+        pointerEvents="none"
+        accessible={false}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        style={[
+          StyleSheet.absoluteFill,
+          { alignItems: "center", justifyContent: "center" },
+        ]}
+      >
+        <Svg width={24} height={24} viewBox="0 0 24 24">
+          <Line
+            x1={6}
+            y1={12}
+            x2={18}
+            y2={12}
+            stroke={theme.chrome.controlIconColor}
+            strokeWidth={2.5}
+            strokeLinecap="round"
+          />
+          {props.symbol === "+" ? (
+            <Line
+              x1={12}
+              y1={6}
+              x2={12}
+              y2={18}
+              stroke={theme.chrome.controlIconColor}
+              strokeWidth={2.5}
+              strokeLinecap="round"
+            />
+          ) : null}
+        </Svg>
+      </View>
     </Button>
   );
 }
@@ -99,6 +125,7 @@ function AllocationStepper(props: {
       className={cn("flex-row items-center gap-2 py-4")}
     >
       <AppText
+        style={theme.typography.body}
         nativeID={labelID}
         className={cn(
           "min-w-24 flex-1 text-base font-semibold",
@@ -138,7 +165,7 @@ function AllocationStepper(props: {
               "text-center text-2xl font-bold",
               theme.chrome.primaryTextClassName,
             )}
-            style={{ fontVariant: ["tabular-nums"] }}
+            style={[theme.typography.number, { fontVariant: ["tabular-nums"] }]}
           >
             {props.value}
           </AppText>
@@ -214,7 +241,7 @@ export default function AllocationSetup(props: {
               theme.chrome.brandTextClassName,
             )}
             style={{
-              fontFamily: "QuickSand",
+              ...theme.typography.title,
               fontSize: 19,
               lineHeight: 24,
               letterSpacing: -0.35,
@@ -239,13 +266,15 @@ export default function AllocationSetup(props: {
               "overflow-hidden rounded-3xl border-2 px-5",
               theme.chrome.cardClassName,
             )}
-            style={{ borderCurve: "continuous" }}
+            style={theme.surfaces.card}
           >
-            <AnimatedBlurView
-              blurIntensity={blurIntensity}
-              tint={theme.chrome.controlBlurTint}
-              style={StyleSheet.absoluteFill}
-            />
+            {theme.surfaces.blur ? (
+              <AnimatedBlurView
+                blurIntensity={blurIntensity}
+                tint={theme.chrome.controlBlurTint}
+                style={StyleSheet.absoluteFill}
+              />
+            ) : null}
             <View
               pointerEvents="none"
               style={StyleSheet.absoluteFill}
@@ -298,11 +327,7 @@ export default function AllocationSetup(props: {
             ) : null}
           </View>
 
-          <AllocationStartButton
-            label={t`Start`}
-            accentColor={theme.chrome.accentColor}
-            onPress={props.onStart}
-          />
+          <AllocationStartButton label={t`Start`} onPress={props.onStart} />
         </Animated.View>
       </View>
     </View>

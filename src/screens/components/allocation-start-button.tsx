@@ -1,49 +1,75 @@
+import { useGameTheme } from "@/src/game-themes/game-theme-provider";
+import { H } from "@/src/screens/utils/helper";
 import { AppText } from "@/src/components/app-text";
 import { Pressable, StyleSheet, View } from "react-native";
 import Svg, { Polygon } from "react-native-svg";
 
 export function AllocationStartButton(props: {
-  accentColor: string;
   label: string;
   onPress: () => void;
 }) {
+  const { theme } = useGameTheme();
+  const handlePressIn = () => {
+    void H.startPress();
+  };
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={props.label}
       onPress={props.onPress}
+      onPressIn={handlePressIn}
       testID="start-button"
-      style={(state) => [
-        styles.button,
-        {
-          opacity: state.pressed ? 0.82 : 1,
-          transform: [{ scale: state.pressed ? 0.97 : 1 }],
-        },
-      ]}
+      style={[styles.button, { borderRadius: theme.start.style.borderRadius }]}
     >
-      <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-        <Svg
-          style={StyleSheet.absoluteFill}
-          viewBox="0 0 300 86"
-          preserveAspectRatio="none"
+      {(state) => (
+        <View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFill,
+            styles.face,
+            theme.start.style,
+            theme.start.variant !== "beveled" && {
+              backgroundColor: theme.start.backgroundColor,
+              borderColor: theme.start.borderColor,
+            },
+            state.pressed && theme.start.pressedStyle,
+          ]}
         >
-          <Polygon
-            points="19,2 281,2 298,19 298,67 281,84 19,84 2,67 2,19"
-            fill={props.accentColor}
-            fillOpacity={0.86}
-            stroke="rgba(255,255,255,0.88)"
-            strokeWidth={4}
-            strokeLinejoin="miter"
-          />
-          <Polygon
-            points="24,10 276,10 290,24 290,62 276,76 24,76 10,62 10,24"
-            fill="none"
-            stroke="rgba(255,255,255,0.3)"
-            strokeWidth={1.5}
-          />
-        </Svg>
-      </View>
-      <AppText style={styles.label}>{props.label.toLocaleUpperCase()}</AppText>
+          {theme.start.variant === "beveled" ? (
+            <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+              <Svg
+                style={StyleSheet.absoluteFill}
+                viewBox="0 0 300 86"
+                preserveAspectRatio="none"
+              >
+                <Polygon
+                  points="19,2 281,2 298,19 298,67 281,84 19,84 2,67 2,19"
+                  fill={theme.start.backgroundColor}
+                  fillOpacity={1}
+                  stroke={theme.start.borderColor}
+                  strokeWidth={4}
+                  strokeLinejoin="miter"
+                />
+                <Polygon
+                  points="24,10 276,10 290,24 290,62 276,76 24,76 10,62 10,24"
+                  fill="none"
+                  stroke={theme.start.borderColor}
+                  strokeWidth={1.5}
+                />
+              </Svg>
+            </View>
+          ) : null}
+          <AppText
+            style={[
+              styles.label,
+              theme.typography.title,
+              { color: theme.start.foregroundColor },
+            ]}
+          >
+            {props.label.toLocaleUpperCase()}
+          </AppText>
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -55,6 +81,10 @@ const styles = StyleSheet.create({
     height: 86,
     justifyContent: "center",
     marginTop: 32,
+  },
+  face: {
+    alignItems: "center",
+    justifyContent: "center",
   },
   label: {
     color: "#FFFFFF",

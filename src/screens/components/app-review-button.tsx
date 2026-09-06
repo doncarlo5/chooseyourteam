@@ -92,6 +92,7 @@ export default function AppReviewButton(props: { isVisible: boolean }) {
   return (
     <View className="absolute bottom-10 inset-x-0 items-center">
       <Button
+        style={theme.surfaces.control}
         size="md"
         className={cn("rounded-full px-5", theme.chrome.reviewSurfaceClassName)}
         accessibilityRole="button"
@@ -113,6 +114,7 @@ export default function AppReviewButton(props: { isVisible: boolean }) {
       >
         <View className={cn("flex-row items-center gap-2")}>
           <AppText
+            style={theme.typography.body}
             className={cn(
               "text-sm font-semibold",
               theme.chrome.reviewForegroundClassName,

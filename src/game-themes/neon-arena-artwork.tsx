@@ -1,5 +1,6 @@
 import {
   Blur,
+  DashPathEffect,
   Circle,
   Group,
   Path,
@@ -22,8 +23,8 @@ import {
 const PINK = "#FF2CCB";
 const BLUE = "#286BFF";
 const WHITE = "#FFFFFF";
-const DARK_CENTER = "rgba(3,0,8,0.94)";
 const REVEALED_DARK_CENTER = "#030008";
+const DARK_CENTER = "rgba(3,0,8,0.94)";
 
 function makeCirclePath(size: number, radius: number) {
   return Skia.Path.Circle(size / 2, size / 2, radius);
@@ -64,7 +65,9 @@ function NeonRings(props: { size: number }) {
         style="stroke"
         strokeWidth={coreWidth}
         color={BLUE}
-      />
+      >
+        <DashPathEffect intervals={[props.size * 0.17, props.size * 0.045]} />
+      </Path>
       <Path
         path={innerPath}
         style="stroke"
@@ -78,7 +81,9 @@ function NeonRings(props: { size: number }) {
         style="stroke"
         strokeWidth={coreWidth}
         color={PINK}
-      />
+      >
+        <DashPathEffect intervals={[props.size * 0.12, props.size * 0.04]} />
+      </Path>
     </>
   );
 }

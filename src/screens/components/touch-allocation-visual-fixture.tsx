@@ -142,12 +142,7 @@ export default function TouchAllocationVisualFixture() {
     roundOne: RevealedPlayer[];
     roundTwo: RevealedPlayer[];
   }>(() => {
-    if (
-      !isFrozen &&
-      !isScrolling &&
-      !isRoundTwoDynamic &&
-      !isMultiRoundCycle
-    ) {
+    if (!isFrozen && !isScrolling && !isRoundTwoDynamic && !isMultiRoundCycle) {
       return { roundOne: [], roundTwo: [] };
     }
     const roundTwo = [
@@ -157,23 +152,23 @@ export default function TouchAllocationVisualFixture() {
     const roundOne: RevealedPlayer[] = isMultiRoundCycle
       ? multiRoundCycleRoundOne
       : isQualityFrozen
-      ? livePositions.slice(0, liveCount).map((position, index) => ({
-          ...position,
-          team: revealedTeams[index % revealedTeams.length],
-        }))
-      : isRoundTwoDynamic
-        ? [
-            { x: 300, y: 600, team: 1 },
-            { x: 100, y: 620, team: 2 },
-            { x: 275, y: 540, team: 3 },
-            { x: 100, y: 520, team: 1 },
-            { x: 200, y: 650, team: 2 },
-          ]
-        : [
-            { x: 90, y: 310, team: 1 },
-            { x: 195, y: 430, team: 2 },
-            { x: 300, y: 320, team: 3 },
-          ];
+        ? livePositions.slice(0, liveCount).map((position, index) => ({
+            ...position,
+            team: revealedTeams[index % revealedTeams.length],
+          }))
+        : isRoundTwoDynamic
+          ? [
+              { x: 300, y: 600, team: 1 },
+              { x: 100, y: 620, team: 2 },
+              { x: 275, y: 540, team: 3 },
+              { x: 100, y: 520, team: 1 },
+              { x: 200, y: 650, team: 2 },
+            ]
+          : [
+              { x: 90, y: 310, team: 1 },
+              { x: 195, y: 430, team: 2 },
+              { x: 300, y: 320, team: 3 },
+            ];
     return {
       roundOne:
         isMultiRoundCycle && multiRoundCyclePhase === 0
@@ -269,12 +264,8 @@ export default function TouchAllocationVisualFixture() {
       "worklet";
       const isLivePhase = phase === 0 || phase === 2;
       const isRoundTwo = phase >= 2;
-      buffers.roundOneTransform.set([
-        { translateX: isRoundTwo ? -width : 0 },
-      ]);
-      buffers.roundTwoTransform.set([
-        { translateX: isRoundTwo ? 0 : width },
-      ]);
+      buffers.roundOneTransform.set([{ translateX: isRoundTwo ? -width : 0 }]);
+      buffers.roundTwoTransform.set([{ translateX: isRoundTwo ? 0 : width }]);
       buffers.roundOneOpacity.set(isRoundTwo ? 0 : 1);
       buffers.roundTwoOpacity.set(isRoundTwo ? 1 : 0);
       buffers.liveSceneOpacity.set(isLivePhase ? 1 : 0);
@@ -387,7 +378,7 @@ export default function TouchAllocationVisualFixture() {
         <RevealedPlayerLabel
           key={`${player.x}-${player.y}-${player.team}-${index}`}
           team={player.team}
-          isVisuallyHidden={fixtureTheme.id === "neon-arena"}
+          isVisuallyHidden
           style={[
             styles.label,
             {
@@ -407,7 +398,7 @@ export default function TouchAllocationVisualFixture() {
             transform={buffers.roundOneTransform}
             opacity={buffers.roundOneOpacity}
             isAccessibilityVisible={activeRound === 0}
-            isVisuallyHidden={fixtureTheme.id === "neon-arena"}
+            isVisuallyHidden
           />
           <RevealedPlayerLabelLayer
             testID="fixture-round-two-labels"
@@ -415,7 +406,7 @@ export default function TouchAllocationVisualFixture() {
             transform={buffers.roundTwoTransform}
             opacity={buffers.roundTwoOpacity}
             isAccessibilityVisible={activeRound === 1}
-            isVisuallyHidden={fixtureTheme.id === "neon-arena"}
+            isVisuallyHidden
           />
         </>
       ) : null}

@@ -11,7 +11,7 @@ import type { AppInfoSheetProps } from "./app-info-sheet.types";
 export default function AppInfoSheet(props: AppInfoSheetProps) {
   const { t } = useLingui();
   const { localePreference, setLocalePreference } = useLocalization();
-  const { themeId, setThemeId } = useGameTheme();
+  const { theme, themeId, setThemeId } = useGameTheme();
   const options = [
     { label: t`System`, value: "system" },
     { label: t`English`, value: "en" },
@@ -32,6 +32,10 @@ export default function AppInfoSheet(props: AppInfoSheetProps) {
           className={cn("bg-black/20")}
         />
         <Dialog.Content
+          style={[
+            theme.surfaces.card,
+            { backgroundColor: theme.chrome.dialogSurfaceColor },
+          ]}
           background={null}
           animation="disabled"
           className={cn(
@@ -39,11 +43,25 @@ export default function AppInfoSheet(props: AppInfoSheetProps) {
           )}
         >
           <View className={cn("flex-row items-center justify-between")}>
-            <Dialog.Title>{t`About`}</Dialog.Title>
+            <Dialog.Title
+              className={theme.chrome.primaryTextClassName}
+              style={[
+                theme.typography.title,
+                { color: theme.chrome.controlIconColor },
+              ]}
+            >{t`About`}</Dialog.Title>
             <Dialog.Close accessibilityLabel={t`Close About`} />
           </View>
           <View className={cn("mt-6 gap-3")}>
-            <Label className={cn("text-sm font-semibold")}>{t`Theme`}</Label>
+            <Label>
+              <Label.Text
+                style={[
+                  theme.typography.title,
+                  { color: theme.chrome.controlIconColor },
+                ]}
+                className={cn("text-sm", theme.chrome.primaryTextClassName)}
+              >{t`Theme`}</Label.Text>
+            </Label>
             <RadioGroup
               animation="disable-all"
               value={themeId}
@@ -54,17 +72,47 @@ export default function AppInfoSheet(props: AppInfoSheetProps) {
               }}
               className={cn("gap-4")}
             >
-              {GAME_THEMES.map((theme) => (
-                <RadioGroup.Item key={theme.id} value={theme.id}>
-                  <Radio />
-                  <Label>{theme.displayName}</Label>
+              {GAME_THEMES.map((option) => (
+                <RadioGroup.Item key={option.id} value={option.id}>
+                  <Radio style={{ borderColor: theme.chrome.accentColor }}>
+                    <Radio.Indicator
+                      style={{
+                        backgroundColor: "transparent",
+                        borderColor: theme.chrome.accentColor,
+                        borderWidth: 2,
+                      }}
+                    >
+                      <Radio.IndicatorThumb
+                        style={{ backgroundColor: theme.chrome.accentColor }}
+                      />
+                    </Radio.Indicator>
+                  </Radio>
+                  <Label>
+                    <Label.Text
+                      className={theme.chrome.primaryTextClassName}
+                      style={[
+                        theme.typography.body,
+                        { color: theme.chrome.controlIconColor },
+                      ]}
+                    >
+                      {option.displayName}
+                    </Label.Text>
+                  </Label>
                 </RadioGroup.Item>
               ))}
             </RadioGroup>
           </View>
           <Separator className={cn("my-6")} />
           <View className={cn("gap-3")}>
-            <Label className={cn("text-sm font-semibold")}>{t`Language`}</Label>
+            <Label>
+              <Label.Text
+                style={[
+                  theme.typography.title,
+                  { color: theme.chrome.controlIconColor },
+                ]}
+                className={cn("text-sm", theme.chrome.primaryTextClassName)}
+              >{t`Language`}</Label.Text>
+            </Label>
             <RadioGroup
               animation="disable-all"
               value={localePreference}
@@ -77,15 +125,48 @@ export default function AppInfoSheet(props: AppInfoSheetProps) {
             >
               {options.map((option) => (
                 <RadioGroup.Item key={option.value} value={option.value}>
-                  <Radio />
-                  <Label>{option.label}</Label>
+                  <Radio style={{ borderColor: theme.chrome.accentColor }}>
+                    <Radio.Indicator
+                      style={{
+                        backgroundColor: "transparent",
+                        borderColor: theme.chrome.accentColor,
+                        borderWidth: 2,
+                      }}
+                    >
+                      <Radio.IndicatorThumb
+                        style={{ backgroundColor: theme.chrome.accentColor }}
+                      />
+                    </Radio.Indicator>
+                  </Radio>
+                  <Label>
+                    <Label.Text
+                      className={theme.chrome.primaryTextClassName}
+                      style={[
+                        theme.typography.body,
+                        { color: theme.chrome.controlIconColor },
+                      ]}
+                    >
+                      {option.label}
+                    </Label.Text>
+                  </Label>
                 </RadioGroup.Item>
               ))}
             </RadioGroup>
           </View>
           <Separator className={cn("my-6")} />
-          <Label className={cn("text-center text-sm text-black/55")}>
-            {t`JT Company. Made in 🇫🇷`}
+          <Label>
+            <Label.Text
+              style={[
+                theme.typography.body,
+                { color: theme.chrome.controlIconColor },
+              ]}
+              className={cn(
+                "text-center text-sm",
+                theme.chrome.secondaryTextClassName,
+              )}
+            >
+              {t`JT Company. Made in 🇫🇷`}
+            </Label.Text>
           </Label>
         </Dialog.Content>
       </Dialog.Portal>

@@ -5,6 +5,29 @@ export const desertLagoonTheme: GameThemeDefinition = {
   id: "desert-lagoon",
   displayName: "Desert Lagoon",
   Background: MeshGradientBackground,
+  typography: {
+    body: { fontFamily: "Quicksand_400Regular", fontWeight: "normal" },
+    title: { fontFamily: "Quicksand_700Bold", fontWeight: "normal" },
+    number: { fontFamily: "Quicksand_700Bold", fontWeight: "normal" },
+  },
+  surfaces: {
+    card: { borderRadius: 28, borderWidth: 1, borderCurve: "continuous" },
+    control: {
+      backgroundColor: "rgba(244,237,222,0.45)",
+      borderColor: "rgba(255,255,255,0.7)",
+      borderWidth: 1,
+      borderRadius: 999,
+    },
+    blur: true,
+  },
+  start: {
+    variant: "pill",
+    backgroundColor: "#5BCABA",
+    foregroundColor: "#123F39",
+    borderColor: "rgba(255,255,255,0.7)",
+    style: { borderRadius: 43, borderWidth: 1 },
+    pressedStyle: { transform: [{ translateY: 2 }, { scale: 0.99 }] },
+  },
   chrome: {
     screenBackgroundColor: "transparent",
     brandTextClassName: "text-black/75",
@@ -12,7 +35,7 @@ export const desertLagoonTheme: GameThemeDefinition = {
     secondaryTextClassName: "text-black/55",
     instructionTextClassName: "text-black/25",
     instructionNumberTextClassName: "text-black/30",
-    cardClassName: "bg-white/10 border-white/30",
+    cardClassName: "bg-[#F4EDDE]/35 border-white/50",
     cardSecondaryTextClassName: "text-black/60",
     cardOverlayClassName: "bg-white/15",
     cardActiveClassName: "active:bg-white/40",
