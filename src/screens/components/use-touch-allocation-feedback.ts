@@ -13,7 +13,14 @@ import {
   useAudioPlayerStatus,
 } from "expo-audio";
 import { useToast } from "heroui-native";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  createElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Platform } from "react-native";
 import {
   cancelAnimation,
@@ -22,6 +29,8 @@ import {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+
+import IosTouchLimitToast from "./ios-touch-limit-toast";
 
 const SHAKE_AMP_MIN = 1.5;
 const SHAKE_AMP_MAX = 16;
@@ -133,6 +142,7 @@ const useBubblePlayers = () => {
 
 export default function useTouchAllocationFeedback(props: {
   shakeX: SharedValue<number>;
+  onSelectSixPlayers?: () => void;
 }) {
   const { t } = useLingui();
   const { toast } = useToast();
@@ -170,12 +180,24 @@ export default function useTouchAllocationFeedback(props: {
       });
   };
 
+  const hideToastRef = useRef(toast.hide);
+  hideToastRef.current = toast.hide;
+  const clearTouchLimitToast = useCallback(
+    () => hideToastRef.current("ios-touch-limit"),
+    [],
+  );
+  const registerTouchLimitToastCleanup = () => clearTouchLimitToast;
+  useEffect(registerTouchLimitToastCleanup, [clearTouchLimitToast]);
+
   const showIosTouchLimitToast = () => {
     toast.show({
       id: "ios-touch-limit",
-      variant: "warning",
-      label: t`Maximum 5 fingers`,
-      description: t`Go back and select 6 or more players.`,
+      duration: 8000,
+      component: (toastProps) =>
+        createElement(IosTouchLimitToast, {
+          toastProps,
+          onSelectSixPlayers: props.onSelectSixPlayers,
+        }),
     });
   };
 

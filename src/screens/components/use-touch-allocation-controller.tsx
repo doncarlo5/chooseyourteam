@@ -60,6 +60,7 @@ export default function useTouchAllocationController(props: {
   resetKey?: number;
   exitRequested: boolean;
   onExitReady: () => void;
+  onSelectSixPlayers?: () => void;
 }): {
   touchGesture: ReturnType<typeof Gesture.Manual>;
   slotActive: SharedValue<number>[];
@@ -88,7 +89,10 @@ export default function useTouchAllocationController(props: {
   const revealToken = useSharedValue(0);
   const exitPendingSv = useSharedValue(false);
   const shakeX = useSharedValue(0);
-  const feedback = useTouchAllocationFeedback({ shakeX });
+  const feedback = useTouchAllocationFeedback({
+    shakeX,
+    onSelectSixPlayers: props.onSelectSixPlayers,
+  });
   const slotActive = useSlotSharedValues(0);
   const slotX = useSlotSharedValues(0);
   const slotY = useSlotSharedValues(0);

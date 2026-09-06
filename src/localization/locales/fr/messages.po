@@ -24,8 +24,8 @@ msgid "{count, plural, one {<waiting>Put</waiting><number>#</number><unit>finger
 msgstr "{count, plural, one {<waiting>Poser</waiting><number>#</number><unit>doigt</unit>} other {<waiting>Poser</waiting><number>#</number><unit>doigts</unit>}}"
 
 #: src/screens/components/app-info-button.tsx:15
-#: src/screens/components/app-info-sheet.android.tsx:43
-#: src/screens/components/app-info-sheet.tsx:42
+#: src/screens/components/app-info-sheet.android.tsx:52
+#: src/screens/components/app-info-sheet.tsx:52
 msgid "About"
 msgstr "À propos"
 
@@ -43,77 +43,77 @@ msgctxt "return from allocation to team selection"
 msgid "Close"
 msgstr "Retour"
 
-#: src/screens/components/app-info-sheet.tsx:43
+#: src/screens/components/app-info-sheet.tsx:53
 msgid "Close About"
 msgstr "Fermer À propos"
 
-#: src/screens/components/allocation-setup.tsx:183
+#: src/screens/components/allocation-setup.tsx:210
 msgid "Decrease players"
 msgstr "Diminuer le nombre de joueurs"
 
-#: src/screens/components/allocation-setup.tsx:259
+#: src/screens/components/allocation-setup.tsx:288
 msgid "Decrease teams"
 msgstr "Diminuer le nombre d’équipes"
 
 #: src/screens/components/app-info-sheet.android.tsx:28
-#: src/screens/components/app-info-sheet.ios.tsx:62
+#: src/screens/components/app-info-sheet.ios.tsx:81
 #: src/screens/components/app-info-sheet.tsx:17
 msgid "English"
 msgstr "English"
 
-#: src/screens/components/app-review-button.tsx:121
+#: src/screens/components/app-review-button.tsx:123
 msgid "Give a review"
 msgstr "Donner un avis"
 
-#: src/screens/components/use-touch-allocation-feedback.ts:178
+#: src/screens/components/ios-touch-limit-toast.tsx:55
 msgid "Go back and select 6 or more players."
 msgstr "Revenez en arrière et sélectionnez 6 joueurs ou plus."
 
-#: src/screens/components/allocation-setup.tsx:187
+#: src/screens/components/allocation-setup.tsx:214
 msgid "Increase players"
 msgstr "Augmenter le nombre de joueurs"
 
-#: src/screens/components/allocation-setup.tsx:260
+#: src/screens/components/allocation-setup.tsx:289
 msgid "Increase teams"
 msgstr "Augmenter le nombre d’équipes"
 
-#: src/screens/components/app-info-sheet.android.tsx:105
-#: src/screens/components/app-info-sheet.ios.tsx:50
-#: src/screens/components/app-info-sheet.tsx:88
+#: src/screens/components/app-info-sheet.android.tsx:118
+#: src/screens/components/app-info-sheet.ios.tsx:69
+#: src/screens/components/app-info-sheet.tsx:168
 msgid "JT Company. Made in 🇫🇷"
 msgstr "JT Company. Fait en 🇫🇷"
 
-#: src/screens/components/pairing-mode-toggle.tsx:44
+#: src/screens/components/pairing-mode-toggle.tsx:47
 msgid "Keeps the second and third players on the same team when fair allocation allows it"
 msgstr "Maintient les deuxième et troisième joueurs dans la même équipe lorsque l’équilibrage le permet"
 
-#: src/screens/components/app-info-sheet.android.tsx:76
-#: src/screens/components/app-info-sheet.ios.tsx:49
-#: src/screens/components/app-info-sheet.tsx:67
+#: src/screens/components/app-info-sheet.android.tsx:87
+#: src/screens/components/app-info-sheet.ios.tsx:68
+#: src/screens/components/app-info-sheet.tsx:114
 msgid "Language"
 msgstr "Langue"
 
-#: src/screens/components/use-touch-allocation-feedback.ts:186
+#: src/screens/components/use-touch-allocation-feedback.ts:208
 msgid "Maximum {MAX_OBSERVED_PLAYER_COUNT} fingers"
 msgstr "{MAX_OBSERVED_PLAYER_COUNT} doigts maximum"
 
-#: src/screens/components/use-touch-allocation-feedback.ts:177
+#: src/screens/components/ios-touch-limit-toast.tsx:44
 msgid "Maximum 5 fingers"
 msgstr "5 doigts maximum"
 
-#: src/screens/components/allocation-setup.tsx:275
+#: src/screens/components/allocation-setup.tsx:304
 msgid "More players"
 msgstr "Plus de joueurs"
 
-#: src/screens/components/pairing-mode-toggle.tsx:38
+#: src/screens/components/pairing-mode-toggle.tsx:41
 msgid "Off"
 msgstr "Désactivé"
 
-#: src/screens/components/pairing-mode-toggle.tsx:36
+#: src/screens/components/pairing-mode-toggle.tsx:39
 msgid "On · players 2 + 3 together"
 msgstr "Activé · joueurs 2 et 3 ensemble"
 
-#: src/screens/components/use-touch-allocation-feedback.ts:187
+#: src/screens/components/use-touch-allocation-feedback.ts:209
 msgid "Only the first {MAX_OBSERVED_PLAYER_COUNT} detected fingers can join."
 msgstr "Seuls les {MAX_OBSERVED_PLAYER_COUNT} premiers doigts détectés participent."
 
@@ -121,11 +121,11 @@ msgstr "Seuls les {MAX_OBSERVED_PLAYER_COUNT} premiers doigts détectés partici
 msgid "Opens developer credits, language, and theme settings"
 msgstr "Ouvre les crédits du développeur et les réglages de langue et de thème"
 
-#: src/screens/components/app-review-button.tsx:102
+#: src/screens/components/app-review-button.tsx:103
 msgid "Opens the App Store review page"
 msgstr "Ouverture de la page d’avis de l’App Store"
 
-#: src/screens/components/app-review-button.tsx:101
+#: src/screens/components/app-review-button.tsx:102
 msgid "Opens the Google Play review page"
 msgstr "Ouvre la page d’avis Google Play"
 
@@ -137,22 +137,22 @@ msgstr "Ouverture du partage avec le lien de l’App Store"
 msgid "Opens the share sheet with the Google Play link"
 msgstr "Ouverture du partage avec le lien de Google Play"
 
-#: src/screens/components/pairing-mode-toggle.tsx:30
-#: src/screens/components/pairing-mode-toggle.tsx:43
+#: src/screens/components/pairing-mode-toggle.tsx:32
+#: src/screens/components/pairing-mode-toggle.tsx:46
 msgid "Pairing mode"
 msgstr "Mode duo"
 
 #. placeholder {0}: props.team
-#: src/screens/components/revealed-player-label.tsx:55
+#: src/screens/components/revealed-player-label.tsx:54
 msgid "Player assigned to Team {0}"
 msgstr "Joueur affecté à l’équipe {0}"
 
 #. placeholder {0}: props.playerSelection.count
-#: src/screens/components/allocation-setup.tsx:178
+#: src/screens/components/allocation-setup.tsx:205
 msgid "Players, {0}"
 msgstr "Joueurs, {0}"
 
-#: src/screens/components/app-review-button.tsx:98
+#: src/screens/components/app-review-button.tsx:99
 msgid "Rate this app"
 msgstr "Noter l’application"
 
@@ -164,7 +164,12 @@ msgstr "Réduction des animations activée"
 msgid "Returns to team selection"
 msgstr "Retour à la sélection des équipes"
 
-#: src/screens/components/allocation-setup.tsx:186
+#: src/screens/components/ios-touch-limit-toast.tsx:61
+msgid "Returns to team selection with 6 players"
+msgstr "Revient au choix des équipes avec 6 joueurs"
+
+#: src/screens/components/allocation-setup.tsx:213
+#: src/screens/components/ios-touch-limit-toast.tsx:60
 msgid "Select 6 players"
 msgstr "Sélectionner 6 joueurs"
 
@@ -172,35 +177,35 @@ msgstr "Sélectionner 6 joueurs"
 msgid "Share {brandName}"
 msgstr "Partager {brandName}"
 
-#: src/screens/components/allocation-setup.tsx:302
+#: src/screens/components/allocation-setup.tsx:330
 msgid "Start"
 msgstr "Commencer"
 
 #: src/screens/components/app-info-sheet.android.tsx:27
-#: src/screens/components/app-info-sheet.ios.tsx:61
+#: src/screens/components/app-info-sheet.ios.tsx:80
 #: src/screens/components/app-info-sheet.tsx:16
 msgid "System"
 msgstr "Système"
 
-#: src/screens/components/allocation-setup.tsx:256
+#: src/screens/components/allocation-setup.tsx:285
 msgid "Teams"
 msgstr "Équipes"
 
 #. placeholder {0}: props.selectedTeams
-#: src/screens/components/allocation-setup.tsx:258
+#: src/screens/components/allocation-setup.tsx:287
 msgid "Teams, {0}"
 msgstr "Équipes, {0}"
 
-#: src/screens/components/app-info-sheet.android.tsx:48
-#: src/screens/components/app-info-sheet.ios.tsx:31
-#: src/screens/components/app-info-sheet.tsx:46
+#: src/screens/components/app-info-sheet.android.tsx:58
+#: src/screens/components/app-info-sheet.ios.tsx:50
+#: src/screens/components/app-info-sheet.tsx:63
 msgid "Theme"
 msgstr "Thème"
 
-#: src/screens/components/allocation-setup.tsx:177
+#: src/screens/components/allocation-setup.tsx:204
 msgid "Up to 5 players"
 msgstr "Jusqu’à 5 joueurs"
 
-#: src/screens/components/allocation-setup.tsx:182
+#: src/screens/components/allocation-setup.tsx:209
 msgid "Use up to 5 players"
 msgstr "Utiliser jusqu’à 5 joueurs"

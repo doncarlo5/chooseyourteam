@@ -326,6 +326,7 @@ export type TouchAllocationSceneProps = {
   onTouchStateChange: (state: { count: number; isTouching: boolean }) => void;
   exitRequested: boolean;
   onExitReady: () => void;
+  onSelectSixPlayers?: () => void;
   children: ReactNode;
 };
 
@@ -699,6 +700,7 @@ export default function TouchAllocationScene(props: TouchAllocationSceneProps) {
     resetKey: props.configuration.resetKey,
     exitRequested: props.exitRequested,
     onExitReady: props.onExitReady,
+    onSelectSixPlayers: props.onSelectSixPlayers,
   });
   const hasFrozenCurrentRound =
     round === 0

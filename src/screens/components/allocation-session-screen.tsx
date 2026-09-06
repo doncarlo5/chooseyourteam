@@ -1,13 +1,16 @@
 import type { RevealedPlayer } from "@/src/domain/revealed-player";
 import type { TouchRect } from "@/src/helpers/types/home-screen";
-import type { AllocationSessionConfiguration } from "@/src/screens/state/allocation-setup-state";
+import type {
+  PlayerSelection,
+  AllocationSessionConfiguration,
+} from "@/src/screens/state/allocation-setup-state";
 import {
   allocationSessionReducer,
   createAllocationSessionState,
   projectCurrentRound,
   type AllocationRound,
 } from "@/src/screens/state/allocation-session-state";
-import { useCallback, useMemo, useReducer, useState } from "react";
+import { useCallback, useMemo, useReducer, useRef, useState } from "react";
 import { useSharedValue } from "react-native-reanimated";
 import AllocationBackButton from "./allocation-back-button";
 import AllocationRoundNavigation from "./allocation-round-navigation";
@@ -25,7 +28,7 @@ const emptyTouchRect = (): TouchRect => ({
 
 export default function AllocationSessionScreen(props: {
   configuration: AllocationSessionConfiguration;
-  onExit: () => void;
+  onExit: (nextSelection?: PlayerSelection) => void;
 }) {
   const [session, dispatchSession] = useReducer(
     allocationSessionReducer,
@@ -36,6 +39,11 @@ export default function AllocationSessionScreen(props: {
     count: 0,
     isTouching: false,
   });
+  const exitSelection = useRef<PlayerSelection | undefined>(undefined);
+  const handleSelectSixPlayers = () => {
+    exitSelection.current = { mode: "declared", count: 6 };
+    setIsExitRequested(true);
+  };
   const [isExitRequested, setIsExitRequested] = useState(false);
   const backButtonRect = useSharedValue<TouchRect>(emptyTouchRect());
   const excludedTouchRects = useMemo(() => [backButtonRect], [backButtonRect]);
@@ -68,7 +76,7 @@ export default function AllocationSessionScreen(props: {
   const handleExitReady = () => {
     setIsExitRequested(false);
     dispatchSession({ type: "exitCompleted" });
-    props.onExit();
+    props.onExit(exitSelection.current);
   };
 
   return (
@@ -120,6 +128,7 @@ export default function AllocationSessionScreen(props: {
           onTouchStateChange={handleTouchStateChange}
           exitRequested={isExitRequested}
           onExitReady={handleExitReady}
+          onSelectSixPlayers={handleSelectSixPlayers}
         >
           {navigationLayer}
           <AllocationBackButton

@@ -52,7 +52,8 @@ export default function Home() {
     setPlayerSelection(nextSelection);
     setSelectedTeams((teams) => normalizeSelectedTeams(teams, nextSelection));
   };
-  const handleSessionExit = () => {
+  const handleSessionExit = (nextSelection?: PlayerSelection) => {
+    if (nextSelection) handlePlayerSelectionChange(nextSelection);
     setActiveConfiguration(null);
     setIsPairingModeEnabled(false);
   };
